@@ -7,32 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
-        
         .chart-container { position: relative; width: 100%; max-width: 800px; margin: 0 auto; height: 50vh; max-height: 400px; min-height: 300px; }
         .mini-chart-container { position: relative; width: 100%; height: 250px; }
         .radar-chart-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto; height: 300px; }
-
         #well-simulator-container { position: relative; width: 100%; max-width: 350px; margin: 0 auto; height: 450px; background-color: #cbd5e1; border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 4px 6px -1px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
-
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
         .nav-link.active { color: #0284c7; border-bottom: 2px solid #0284c7; }
-
-        /* Flip Cards */
         .flip-card { perspective: 1000px; height: 250px; }
         .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
         .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
         .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .flip-card-front { background-color: white; border: 1px solid #e2e8f0; }
         .flip-card-back { background-color: #0f172a; color: white; transform: rotateY(180deg); }
-
-        /* Toggle Switch & Checkboxes */
         .toggle-checkbox:checked { right: 0; border-color: #10b981; }
         .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
         .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
@@ -41,14 +32,10 @@
         .custom-checkbox:checked { background-color: #f43f5e; border-color: #f43f5e; }
         .custom-checkbox.early-check:checked { background-color: #fbbf24; border-color: #fbbf24; }
         .custom-checkbox:checked::after { content: '✔'; position: absolute; color: white; font-size: 0.8rem; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-
-        /* Definitions Drop-list Active State */
         .def-btn { border-left: 4px solid transparent; }
         .def-btn.active-def { background-color: #f0f9ff; color: #0284c7; border-left-color: #0ea5e9; font-weight: 700; }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
-
-        /* CSS Animations */
         @keyframes fluidDrop { 0%, 100% { height: 100%; } 50% { height: 40%; } }
         @keyframes pipeMove { 0%, 100% { transform: translate(-50%, 0); } 25% { transform: translate(-50%, 25%); } 75% { transform: translate(-50%, -25%); } }
         @keyframes pipePullOut { 0% { transform: translate(-50%, 20px); } 100% { transform: translate(-50%, -40px); } }
@@ -61,13 +48,10 @@
         @keyframes balloonBreathe { 0%, 100% { width: 40px; } 50% { width: 60px; background-color: #38bdf8; } }
         @keyframes flowDown { 0% { top: -20px; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         @keyframes geyserErupt { 0% { height: 0; opacity: 0; } 20% { height: 60px; opacity: 1; } 80% { height: 80px; opacity: 1; } 100% { height: 100px; opacity: 0; } }
-        
-        /* New Definition Visual Animations */
         @keyframes permFlow { 0% { height: 0%; opacity: 0.8; } 50% { height: 100%; opacity: 0.8; } 100% { height: 100%; opacity: 0; } }
         @keyframes rockCrack { 0%, 100% { width: 0px; opacity: 0; } 20%, 80% { width: 16px; opacity: 1; } }
         @keyframes chokeRestrict { 0%, 100% { transform: translateY(0); opacity: 0.2; } 50% { transform: translateY(15px); opacity: 1; } }
         @keyframes pulseFriction { 0%, 100% { background-color: #ef4444; opacity: 0.5; box-shadow: 0 0 0px #ef4444; } 50% { background-color: #b91c1c; opacity: 1; box-shadow: 0 0 15px #ef4444; } }
-
         .anim-fluid-drop { animation: fluidDrop 4s ease-in-out infinite; }
         .anim-pipe-move { animation: pipeMove 2.5s ease-in-out infinite; }
         .anim-pipe-pull { animation: pipePullOut 3s ease-out infinite; }
@@ -82,25 +66,14 @@
         .anim-balloon { animation: balloonBreathe 4s ease-in-out infinite; }
         .anim-flow-down { animation: flowDown 1.5s linear infinite; }
         .anim-geyser { animation: geyserErupt 1.2s ease-out infinite; transform-origin: bottom; }
-        
         .anim-perm-flow { animation: permFlow 3s ease-in-out infinite; }
         .anim-rock-crack { animation: rockCrack 3s ease-in-out infinite; }
         .anim-choke-restrict { animation: chokeRestrict 1.5s ease-in-out infinite; }
         .anim-pulse-friction { animation: pulseFriction 1.5s ease-in-out infinite; }
-
-        /* Print Styles */
-        @media print {
-            body * { visibility: hidden; }
-            #report-modal, #report-modal *, #group-report-modal, #group-report-modal * { visibility: visible; }
-            #report-modal, #group-report-modal { position: absolute; left: 0; top: 0; width: 100%; min-height: 100vh; background: white; z-index: 9999; }
-            #report-modal-content, #group-report-modal-content { box-shadow: none; border: none; max-height: none; overflow: visible; }
-            .no-print { display: none !important; }
-        }
+        @media print { body * { visibility: hidden; } #report-modal, #report-modal *, #group-report-modal, #group-report-modal * { visibility: visible; } #report-modal, #group-report-modal { position: absolute; left: 0; top: 0; width: 100%; min-height: 100vh; background: white; z-index: 9999; } #report-modal-content, #group-report-modal-content { box-shadow: none; border: none; max-height: none; overflow: visible; } .no-print { display: none !important; } }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
-
-    <!-- Navigation -->
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -126,8 +99,6 @@
     </nav>
 
     <main class="flex-grow">
-        
-        <!-- Header -->
         <header class="bg-slate-900 text-white pt-20 pb-24 px-4 relative overflow-hidden no-print">
             <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 30px 30px;"></div>
             <div class="max-w-4xl mx-auto text-center relative z-10">
@@ -139,54 +110,33 @@
             </div>
         </header>
 
-        <!-- LEARNING RESOURCES SECTION -->
         <section id="resources" class="pt-12 pb-4 px-4 bg-slate-50 scroll-mt-16 no-print">
             <div class="max-w-7xl mx-auto">
                 <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center gap-6">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-3xl flex-shrink-0 shadow-sm border border-indigo-100">
-                        📂
-                    </div>
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-3xl flex-shrink-0 shadow-sm border border-indigo-100">📂</div>
                     <div class="flex-grow text-center md:text-left">
                         <h2 class="text-xl font-bold text-indigo-900 mb-2">Learning Resources</h2>
-                        <p class="text-sm text-indigo-800 leading-relaxed mb-4 max-w-4xl">
-                            These files are hosted in a secure Google Drive to ensure you always have access to the latest, high-resolution versions. You can view them directly in your browser or download them to your device for offline use in the field.
-                        </p>
-                        <a href="https://drive.google.com/drive/folders/1McQn7EYrk179UFjViMZ_tgSj602VAfa2?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-lg transition-colors shadow-sm text-sm">
-                            <span>🔗</span> Access Google Drive
-                        </a>
+                        <p class="text-sm text-indigo-800 leading-relaxed mb-4 max-w-4xl">These files are hosted in a secure Google Drive to ensure you always have access to the latest, high-resolution versions. You can view them directly in your browser or download them to your device for offline use in the field.</p>
+                        <a href="https://drive.google.com/drive/folders/1McQn7EYrk179UFjViMZ_tgSj602VAfa2?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-lg transition-colors shadow-sm text-sm"><span>🔗</span> Access Google Drive</a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- DEFINITIONS SECTION (Interactive List) -->
         <section id="definitions" class="py-12 px-4 bg-slate-50 border-b border-slate-200 scroll-mt-16 no-print">
             <div class="max-w-7xl mx-auto">
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3"><span class="text-4xl">📖</span> Core Terminology & Physics</h2>
                     <p class="text-slate-600 leading-relaxed">Expand the categories below and select a term to explore its definition and visual simulation in compliance with IWCF standards.</p>
                 </div>
-
                 <div class="flex flex-col lg:flex-row gap-6 items-stretch">
-                    
-                    <!-- Left: Interactive Drop-List (Accordion) -->
                     <div class="w-full lg:w-1/3 space-y-3">
-                        
-                        <!-- Category 1 -->
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm" open>
-                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">
-                                Reservoir Rock Properties <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
-                            <div class="flex flex-col border-t border-slate-100 bg-slate-50">
-                                <button onclick="showDefinition('def-rock', this)" class="def-btn active-def text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Porosity & Permeability</button>
-                            </div>
+                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Reservoir Rock Properties <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary>
+                            <div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-rock', this)" class="def-btn active-def text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Porosity & Permeability</button></div>
                         </details>
-
-                        <!-- Category 2 -->
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">
-                                Fundamental Pressures <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
+                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Fundamental Pressures <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary>
                             <div class="flex flex-col border-t border-slate-100 bg-slate-50">
                                 <button onclick="showDefinition('def-hp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Hydrostatic Pressure (HP)</button>
                                 <button onclick="showDefinition('def-fp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Pore / Formation Pressure</button>
@@ -195,104 +145,54 @@
                                 <button onclick="showDefinition('def-overburden', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Overburden Pressure</button>
                             </div>
                         </details>
-
-                        <!-- Category 3 -->
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">
-                                Bottom Hole Pressure (BHP) <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
+                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Bottom Hole Pressure (BHP) <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary>
                             <div class="flex flex-col border-t border-slate-100 bg-slate-50">
                                 <button onclick="showDefinition('def-bhp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Static vs. Dynamic BHP</button>
                                 <button onclick="showDefinition('def-choke', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Choke vs. Bell Nipple</button>
                             </div>
                         </details>
-
-                        <!-- Category 4 -->
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">
-                                Surface Pressure Limits <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
-                            <div class="flex flex-col border-t border-slate-100 bg-slate-50">
-                                <button onclick="showDefinition('def-limits', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">MAASP, MASP, & MAWP</button>
-                            </div>
+                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Surface Pressure Limits <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary>
+                            <div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-limits', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">MAASP, MASP, & MAWP</button></div>
                         </details>
-
-                        <!-- Category 5 -->
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">
-                                Circulating Friction Losses <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-                            </summary>
+                            <summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Circulating Friction Losses <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary>
                             <div class="flex flex-col border-t border-slate-100 bg-slate-50">
                                 <button onclick="showDefinition('def-friction', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Friction Losses & APL</button>
                                 <button onclick="showDefinition('def-distinctions', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Key Distinctions in the System</button>
                             </div>
                         </details>
-
                     </div>
 
-                    <!-- Right: Visual & Definition Area -->
                     <div class="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative min-h-[500px]">
-                        
-                        <!-- Panel: Rock Properties -->
                         <div id="def-rock" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-start custom-scroll overflow-y-auto">
                             <div class="relative w-32 h-48 bg-amber-900 rounded flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-slate-300">
-                                <!-- Grains -->
-                                <div class="absolute w-12 h-12 bg-amber-700 rounded-full top-2 left-2 shadow"></div>
-                                <div class="absolute w-16 h-16 bg-amber-700 rounded-full bottom-2 right-1 shadow"></div>
-                                <div class="absolute w-10 h-10 bg-amber-700 rounded-full bottom-10 left-4 shadow"></div>
-                                <div class="absolute w-12 h-12 bg-amber-700 rounded-full top-6 right-2 shadow"></div>
-                                <!-- Fluid Permeability Path -->
+                                <div class="absolute w-12 h-12 bg-amber-700 rounded-full top-2 left-2 shadow"></div><div class="absolute w-16 h-16 bg-amber-700 rounded-full bottom-2 right-1 shadow"></div><div class="absolute w-10 h-10 bg-amber-700 rounded-full bottom-10 left-4 shadow"></div><div class="absolute w-12 h-12 bg-amber-700 rounded-full top-6 right-2 shadow"></div>
                                 <div class="absolute w-2 bg-sky-400 opacity-80 anim-perm-flow rounded-full blur-[1px]" style="left:40%; top:0; z-index: 10;"></div>
                             </div>
                             <div class="space-y-4">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Reservoir Rock Properties</h3>
-                                <div>
-                                    <strong class="text-sky-700 block">Porosity:</strong>
-                                    <p class="text-sm text-slate-600">The measure of the void (empty) space within a formation rock, expressed as a percentage or fraction of the total bulk volume.</p>
-                                </div>
-                                <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1">
-                                    <li><strong>Absolute Porosity:</strong> Ratio of total void space to bulk volume, regardless of connectivity.</li>
-                                    <li><strong>Effective Porosity:</strong> Ratio of interconnected pore space to bulk volume. This is critical for production, as isolated pores cannot flow fluid.</li>
-                                </ul>
-                                <div class="mt-4">
-                                    <strong class="text-sky-700 block">Permeability ($k$):</strong>
-                                    <p class="text-sm text-slate-600">A measure of the formation rock's ability to transmit fluids through its interconnected pore spaces. Measured in Darcies or millidarcies (mD).</p>
-                                </div>
+                                <div><strong class="text-sky-700 block">Porosity:</strong><p class="text-sm text-slate-600">The measure of the void (empty) space within a formation rock, expressed as a percentage or fraction of the total bulk volume.</p></div>
+                                <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1"><li><strong>Absolute Porosity:</strong> Ratio of total void space to bulk volume, regardless of connectivity.</li><li><strong>Effective Porosity:</strong> Ratio of interconnected pore space to bulk volume. This is critical for production, as isolated pores cannot flow fluid.</li></ul>
+                                <div class="mt-4"><strong class="text-sky-700 block">Permeability ($k$):</strong><p class="text-sm text-slate-600">A measure of the formation rock's ability to transmit fluids through its interconnected pore spaces. Measured in Darcies or millidarcies (mD).</p></div>
                             </div>
                         </div>
 
-                        <!-- Panel: Hydrostatic Pressure -->
                         <div id="def-hp" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
                             <div class="relative w-32 h-48 bg-slate-100 border-2 border-slate-300 rounded-b-lg flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
-                                <div class="absolute bottom-0 w-full h-[80%] bg-sky-500"></div>
-                                <div class="absolute top-[35%] flex flex-col items-center">
-                                    <div class="w-1.5 h-12 bg-white"></div>
-                                    <div class="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[10px] border-transparent border-t-white"></div>
-                                </div>
-                                <div class="absolute bottom-2 text-white font-bold text-xs">HP</div>
+                                <div class="absolute bottom-0 w-full h-[80%] bg-sky-500"></div><div class="absolute top-[35%] flex flex-col items-center"><div class="w-1.5 h-12 bg-white"></div><div class="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[10px] border-transparent border-t-white"></div></div><div class="absolute bottom-2 text-white font-bold text-xs">HP</div>
                             </div>
                             <div class="space-y-4">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Pressure Fundamentals</h3>
-                                <div>
-                                    <strong class="text-sky-700 block">Pressure:</strong>
-                                    <p class="text-sm text-slate-600">The force exerted per unit area, typically measured in psi (pounds per square inch) or bar.</p>
-                                </div>
-                                <div>
-                                    <strong class="text-sky-700 block">Hydrostatic Pressure (HP):</strong>
-                                    <p class="text-sm text-slate-600 mb-2">The pressure exerted by a column of stationary fluid at a specific true vertical depth (TVD). It is entirely dependent on fluid density and vertical height.</p>
-                                    <div class="bg-slate-100 border border-slate-200 p-2 rounded text-sm font-mono text-slate-700 inline-block font-semibold">HP = 0.052 × Mud Weight (ppg) × TVD (ft)</div>
-                                </div>
+                                <div><strong class="text-sky-700 block">Pressure:</strong><p class="text-sm text-slate-600">The force exerted per unit area, typically measured in psi (pounds per square inch) or bar.</p></div>
+                                <div><strong class="text-sky-700 block">Hydrostatic Pressure (HP):</strong><p class="text-sm text-slate-600 mb-2">The pressure exerted by a column of stationary fluid at a specific true vertical depth (TVD). It is entirely dependent on fluid density and vertical height.</p><div class="bg-slate-100 border border-slate-200 p-2 rounded text-sm font-mono text-slate-700 inline-block font-semibold">HP = 0.052 × Mud Weight (ppg) × TVD (ft)</div></div>
                             </div>
                         </div>
 
-                        <!-- Panel: Pore Pressure -->
                         <div id="def-fp" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
                             <div class="relative w-32 h-48 bg-amber-900 border-2 border-slate-300 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
-                                <div class="absolute w-12 h-full bg-slate-300 shadow-lg"></div>
-                                <div class="absolute left-1 top-[30%] text-rose-400 font-bold text-2xl animate-pulse">→</div>
-                                <div class="absolute left-1 top-[60%] text-rose-400 font-bold text-2xl animate-pulse">→</div>
-                                <div class="absolute right-1 top-[40%] text-rose-400 font-bold text-2xl animate-pulse">←</div>
-                                <div class="absolute right-1 top-[70%] text-rose-400 font-bold text-2xl animate-pulse">←</div>
+                                <div class="absolute w-12 h-full bg-slate-300 shadow-lg"></div><div class="absolute left-1 top-[30%] text-rose-400 font-bold text-2xl animate-pulse">→</div><div class="absolute left-1 top-[60%] text-rose-400 font-bold text-2xl animate-pulse">→</div><div class="absolute right-1 top-[40%] text-rose-400 font-bold text-2xl animate-pulse">←</div><div class="absolute right-1 top-[70%] text-rose-400 font-bold text-2xl animate-pulse">←</div>
                             </div>
                             <div>
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Pore Pressure / Formation Pressure</h3>
@@ -301,120 +201,52 @@
                             </div>
                         </div>
 
-                        <!-- Panel: Pressure Gradients -->
                         <div id="def-gradients" class="def-panel p-8 h-full flex flex-col gap-6 hidden custom-scroll overflow-y-auto">
                             <div class="w-full">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Pressure Gradients</h3>
                                 <p class="text-sm text-slate-600 leading-relaxed mb-2"><strong class="text-sky-700">Definition:</strong> The rate at which pressure increases with vertical depth. In well control, it is commonly expressed in <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">psi/ft</span> (API).</p>
                             </div>
-
-                            <!-- 1. Normal Formation Pressure -->
                             <div class="flex flex-col md:flex-row gap-6 items-center bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                                <div class="relative w-24 h-32 bg-slate-100 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col justify-end shadow-inner">
-                                    <div class="w-full h-full bg-sky-300/30 absolute bottom-0"></div>
-                                    <div class="w-full h-1/2 bg-sky-500 relative z-10 flex items-center justify-center text-[10px] text-white font-bold text-center leading-tight">Native<br>Fluid</div>
-                                    <div class="absolute top-2 w-full text-center text-sky-800 font-bold opacity-40">↓</div>
-                                </div>
+                                <div class="relative w-24 h-32 bg-slate-100 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col justify-end shadow-inner"><div class="w-full h-full bg-sky-300/30 absolute bottom-0"></div><div class="w-full h-1/2 bg-sky-500 relative z-10 flex items-center justify-center text-[10px] text-white font-bold text-center leading-tight">Native<br>Fluid</div><div class="absolute top-2 w-full text-center text-sky-800 font-bold opacity-40">↓</div></div>
                                 <div class="flex-grow">
                                     <h4 class="font-bold text-sky-700 text-lg mb-1 flex items-center gap-2"><span class="text-sky-400">🌊</span> 1. Normal Formation Pressure</h4>
                                     <p class="text-xs text-slate-600 mb-2"><strong>IWCF Definition:</strong> A pressure equal to the hydrostatic pressure of a full column of native formation fluid extending from the depth of the formation to the surface.</p>
                                     <p class="text-xs text-slate-600 mb-3"><strong>The Mechanism:</strong> The pore spaces are connected all the way to the surface (open system). The fluids within the pores only support the weight of the fluid column above them.</p>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] text-slate-700">
-                                        <div class="bg-slate-50 p-2 rounded border border-slate-100">
-                                            <strong class="block mb-1 text-slate-800">Standard IWCF Values:</strong>
-                                            <ul class="space-y-0.5">
-                                                <li>• <strong>Freshwater:</strong> 0.433 psi/ft (8.33 ppg)</li>
-                                                <li>• <strong>Saltwater:</strong> 0.465 psi/ft (8.94 ppg)</li>
-                                            </ul>
-                                        </div>
-                                        <div class="bg-sky-50 p-2 rounded border border-sky-100">
-                                            <strong class="block mb-1 text-sky-800">Operational Rule:</strong>
-                                            Drill safely with MW slightly above native (e.g., 9.0 - 9.2 ppg) to provide a standard trip margin.
-                                        </div>
-                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] text-slate-700"><div class="bg-slate-50 p-2 rounded border border-slate-100"><strong class="block mb-1 text-slate-800">Standard IWCF Values:</strong><ul class="space-y-0.5"><li>• <strong>Freshwater:</strong> 0.433 psi/ft (8.33 ppg)</li><li>• <strong>Saltwater:</strong> 0.465 psi/ft (8.94 ppg)</li></ul></div><div class="bg-sky-50 p-2 rounded border border-sky-100"><strong class="block mb-1 text-sky-800">Operational Rule:</strong> Drill safely with MW slightly above native (e.g., 9.0 - 9.2 ppg) to provide a standard trip margin.</div></div>
                                 </div>
                             </div>
-
-                            <!-- 2. Abnormal (Overpressure) -->
                             <div class="flex flex-col md:flex-row gap-6 items-center bg-rose-50 p-5 rounded-xl border border-rose-200 shadow-sm">
-                                <div class="relative w-24 h-32 bg-slate-100 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col justify-end shadow-inner">
-                                    <div class="w-full h-8 bg-slate-700 absolute top-4 border-b-4 border-slate-900 z-20 flex items-center justify-center text-[10px] text-white font-bold shadow-md">Cap Rock</div>
-                                    <div class="w-full h-20 bg-rose-500 relative z-10 flex items-center justify-center text-[10px] text-white font-bold text-center leading-tight anim-pulse-pressure">Trapped<br>Fluid</div>
-                                    <div class="absolute bottom-2 w-full flex justify-around px-2 z-20">
-                                        <span class="text-white font-bold text-sm animate-pulse">↑</span>
-                                        <span class="text-white font-bold text-sm animate-pulse">↑</span>
-                                    </div>
-                                </div>
+                                <div class="relative w-24 h-32 bg-slate-100 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col justify-end shadow-inner"><div class="w-full h-8 bg-slate-700 absolute top-4 border-b-4 border-slate-900 z-20 flex items-center justify-center text-[10px] text-white font-bold shadow-md">Cap Rock</div><div class="w-full h-20 bg-rose-500 relative z-10 flex items-center justify-center text-[10px] text-white font-bold text-center leading-tight anim-pulse-pressure">Trapped<br>Fluid</div><div class="absolute bottom-2 w-full flex justify-around px-2 z-20"><span class="text-white font-bold text-sm animate-pulse">↑</span><span class="text-white font-bold text-sm animate-pulse">↑</span></div></div>
                                 <div class="flex-grow">
                                     <h4 class="font-bold text-rose-700 text-lg mb-1 flex items-center gap-2"><span class="text-rose-400">💥</span> 2. Abnormal Formation Pressure (Overpressure)</h4>
                                     <p class="text-xs text-slate-700 mb-2"><strong>IWCF Definition:</strong> Any formation pore pressure that is greater than the normal hydrostatic pressure of the formation water for that specific TVD.</p>
                                     <p class="text-xs text-slate-700 mb-3"><strong>The Mechanism:</strong> Requires a <em>sealing mechanism</em> (cap rock or impermeable barrier) and a <em>pressurizing mechanism</em>. Trapped fluid is forced to support a portion of the overlying rock matrix (the overburden).</p>
-                                    <div class="text-[10px] text-slate-800 bg-white p-3 rounded border border-rose-100">
-                                        <strong class="block mb-1 text-rose-800 border-b border-rose-50 pb-1">Primary Causes (IWCF Syllabus Focus):</strong>
-                                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1 mt-1 list-disc pl-4">
-                                            <li><strong>Under-compaction of Shales</strong> (Most Common): Trapped water bears rock weight.</li>
-                                            <li><strong>Artesian Effect:</strong> Formation outcrop is higher than rig floor.</li>
-                                            <li><strong>Gas Cap Effect:</strong> Low-density gas transmits high bottom pressure to the top.</li>
-                                            <li><strong>Faulting / Salt Domes:</strong> Fluid migration or blocked pathways.</li>
-                                        </ul>
-                                    </div>
+                                    <div class="text-[10px] text-slate-800 bg-white p-3 rounded border border-rose-100"><strong class="block mb-1 text-rose-800 border-b border-rose-50 pb-1">Primary Causes (IWCF Syllabus Focus):</strong><ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1 mt-1 list-disc pl-4"><li><strong>Under-compaction of Shales</strong> (Most Common): Trapped water bears rock weight.</li><li><strong>Artesian Effect:</strong> Formation outcrop is higher than rig floor.</li><li><strong>Gas Cap Effect:</strong> Low-density gas transmits high bottom pressure to the top.</li><li><strong>Faulting / Salt Domes:</strong> Fluid migration or blocked pathways.</li></ul></div>
                                 </div>
                             </div>
-
-                            <!-- 3. Subnormal Pressure -->
                             <div class="flex flex-col md:flex-row gap-6 items-center bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-sm">
-                                <div class="relative w-24 h-32 bg-slate-100 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col justify-end shadow-inner">
-                                    <div class="w-full h-10 bg-amber-700/40 relative z-10 flex items-center justify-center text-[10px] text-amber-900 font-bold text-center leading-tight">Depleted<br>Zone</div>
-                                    <div class="absolute bottom-1 w-full flex justify-around px-2 z-20 opacity-50">
-                                        <span class="text-amber-900 font-bold text-sm">↓</span>
-                                        <span class="text-amber-900 font-bold text-sm">↓</span>
-                                    </div>
-                                </div>
+                                <div class="relative w-24 h-32 bg-slate-100 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col justify-end shadow-inner"><div class="w-full h-10 bg-amber-700/40 relative z-10 flex items-center justify-center text-[10px] text-amber-900 font-bold text-center leading-tight">Depleted<br>Zone</div><div class="absolute bottom-1 w-full flex justify-around px-2 z-20 opacity-50"><span class="text-amber-900 font-bold text-sm">↓</span><span class="text-amber-900 font-bold text-sm">↓</span></div></div>
                                 <div class="flex-grow">
                                     <h4 class="font-bold text-amber-700 text-lg mb-1 flex items-center gap-2"><span class="text-amber-500">📉</span> 3. Subnormal Formation Pressure</h4>
                                     <p class="text-xs text-slate-700 mb-3">Pore pressure that is less than the normal hydrostatic pressure for that vertical depth.</p>
-                                    <div class="text-[10px] text-slate-800 bg-white p-3 rounded border border-amber-100 mb-3">
-                                        <strong class="block mb-1 text-amber-800 border-b border-amber-50 pb-1">Primary Causes:</strong>
-                                        <ul class="list-disc pl-4 mt-1 space-y-0.5">
-                                            <li><strong>Depletion:</strong> The most common cause in modern drilling. Hydrocarbons produced from reservoir artificially lower the pressure.</li>
-                                            <li><strong>Thermal Contraction:</strong> Cooling of formation fluids.</li>
-                                        </ul>
-                                    </div>
-                                    <div class="bg-rose-100 text-rose-800 p-2 rounded text-[11px] border border-rose-200 flex items-center gap-2 font-medium">
-                                        <span class="text-lg">⚠️</span> <span><strong>Operational Risk:</strong> Severe lost circulation. Standard mud weights will be heavily overbalanced.</span>
-                                    </div>
+                                    <div class="text-[10px] text-slate-800 bg-white p-3 rounded border border-amber-100 mb-3"><strong class="block mb-1 text-amber-800 border-b border-amber-50 pb-1">Primary Causes:</strong><ul class="list-disc pl-4 mt-1 space-y-0.5"><li><strong>Depletion:</strong> The most common cause in modern drilling. Hydrocarbons produced from reservoir artificially lower the pressure.</li><li><strong>Thermal Contraction:</strong> Cooling of formation fluids.</li></ul></div>
+                                    <div class="bg-rose-100 text-rose-800 p-2 rounded text-[11px] border border-rose-200 flex items-center gap-2 font-medium"><span class="text-lg">⚠️</span> <span><strong>Operational Risk:</strong> Severe lost circulation. Standard mud weights will be heavily overbalanced.</span></div>
                                 </div>
                             </div>
-                            
-                            <!-- Conclusion Reference -->
                             <div class="w-full bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm mt-2">
                                 <h4 class="text-sm font-bold text-sky-400 uppercase tracking-widest mb-3 border-b border-slate-700 pb-2 flex items-center gap-2"><span>📌</span> Gradient Quick Reference Rule (Saltwater Base)</h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600 flex flex-col justify-center">
-                                        <span class="block text-[11px] uppercase tracking-wider text-amber-400 font-bold mb-1">Subnormal</span>
-                                        <span class="font-mono text-white text-sm font-semibold">FP &lt; 0.465 psi/ft</span>
-                                    </div>
-                                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600 flex flex-col justify-center ring-1 ring-sky-500/50">
-                                        <span class="block text-[11px] uppercase tracking-wider text-sky-400 font-bold mb-1">Normal</span>
-                                        <span class="font-mono text-white text-sm font-semibold">FP = 0.465 psi/ft</span>
-                                    </div>
-                                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600 flex flex-col justify-center">
-                                        <span class="block text-[11px] uppercase tracking-wider text-rose-400 font-bold mb-1">Abnormal</span>
-                                        <span class="font-mono text-white text-sm font-semibold">FP &gt; 0.465 psi/ft</span>
-                                    </div>
+                                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600 flex flex-col justify-center"><span class="block text-[11px] uppercase tracking-wider text-amber-400 font-bold mb-1">Subnormal</span><span class="font-mono text-white text-sm font-semibold">FP &lt; 0.465 psi/ft</span></div>
+                                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600 flex flex-col justify-center ring-1 ring-sky-500/50"><span class="block text-[11px] uppercase tracking-wider text-sky-400 font-bold mb-1">Normal</span><span class="font-mono text-white text-sm font-semibold">FP = 0.465 psi/ft</span></div>
+                                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600 flex flex-col justify-center"><span class="block text-[11px] uppercase tracking-wider text-rose-400 font-bold mb-1">Abnormal</span><span class="font-mono text-white text-sm font-semibold">FP &gt; 0.465 psi/ft</span></div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Panel: Fracture Pressure -->
                         <div id="def-frac" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
                             <div class="relative w-32 h-48 bg-amber-900 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col items-center justify-center">
-                                <div class="w-12 h-full bg-sky-500 relative z-10 flex items-center justify-center">
-                                    <div class="text-white font-bold text-xl anim-pulse-pressure rounded-full px-1">💥</div>
-                                </div>
-                                <!-- Animated Cracks -->
-                                <div class="absolute top-[40%] left-0 w-[50%] h-1 bg-sky-400 anim-rock-crack origin-right"></div>
-                                <div class="absolute top-[70%] right-0 w-[50%] h-1 bg-sky-400 anim-rock-crack origin-left" style="animation-delay: 0.5s"></div>
+                                <div class="w-12 h-full bg-sky-500 relative z-10 flex items-center justify-center"><div class="text-white font-bold text-xl anim-pulse-pressure rounded-full px-1">💥</div></div>
+                                <div class="absolute top-[40%] left-0 w-[50%] h-1 bg-sky-400 anim-rock-crack origin-right"></div><div class="absolute top-[70%] right-0 w-[50%] h-1 bg-sky-400 anim-rock-crack origin-left" style="animation-delay: 0.5s"></div>
                             </div>
                             <div>
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Fracture Pressure</h3>
@@ -423,16 +255,10 @@
                             </div>
                         </div>
 
-                        <!-- Panel: Overburden Pressure -->
                         <div id="def-overburden" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
                             <div class="relative w-32 h-48 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col">
-                                <div class="h-1/3 bg-slate-300 border-b-2 border-slate-400 w-full flex justify-center items-end pb-1 text-slate-500 font-bold text-lg">↓</div>
-                                <div class="h-1/3 bg-slate-500 border-b-2 border-slate-600 w-full flex justify-center items-end pb-1 text-slate-700 font-bold text-lg">↓</div>
-                                <div class="h-1/3 bg-amber-900 w-full flex justify-center items-end pb-1 text-amber-700 font-bold text-lg">↓</div>
-                                <div class="absolute inset-0 flex items-center justify-center opacity-40">
-                                    <div class="w-2 h-32 bg-slate-800"></div>
-                                    <div class="absolute bottom-6 w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-transparent border-t-slate-800"></div>
-                                </div>
+                                <div class="h-1/3 bg-slate-300 border-b-2 border-slate-400 w-full flex justify-center items-end pb-1 text-slate-500 font-bold text-lg">↓</div><div class="h-1/3 bg-slate-500 border-b-2 border-slate-600 w-full flex justify-center items-end pb-1 text-slate-700 font-bold text-lg">↓</div><div class="h-1/3 bg-amber-900 w-full flex justify-center items-end pb-1 text-amber-700 font-bold text-lg">↓</div>
+                                <div class="absolute inset-0 flex items-center justify-center opacity-40"><div class="w-2 h-32 bg-slate-800"></div><div class="absolute bottom-6 w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-transparent border-t-slate-800"></div></div>
                             </div>
                             <div>
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Overburden Pressure</h3>
@@ -440,135 +266,52 @@
                             </div>
                         </div>
 
-                        <!-- Panel: Static vs Dynamic BHP -->
                         <div id="def-bhp" class="def-panel p-8 h-full flex flex-col gap-6 hidden custom-scroll overflow-y-auto">
-                            <div class="space-y-4">
-                                <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Bottom Hole Pressure (BHP)</h3>
-                                <p class="text-sm text-slate-600 mb-2">BHP is the total pressure exerted at the bottom of the wellbore. Its value changes depending on whether the fluid is static or moving.</p>
-                            </div>
+                            <div class="space-y-4"><h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Bottom Hole Pressure (BHP)</h3><p class="text-sm text-slate-600 mb-2">BHP is the total pressure exerted at the bottom of the wellbore. Its value changes depending on whether the fluid is static or moving.</p></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
-                                    <div class="absolute top-2 right-2 text-2xl opacity-20">🛑</div>
-                                    <strong class="text-sky-700 block mb-1">Static BHP:</strong>
-                                    <p class="text-sm text-slate-600 mb-3">The pressure at the bottom of the well when the mud pumps are off and the fluid is not moving.</p>
-                                    <div class="bg-white border border-slate-200 p-2 rounded text-xs font-mono text-slate-700 font-semibold inline-block">BHP = HP</div>
-                                </div>
-                                <div class="bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-sm relative overflow-hidden">
-                                    <div class="absolute top-2 right-2 text-2xl opacity-20 anim-flow-down">🌊</div>
-                                    <strong class="text-sky-800 block mb-1">Dynamic BHP (Circulating):</strong>
-                                    <p class="text-sm text-slate-600 mb-3">The pressure at bottom when pumps are on. Fluid friction moving up the annulus adds pressure.</p>
-                                    <div class="bg-white border border-sky-200 p-2 rounded text-xs font-mono text-sky-800 font-semibold inline-block">BHP = HP + Annular Pressure Loss</div>
-                                </div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden"><div class="absolute top-2 right-2 text-2xl opacity-20">🛑</div><strong class="text-sky-700 block mb-1">Static BHP:</strong><p class="text-sm text-slate-600 mb-3">The pressure at the bottom of the well when the mud pumps are off and the fluid is not moving.</p><div class="bg-white border border-slate-200 p-2 rounded text-xs font-mono text-slate-700 font-semibold inline-block">BHP = HP</div></div>
+                                <div class="bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-sm relative overflow-hidden"><div class="absolute top-2 right-2 text-2xl opacity-20 anim-flow-down">🌊</div><strong class="text-sky-800 block mb-1">Dynamic BHP (Circulating):</strong><p class="text-sm text-slate-600 mb-3">The pressure at bottom when pumps are on. Fluid friction moving up the annulus adds pressure.</p><div class="bg-white border border-sky-200 p-2 rounded text-xs font-mono text-sky-800 font-semibold inline-block">BHP = HP + Annular Pressure Loss</div></div>
                             </div>
                         </div>
 
-                        <!-- Panel: Choke vs Bell Nipple -->
                         <div id="def-choke" class="def-panel p-8 h-full flex flex-col gap-6 hidden custom-scroll overflow-y-auto">
-                            <div class="space-y-2">
-                                <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">The Choke vs. Bell Nipple Difference</h3>
-                            </div>
+                            <div class="space-y-2"><h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">The Choke vs. Bell Nipple Difference</h3></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Bell Nipple -->
-                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-                                    <div class="relative w-16 h-24 bg-slate-100 border-x-2 border-b-2 border-slate-300 rounded-b overflow-hidden mb-3">
-                                        <div class="absolute bottom-0 w-full h-12 bg-sky-500"></div>
-                                        <div class="absolute top-4 w-full h-12 bg-sky-400 anim-geyser opacity-80 blur-[1px]"></div>
-                                    </div>
-                                    <strong class="text-sky-700 block mb-1">Circulating to Bell Nipple</strong>
-                                    <span class="text-[10px] font-bold bg-slate-200 text-slate-600 px-2 py-0.5 rounded uppercase tracking-wide mb-2">Open System</span>
-                                    <p class="text-xs text-slate-600">The fluid returns to surface at atmospheric pressure. Dynamic BHP is solely HP plus Annular Friction.</p>
-                                </div>
-                                <!-- Choke -->
-                                <div class="bg-rose-50 p-4 rounded-xl border border-rose-200 shadow-sm flex flex-col items-center text-center">
-                                    <div class="relative w-16 h-24 bg-slate-100 border-x-2 border-b-2 border-slate-300 rounded-b overflow-hidden mb-3">
-                                        <div class="absolute top-0 w-full h-4 bg-slate-800 z-20"></div> <!-- BOP/Choke -->
-                                        <div class="absolute bottom-0 w-full h-full bg-sky-500"></div>
-                                        <div class="absolute top-6 left-1/2 -translate-x-1/2 text-rose-200 font-bold text-xl anim-choke-restrict z-10">↓↓</div>
-                                    </div>
-                                    <strong class="text-rose-700 block mb-1">Circulating through Choke</strong>
-                                    <span class="text-[10px] font-bold bg-rose-200 text-rose-800 px-2 py-0.5 rounded uppercase tracking-wide mb-2">Closed System</span>
-                                    <p class="text-xs text-slate-700">Returning fluid is forced through the choke, applying backpressure. <br><strong>Dynamic BHP = HP + Friction + Choke Backpressure.</strong></p>
-                                </div>
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center"><div class="relative w-16 h-24 bg-slate-100 border-x-2 border-b-2 border-slate-300 rounded-b overflow-hidden mb-3"><div class="absolute bottom-0 w-full h-12 bg-sky-500"></div><div class="absolute top-4 w-full h-12 bg-sky-400 anim-geyser opacity-80 blur-[1px]"></div></div><strong class="text-sky-700 block mb-1">Circulating to Bell Nipple</strong><span class="text-[10px] font-bold bg-slate-200 text-slate-600 px-2 py-0.5 rounded uppercase tracking-wide mb-2">Open System</span><p class="text-xs text-slate-600">The fluid returns to surface at atmospheric pressure. Dynamic BHP is solely HP plus Annular Friction.</p></div>
+                                <div class="bg-rose-50 p-4 rounded-xl border border-rose-200 shadow-sm flex flex-col items-center text-center"><div class="relative w-16 h-24 bg-slate-100 border-x-2 border-b-2 border-slate-300 rounded-b overflow-hidden mb-3"><div class="absolute top-0 w-full h-4 bg-slate-800 z-20"></div><div class="absolute bottom-0 w-full h-full bg-sky-500"></div><div class="absolute top-6 left-1/2 -translate-x-1/2 text-rose-200 font-bold text-xl anim-choke-restrict z-10">↓↓</div></div><strong class="text-rose-700 block mb-1">Circulating through Choke</strong><span class="text-[10px] font-bold bg-rose-200 text-rose-800 px-2 py-0.5 rounded uppercase tracking-wide mb-2">Closed System</span><p class="text-xs text-slate-700">Returning fluid is forced through the choke, applying backpressure. <br><strong>Dynamic BHP = HP + Friction + Choke Backpressure.</strong></p></div>
                             </div>
                         </div>
 
-                        <!-- Panel: Surface Pressure Limits -->
                         <div id="def-limits" class="def-panel p-8 h-full flex flex-col gap-6 hidden custom-scroll overflow-y-auto">
                             <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Well Control Surface Pressure Limits</h3>
                             <div class="space-y-5">
-                                <div>
-                                    <strong class="text-rose-600 block text-lg flex items-center gap-2"><span>💥</span> MAASP</strong>
-                                    <span class="text-xs font-bold text-slate-500 block mb-1">Maximum Allowable Annular Surface Pressure</span>
-                                    <p class="text-sm text-slate-600 mb-2">The maximum pressure that can be applied to the annulus at the surface (with the BOP closed) before the formation at the casing shoe breaks down. Assumes a static fluid column.</p>
-                                    <div class="bg-rose-50 border border-rose-100 p-2 rounded text-xs font-mono text-rose-800 inline-block font-semibold">MAASP = (Frac MW - Current MW) × 0.052 × Shoe TVD</div>
-                                </div>
-                                <div class="border-t border-slate-100 pt-4">
-                                    <strong class="text-amber-600 block text-lg flex items-center gap-2"><span>⚠️</span> MASP</strong>
-                                    <span class="text-xs font-bold text-slate-500 block mb-1">Maximum Anticipated Surface Pressure</span>
-                                    <p class="text-sm text-slate-600">The highest pressure predicted to be encountered at surface during a specific well operation (e.g., a worst-case gas kick reaching surface). Heavily used in equipment design and selection.</p>
-                                </div>
-                                <div class="border-t border-slate-100 pt-4">
-                                    <strong class="text-slate-800 block text-lg flex items-center gap-2"><span>⚙️</span> MAWP</strong>
-                                    <span class="text-xs font-bold text-slate-500 block mb-1">Maximum Allowable Working Pressure</span>
-                                    <p class="text-sm text-slate-600">The maximum safe working pressure of a specific piece of equipment (e.g., BOP, choke manifold, valves) as rated by the manufacturer. Equipment must never be operated above its MAWP.</p>
-                                </div>
+                                <div><strong class="text-rose-600 block text-lg flex items-center gap-2"><span>💥</span> MAASP</strong><span class="text-xs font-bold text-slate-500 block mb-1">Maximum Allowable Annular Surface Pressure</span><p class="text-sm text-slate-600 mb-2">The maximum pressure that can be applied to the annulus at the surface (with the BOP closed) before the formation at the casing shoe breaks down. Assumes a static fluid column.</p><div class="bg-rose-50 border border-rose-100 p-2 rounded text-xs font-mono text-rose-800 inline-block font-semibold">MAASP = (Frac MW - Current MW) × 0.052 × Shoe TVD</div></div>
+                                <div class="border-t border-slate-100 pt-4"><strong class="text-amber-600 block text-lg flex items-center gap-2"><span>⚠️</span> MASP</strong><span class="text-xs font-bold text-slate-500 block mb-1">Maximum Anticipated Surface Pressure</span><p class="text-sm text-slate-600">The highest pressure predicted to be encountered at surface during a specific well operation (e.g., a worst-case gas kick reaching surface). Heavily used in equipment design and selection.</p></div>
+                                <div class="border-t border-slate-100 pt-4"><strong class="text-slate-800 block text-lg flex items-center gap-2"><span>⚙️</span> MAWP</strong><span class="text-xs font-bold text-slate-500 block mb-1">Maximum Allowable Working Pressure</span><p class="text-sm text-slate-600">The maximum safe working pressure of a specific piece of equipment (e.g., BOP, choke manifold, valves) as rated by the manufacturer. Equipment must never be operated above its MAWP.</p></div>
                             </div>
                         </div>
 
-                        <!-- Panel: Circulating Friction Losses -->
                         <div id="def-friction" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
                             <div class="relative w-32 h-64 bg-slate-100 border-2 border-slate-300 rounded-b-xl flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
-                                <div class="absolute bottom-0 w-full h-[90%] bg-sky-500 opacity-50"></div>
-                                <div class="absolute top-0 w-8 h-[80%] bg-slate-400 border-x-2 border-slate-500"></div>
-                                <!-- BHA -->
-                                <div class="absolute top-[80%] w-10 h-[10%] bg-slate-600 border-x-2 border-slate-700"></div>
-                                <!-- Bit High Friction -->
-                                <div class="absolute top-[90%] w-12 h-2 anim-pulse-friction rounded-full"></div>
-                                <!-- Annulus Friction -->
-                                <div class="absolute right-2 top-[30%] w-3 h-32 bg-orange-400 opacity-40 blur-[2px] rounded-full"></div>
-                                <div class="absolute left-2 top-[30%] w-3 h-32 bg-orange-400 opacity-40 blur-[2px] rounded-full"></div>
+                                <div class="absolute bottom-0 w-full h-[90%] bg-sky-500 opacity-50"></div><div class="absolute top-0 w-8 h-[80%] bg-slate-400 border-x-2 border-slate-500"></div><div class="absolute top-[80%] w-10 h-[10%] bg-slate-600 border-x-2 border-slate-700"></div><div class="absolute top-[90%] w-12 h-2 anim-pulse-friction rounded-full"></div><div class="absolute right-2 top-[30%] w-3 h-32 bg-orange-400 opacity-40 blur-[2px] rounded-full"></div><div class="absolute left-2 top-[30%] w-3 h-32 bg-orange-400 opacity-40 blur-[2px] rounded-full"></div>
                             </div>
                             <div class="space-y-4 w-full">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-2">Circulating Friction Losses</h3>
                                 <p class="text-sm text-slate-600 mb-4">During circulation, mud pump pressure is entirely consumed by friction as fluid travels through the system.</p>
-                                
                                 <div class="space-y-2">
-                                    <div class="bg-white p-3 rounded shadow-sm border border-slate-200">
-                                        <strong class="text-sky-700 text-sm block">APL (Annular Pressure Loss)</strong>
-                                        <p class="text-xs text-slate-600">Pressure required to push fluid up the annulus from bit to surface.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded shadow-sm border border-slate-200">
-                                        <strong class="text-slate-700 text-sm block">Surface Losses</strong>
-                                        <p class="text-xs text-slate-600">Friction through standpipe, kelly hose, top drive, and surface piping.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded shadow-sm border border-slate-200">
-                                        <strong class="text-slate-700 text-sm block">Drill String & BHA Losses</strong>
-                                        <p class="text-xs text-slate-600">Friction through the inside of drill pipe, HWDP, drill collars, and tools.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded shadow-sm border border-rose-200 border-l-4 border-l-rose-500">
-                                        <strong class="text-rose-700 text-sm block">Bit Losses</strong>
-                                        <p class="text-xs text-slate-600">The massive pressure drop across the bit nozzles to maximize hydraulic impact.</p>
-                                    </div>
+                                    <div class="bg-white p-3 rounded shadow-sm border border-slate-200"><strong class="text-sky-700 text-sm block">APL (Annular Pressure Loss)</strong><p class="text-xs text-slate-600">Pressure required to push fluid up the annulus from bit to surface.</p></div>
+                                    <div class="bg-white p-3 rounded shadow-sm border border-slate-200"><strong class="text-slate-700 text-sm block">Surface Losses</strong><p class="text-xs text-slate-600">Friction through standpipe, kelly hose, top drive, and surface piping.</p></div>
+                                    <div class="bg-white p-3 rounded shadow-sm border border-slate-200"><strong class="text-slate-700 text-sm block">Drill String & BHA Losses</strong><p class="text-xs text-slate-600">Friction through the inside of drill pipe, HWDP, drill collars, and tools.</p></div>
+                                    <div class="bg-white p-3 rounded shadow-sm border border-rose-200 border-l-4 border-l-rose-500"><strong class="text-rose-700 text-sm block">Bit Losses</strong><p class="text-xs text-slate-600">The massive pressure drop across the bit nozzles to maximize hydraulic impact.</p></div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Panel: Key Distinctions -->
                         <div id="def-distinctions" class="def-panel p-8 h-full flex flex-col gap-6 hidden custom-scroll overflow-y-auto">
                             <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Key Distinctions in the System</h3>
                             <div class="space-y-6">
-                                <div class="bg-rose-50 p-6 rounded-xl border border-rose-100 shadow-sm relative">
-                                    <div class="absolute -top-3 -left-3 text-4xl">🥇</div>
-                                    <strong class="text-rose-800 block text-lg mb-2 pl-4">Where is the highest friction loss?</strong>
-                                    <p class="text-sm text-slate-700 font-medium pl-4">➔ The Bit.</p>
-                                    <p class="text-sm text-slate-600 mt-2 pl-4">A significant portion of the total pump pressure (often 50% or more) is intentionally dropped across the bit nozzles to maximize hydraulic impact and clean the hole.</p>
-                                </div>
-                                <div class="bg-sky-50 p-6 rounded-xl border border-sky-100 shadow-sm relative">
-                                    <div class="absolute -top-3 -left-3 text-4xl">🎯</div>
-                                    <strong class="text-sky-800 block text-lg mb-2 pl-4">Which part is most important for well control?</strong>
-                                    <p class="text-sm text-slate-700 font-medium pl-4">➔ The Annulus (APL).</p>
-                                    <p class="text-sm text-slate-600 mt-2 pl-4">While it accounts for a very small percentage of the total system pressure loss, it acts directly on the open hole. APL increases the dynamic BHP, creating Equivalent Circulating Density (ECD). If APL is too high, it can fracture the formation; if suddenly removed (shutting off pumps), the pressure drop can allow a kick.</p>
-                                </div>
+                                <div class="bg-rose-50 p-6 rounded-xl border border-rose-100 shadow-sm relative"><div class="absolute -top-3 -left-3 text-4xl">🥇</div><strong class="text-rose-800 block text-lg mb-2 pl-4">Where is the highest friction loss?</strong><p class="text-sm text-slate-700 font-medium pl-4">➔ The Bit.</p><p class="text-sm text-slate-600 mt-2 pl-4">A significant portion of the total pump pressure (often 50% or more) is intentionally dropped across the bit nozzles to maximize hydraulic impact and clean the hole.</p></div>
+                                <div class="bg-sky-50 p-6 rounded-xl border border-sky-100 shadow-sm relative"><div class="absolute -top-3 -left-3 text-4xl">🎯</div><strong class="text-sky-800 block text-lg mb-2 pl-4">Which part is most important for well control?</strong><p class="text-sm text-slate-700 font-medium pl-4">➔ The Annulus (APL).</p><p class="text-sm text-slate-600 mt-2 pl-4">While it accounts for a very small percentage of the total system pressure loss, it acts directly on the open hole. APL increases the dynamic BHP, creating Equivalent Circulating Density (ECD). If APL is too high, it can fracture the formation; if suddenly removed (shutting off pumps), the pressure drop can allow a kick.</p></div>
                             </div>
                         </div>
 
@@ -583,7 +326,6 @@
                 <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2"><span class="text-3xl">🎛️</span> Command Dashboard</h2>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Panel 1: Quick Navigation & Equations -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
                         <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Training Modules</h3>
                         <div class="grid grid-cols-2 gap-2 mb-6">
@@ -604,7 +346,6 @@
                         </div>
                     </div>
 
-                    <!-- Panel 2: Quick Pressure Calculators -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
                         <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Quick Pressures</h3>
                         <div class="grid grid-cols-3 gap-3 mb-4">
@@ -619,7 +360,6 @@
                         </div>
                     </div>
 
-                    <!-- Panel 3: Detection Checklist & Dynamic Action -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden lg:col-span-2">
                         <div class="p-5 pb-2">
                             <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
@@ -629,7 +369,6 @@
                                 </button>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Early Warning Signs -->
                                 <div>
                                     <span class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2 block flex items-center gap-1"><span>⚠️</span> Early Warning Signs (Abnormal Trends)</span>
                                     <div class="space-y-1 text-[11px] text-slate-700 font-medium">
@@ -644,7 +383,6 @@
                                         <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Return Mud Salinity (Chlorides) ↑</label>
                                     </div>
                                 </div>
-                                <!-- Positive Indicators -->
                                 <div>
                                     <span class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-2 block flex items-center gap-1"><span>🚨</span> Positive Indicators (Active Influx)</span>
                                     <div class="space-y-1 text-[11px] text-slate-700 font-medium">
@@ -654,7 +392,6 @@
                                         <label class="flex items-center gap-1.5 cursor-pointer hover:bg-rose-50 p-1.5 rounded border border-transparent hover:border-rose-100"><input type="checkbox" class="custom-checkbox pos-check" onchange="window.updateChecklistAction()"> Incorrect Fill Volume (Tripping)</label>
                                     </div>
                                     
-                                    <!-- Dynamic Action Panel -->
                                     <div id="checklist-action-panel" class="bg-slate-100 p-4 mt-6 rounded-lg border border-slate-200 transition-all duration-300 h-32 flex flex-col justify-center">
                                         <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Dynamic First Action Protocol</span>
                                         <div id="dynamic-action-text" class="text-sm font-medium text-slate-700 leading-snug">
@@ -719,6 +456,33 @@
                                     <input type="range" id="fp-slider" min="3000" max="10000" step="100" value="6200" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
                                 </div>
                             </div>
+
+                            <div class="flex flex-row gap-4 mt-8 pt-6 border-t border-slate-200">
+                                <div class="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Bottom Hole (BHP)</span>
+                                    <div class="relative w-32 h-16">
+                                        <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible">
+                                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"></path>
+                                            <path id="gauge-bhp-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#0ea5e9" stroke-width="10" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" class="transition-all duration-500 ease-out"></path>
+                                        </svg>
+                                        <div class="absolute bottom-0 left-0 w-full text-center translate-y-3">
+                                            <span class="font-mono text-lg font-bold text-slate-800" id="gauge-bhp-text">0 psi</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Formation (FP)</span>
+                                    <div class="relative w-32 h-16">
+                                        <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible">
+                                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"></path>
+                                            <path id="gauge-fp-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" class="transition-all duration-500 ease-out"></path>
+                                        </svg>
+                                        <div class="absolute bottom-0 left-0 w-full text-center translate-y-3">
+                                            <span class="font-mono text-lg font-bold text-slate-800" id="gauge-fp-text">0 psi</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -733,7 +497,6 @@
                         <div id="status-banner" class="w-full text-center py-3 font-bold text-white uppercase tracking-widest transition-colors duration-300 bg-emerald-500 text-sm z-10 relative">Wellbore Stable (Dynamic)</div>
                         <div id="well-simulator-container" class="border-x-8 border-b-8 border-slate-800 rounded-b-xl relative bg-amber-900 -mt-1 w-full max-w-full"><canvas id="wellCanvas" class="absolute inset-0 w-full h-full"></canvas></div>
                         
-                        <!-- Pressure Balance State Indicator -->
                         <div id="balance-state-container" class="mt-4 p-4 rounded-xl border text-left w-full max-w-md transition-colors duration-300 hidden">
                             <h4 id="balance-state-title" class="font-bold text-lg mb-1 flex items-center gap-2"></h4>
                             <p id="balance-state-desc" class="text-sm"></p>
@@ -743,7 +506,6 @@
                     </div>
                 </div>
 
-                <!-- Advanced Note: Managed Pressure Drilling -->
                 <div class="mt-10 bg-indigo-50 border border-indigo-200 rounded-2xl p-8 shadow-sm">
                     <h3 class="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2"><span>⚙️</span> Enrichment Module: Managed Pressure Drilling (MPD)</h3>
                     <p class="text-sm text-indigo-800 leading-relaxed">
@@ -765,128 +527,8 @@
                     </p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Cause 1 -->
-                    <div class="flip-card bg-transparent cursor-pointer group">
-                        <div class="flip-card-inner shadow-sm rounded-xl">
-                            <div class="flip-card-front">
-                                <div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4">
-                                    <div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-slate-800"></div>
-                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 bg-sky-500 anim-fluid-drop"></div>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 leading-tight">Failure to Fill Hole</h3>
-                                <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-bold">Hover to explore</p>
-                            </div>
-                            <div class="flip-card-back">
-                                <h4 class="font-bold text-sky-400 mb-2 border-b border-slate-700 pb-1 text-left text-sm">Mechanism</h4>
-                                <p class="text-xs text-slate-300 text-left mb-3">Fluid level drops during tripping because steel volume removed isn't replaced with mud.</p>
-                                <h4 class="font-bold text-emerald-400 mb-1 text-left text-sm">Prevention</h4>
-                                <p class="text-xs text-slate-300 text-left">Continuously monitor trip tank; fill hole systematically.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Cause 2 -->
-                    <div class="flip-card bg-transparent cursor-pointer group">
-                        <div class="flip-card-inner shadow-sm rounded-xl">
-                            <div class="flip-card-front">
-                                <div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4">
-                                    <div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-600"></div>
-                                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-10 bg-slate-200 border-b-2 border-slate-800 anim-pipe-move z-10"></div>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 leading-tight">Swabbing & Surging</h3>
-                                <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-bold">Hover to explore</p>
-                            </div>
-                            <div class="flip-card-back">
-                                <h4 class="font-bold text-sky-400 mb-2 border-b border-slate-700 pb-1 text-left text-sm">Mechanism</h4>
-                                <p class="text-xs text-slate-300 text-left mb-3">Moving pipe too fast creates mechanical pressure spikes (suction on POOH, fracture on RIH).</p>
-                                <h4 class="font-bold text-emerald-400 mb-1 text-left text-sm">Prevention</h4>
-                                <p class="text-xs text-slate-300 text-left">Control tripping speeds; apply Trip Margin.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Cause 3 -->
-                    <div class="flip-card bg-transparent cursor-pointer group">
-                        <div class="flip-card-inner shadow-sm rounded-xl">
-                            <div class="flip-card-front">
-                                <div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                                    <div class="absolute bottom-1 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[20px] border-transparent border-b-slate-400"></div>
-                                    <div class="w-12 h-1.5 bg-slate-400 rounded anim-tilt relative bottom-1">
-                                        <div class="absolute -top-5 -left-2 w-5 h-5 bg-sky-400 rounded flex items-center justify-center text-[7px] text-white">MW</div>
-                                        <div class="absolute -top-6 -right-3 w-7 h-7 bg-rose-500 rounded flex items-center justify-center text-[9px] text-white">FP</div>
-                                    </div>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 leading-tight">Insufficient Mud Weight</h3>
-                                <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-bold">Hover to explore</p>
-                            </div>
-                            <div class="flip-card-back">
-                                <h4 class="font-bold text-sky-400 mb-2 border-b border-slate-700 pb-1 text-left text-sm">Mechanism</h4>
-                                <p class="text-xs text-slate-300 text-left mb-3">Base density of drilling fluid is naturally too low to hold back formation pore pressure.</p>
-                                <h4 class="font-bold text-emerald-400 mb-1 text-left text-sm">Prevention</h4>
-                                <p class="text-xs text-slate-300 text-left">Accurate pore pressure prediction; timely mud weight increases.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Cause 4 -->
-                    <div class="flip-card bg-transparent cursor-pointer group">
-                        <div class="flip-card-inner shadow-sm rounded-xl">
-                            <div class="flip-card-front">
-                                <div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4">
-                                    <div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-500"></div>
-                                    <div class="absolute top-[40%] left-[50%] h-1.5 bg-sky-500 anim-leak-right origin-left"></div>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 leading-tight">Lost Circulation</h3>
-                                <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-bold">Hover to explore</p>
-                            </div>
-                            <div class="flip-card-back">
-                                <h4 class="font-bold text-sky-400 mb-2 border-b border-slate-700 pb-1 text-left text-sm">Mechanism</h4>
-                                <p class="text-xs text-slate-300 text-left mb-3">Mud is lost to fractured formations, causing annular fluid level and hydrostatic pressure to drop.</p>
-                                <h4 class="font-bold text-emerald-400 mb-1 text-left text-sm">Prevention</h4>
-                                <p class="text-xs text-slate-300 text-left">Treat with LCM; minimize ECD to prevent fracturing.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Cause 5 -->
-                    <div class="flip-card bg-transparent cursor-pointer group">
-                        <div class="flip-card-inner shadow-sm rounded-xl">
-                            <div class="flip-card-front">
-                                <div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4 flex items-end justify-center">
-                                    <div class="absolute bottom-[-10px] w-14 h-10 bg-rose-600 rounded-t-full anim-pulse-pressure"></div>
-                                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-8 bg-sky-600 z-10"></div>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 leading-tight">Abnormal Pressures</h3>
-                                <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-bold">Hover to explore</p>
-                            </div>
-                            <div class="flip-card-back">
-                                <h4 class="font-bold text-sky-400 mb-2 border-b border-slate-700 pb-1 text-left text-sm">Mechanism</h4>
-                                <p class="text-xs text-slate-300 text-left mb-3">Drilling into unexpectedly over-pressurized geological pockets.</p>
-                                <h4 class="font-bold text-emerald-400 mb-1 text-left text-sm">Prevention</h4>
-                                <p class="text-xs text-slate-300 text-left">Monitor D-exponent and gas trends.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Cause 6 -->
-                    <div class="flip-card bg-transparent cursor-pointer group">
-                        <div class="flip-card-inner shadow-sm rounded-xl">
-                            <div class="flip-card-front">
-                                <div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-sky-700 overflow-hidden mx-auto mb-4">
-                                    <div class="absolute bottom-0 w-full h-4 bg-amber-900"></div>
-                                    <div class="absolute left-[20%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-1"></div>
-                                    <div class="absolute left-[50%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-2"></div>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 leading-tight">Gas Cut Mud</h3>
-                                <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-bold">Hover to explore</p>
-                            </div>
-                            <div class="flip-card-back">
-                                <h4 class="font-bold text-sky-400 mb-2 border-b border-slate-700 pb-1 text-left text-sm">Mechanism</h4>
-                                <p class="text-xs text-slate-300 text-left mb-3">Entrained gas expands massively near the surface, reducing overall hydrostatic column.</p>
-                                <h4 class="font-bold text-emerald-400 mb-1 text-left text-sm">Prevention</h4>
-                                <p class="text-xs text-slate-300 text-left">Time drill gas caps; utilize degassers.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="causes-grid"></div>
                 
-                <!-- Advanced Note: Tripping Dynamics -->
                 <div class="mt-10 bg-indigo-50 border border-indigo-200 rounded-2xl p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center">
                     <div class="flex-grow">
                         <h3 class="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2"><span>📘</span> Advanced Enrichment: Tripping Mechanics & Pumping Out</h3>
@@ -911,22 +553,11 @@
                         </div>
                     </div>
                     
-                    <!-- Trip Tank Visual -->
                     <div class="flex-shrink-0 w-48 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-end h-64">
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center block">Trip Out<br>Simulation</span>
                         <div class="flex gap-4 items-end h-32 w-full justify-center">
-                            <!-- Pipe pulling out -->
-                            <div class="relative w-8 h-full bg-slate-200 border-x border-slate-300 overflow-hidden">
-                                <div class="absolute bottom-0 w-full h-full bg-slate-800 anim-pipe-pull origin-bottom"></div>
-                            </div>
-                            <!-- Trip Tank dropping -->
-                            <div class="relative w-12 h-full bg-slate-100 border-b-4 border-x-2 border-slate-300 rounded-b">
-                                <div class="absolute bottom-0 w-full h-full bg-sky-500 anim-tank-drop"></div>
-                                <!-- ticks -->
-                                <div class="absolute right-0 w-2 h-px bg-white top-1/4"></div>
-                                <div class="absolute right-0 w-2 h-px bg-white top-1/2"></div>
-                                <div class="absolute right-0 w-2 h-px bg-white top-3/4"></div>
-                            </div>
+                            <div class="relative w-8 h-full bg-slate-200 border-x border-slate-300 overflow-hidden"><div class="absolute bottom-0 w-full h-full bg-slate-800 anim-pipe-pull origin-bottom"></div></div>
+                            <div class="relative w-12 h-full bg-slate-100 border-b-4 border-x-2 border-slate-300 rounded-b"><div class="absolute bottom-0 w-full h-full bg-sky-500 anim-tank-drop"></div><div class="absolute right-0 w-2 h-px bg-white top-1/4"></div><div class="absolute right-0 w-2 h-px bg-white top-1/2"></div><div class="absolute right-0 w-2 h-px bg-white top-3/4"></div></div>
                         </div>
                         <span class="text-[10px] font-bold text-indigo-600 mt-3 text-center block leading-tight">Tank level drops to replace<br>metal volume removed</span>
                     </div>
@@ -958,24 +589,15 @@
                     </div>
 
                     <div class="lg:col-span-1 bg-slate-900 rounded-2xl p-6 shadow-xl text-white flex flex-col h-full border border-slate-800">
-                        <div id="detail-empty" class="flex flex-col items-center justify-center h-full text-slate-500 text-center py-12">
-                            <span class="text-5xl mb-4">👈</span><p class="font-medium">Select an indicator from the chart to analyze detection methodologies.</p>
-                        </div>
+                        <div id="detail-empty" class="flex flex-col items-center justify-center h-full text-slate-500 text-center py-12"><span class="text-5xl mb-4">👈</span><p class="font-medium">Select an indicator from the chart to analyze detection methodologies.</p></div>
                         <div id="detail-content" class="hidden h-full flex flex-col">
-                            <div class="border-b border-slate-700 pb-4 mb-4">
-                                <div class="flex items-center gap-3 mb-2"><span id="detail-icon" class="text-3xl"></span><span id="detail-type" class="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded"></span></div>
-                                <h4 id="detail-title" class="text-2xl font-bold text-white"></h4>
-                            </div>
-                            <div class="flex-grow space-y-6 custom-scroll overflow-y-auto pr-2">
-                                <div><h5 class="text-xs font-bold text-sky-400 uppercase tracking-widest mb-2">Mechanics / Why it Happens</h5><p id="detail-desc" class="text-slate-300 text-sm leading-relaxed"></p></div>
-                                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><h5 class="text-xs font-bold text-sky-400 uppercase tracking-widest mb-2">Detection Methodology</h5><p id="detail-detection" class="text-white text-sm font-medium"></p></div>
-                            </div>
+                            <div class="border-b border-slate-700 pb-4 mb-4"><div class="flex items-center gap-3 mb-2"><span id="detail-icon" class="text-3xl"></span><span id="detail-type" class="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded"></span></div><h4 id="detail-title" class="text-2xl font-bold text-white"></h4></div>
+                            <div class="flex-grow space-y-6 custom-scroll overflow-y-auto pr-2"><div><h5 class="text-xs font-bold text-sky-400 uppercase tracking-widest mb-2">Mechanics / Why it Happens</h5><p id="detail-desc" class="text-slate-300 text-sm leading-relaxed"></p></div><div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><h5 class="text-xs font-bold text-sky-400 uppercase tracking-widest mb-2">Detection Methodology</h5><p id="detail-detection" class="text-white text-sm font-medium"></p></div></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                    <!-- Onshore Masking Factors -->
                     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-8 shadow-sm">
                         <h3 class="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2"><span>🕵️‍♂️</span> Onshore Masking Factors</h3>
                         <p class="text-amber-800 text-sm leading-relaxed mb-6">A "False Negative." Routine onshore operations cause fluctuations in pit volume or flow rate that can hide an influx, causing crews to ignore positive indicators.</p>
@@ -985,17 +607,9 @@
                             <li class="flex items-start gap-3 bg-white p-3 rounded-lg border border-amber-100 shadow-sm"><span class="text-lg">🚿</span><div><strong class="text-slate-800 text-sm block">Pump Start/Stop & Drain Back</strong><span class="text-xs text-slate-600">Flowline drain back and ECD changes cause temporary volume surges in pits.</span></div></li>
                             <li class="flex items-start gap-3 bg-white p-3 rounded-lg border border-amber-100 shadow-sm"><span class="text-lg">⚙️</span><div><strong class="text-slate-800 text-sm block">Solids Control & Spills</strong><span class="text-xs text-slate-600">Dumping from shakers/centrifuges or surface leaks mask volume gains.</span></div></li>
                         </ul>
-                        
-                        <div class="mt-4 bg-amber-100/50 border border-amber-200 p-3 rounded-lg text-xs text-amber-900">
-                            <strong class="block mb-1">Important Definitions:</strong>
-                            <ul class="list-disc pl-4 space-y-1">
-                                <li><strong>Drain Back:</strong> Mud draining from the flowline and surface equipment back into the active pits after pumps are stopped, causing a temporary, false pit volume increase.</li>
-                                <li><strong>Flow Return:</strong> The normal return of mud from the wellbore. Once pumps are stopped and drain back completes, flow returns must cease. Any continuous flow return is a positive kick indicator.</li>
-                            </ul>
-                        </div>
+                        <div class="mt-4 bg-amber-100/50 border border-amber-200 p-3 rounded-lg text-xs text-amber-900"><strong class="block mb-1">Important Definitions:</strong><ul class="list-disc pl-4 space-y-1"><li><strong>Drain Back:</strong> Mud draining from the flowline and surface equipment back into the active pits after pumps are stopped, causing a temporary, false pit volume increase.</li><li><strong>Flow Return:</strong> The normal return of mud from the wellbore. Once pumps are stopped and drain back completes, flow returns must cease. Any continuous flow return is a positive kick indicator.</li></ul></div>
                     </div>
 
-                    <!-- Ballooning vs Kick -->
                     <div class="bg-sky-50 border border-sky-200 rounded-2xl p-8 shadow-sm flex flex-col">
                         <h3 class="text-xl font-bold text-sky-900 mb-2 flex items-center gap-2"><span>🎈</span> Ballooning vs. True Kick</h3>
                         <p class="text-sky-800 text-sm leading-relaxed mb-6"><strong>Ballooning</strong> occurs when dynamic ECD forces mud into formation micro-fractures. When pumps turn off, rock squeezes mud back out. <br><br><em>Rule: Ballooning flow is FINITE (slows down and stops). Kick flow is CONTINUOUS.</em></p>
@@ -1007,23 +621,13 @@
                     </div>
                 </div>
 
-                <!-- Advanced Note: Early Kick Detection (EKD) -->
                 <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-8 shadow-sm">
                     <h3 class="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2"><span>📡</span> Enrichment Module: Automated Early Kick Detection (EKD)</h3>
                     <p class="text-sm text-indigo-800 mb-4">While conventional monitoring relies on human observation and standard Pit Volume Totalizers (PVT), modern onshore rigs are increasingly adopting advanced EKD systems to reduce the influx volume before shut-in. Industry studies (including onshore Texas regression analyses) demonstrate that <strong>54% of kick-triggering causes can be mitigated</strong> by implementing automated EKDS and MPD technologies.</p>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
-                            <strong class="text-slate-800 text-sm block">Conventional PVT</strong>
-                            <span class="text-xs text-slate-600 block mt-1">Detection threshold: <strong>10+ barrels</strong>. Heavily reliant on visual float levels and highly susceptible to masking factors.</span>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
-                            <strong class="text-slate-800 text-sm block">Coriolis Flow Meters</strong>
-                            <span class="text-xs text-slate-600 block mt-1">Detection threshold: <strong>3-5 barrels</strong>. Measures mass flow rate out vs. in, providing a 50% improvement in response time.</span>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
-                            <strong class="text-slate-800 text-sm block">Downhole MWD Sensors</strong>
-                            <span class="text-xs text-slate-600 block mt-1">Detection threshold: <strong>Instantaneous</strong>. Detects annular pressure anomalies at the bit milliseconds after they occur.</span>
-                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm"><strong class="text-slate-800 text-sm block">Conventional PVT</strong><span class="text-xs text-slate-600 block mt-1">Detection threshold: <strong>10+ barrels</strong>. Heavily reliant on visual float levels and highly susceptible to masking factors.</span></div>
+                        <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm"><strong class="text-slate-800 text-sm block">Coriolis Flow Meters</strong><span class="text-xs text-slate-600 block mt-1">Detection threshold: <strong>3-5 barrels</strong>. Measures mass flow rate out vs. in, providing a 50% improvement in response time.</span></div>
+                        <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm"><strong class="text-slate-800 text-sm block">Downhole MWD Sensors</strong><span class="text-xs text-slate-600 block mt-1">Detection threshold: <strong>Instantaneous</strong>. Detects annular pressure anomalies at the bit milliseconds after they occur.</span></div>
                     </div>
                 </div>
             </div>
@@ -1037,129 +641,57 @@
                     <p class="text-slate-400 text-lg leading-relaxed">Upon observing a positive indicator, immediately execute the Flow Check and Shut-In procedures.</p>
                 </div>
                 
-                <!-- Protocol Stepper -->
                 <div class="relative max-w-4xl mx-auto mb-16">
                     <div class="absolute left-[27px] top-4 bottom-4 w-1 bg-slate-700 rounded-full md:left-1/2 md:-ml-[2px]"></div>
                     <div class="space-y-8 md:space-y-12">
-                        <div class="relative flex flex-col md:flex-row items-center group cursor-pointer" onclick="window.activateStep(1)">
-                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-1">1</div>
-                            <div class="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-1"><h3 class="text-xl font-bold text-white mb-2">Stop Rotary Table</h3><p class="text-slate-400 text-sm">Halt drilling rotation to assess without inducing dynamic pressures.</p></div></div>
-                        </div>
-                        <div class="relative flex flex-col md:flex-row items-center md:flex-row-reverse group cursor-pointer" onclick="window.activateStep(2)">
-                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-2">2</div>
-                            <div class="ml-20 md:ml-0 md:w-1/2 md:pl-16 text-left w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-2"><h3 class="text-xl font-bold text-white mb-2">Pick Up Off Bottom</h3><p class="text-slate-400 text-sm">Raise drill string so tool joint is positioned above the BOP rams.</p></div></div>
-                        </div>
-                        <div class="relative flex flex-col md:flex-row items-center group cursor-pointer" onclick="window.activateStep(3)">
-                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-3">3</div>
-                            <div class="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-3"><h3 class="text-xl font-bold text-white mb-2">Stop Mud Pumps</h3><p class="text-slate-400 text-sm">Shut down active circulation to remove friction pressure (ECD).</p></div></div>
-                        </div>
-                        <div class="relative flex flex-col md:flex-row items-center md:flex-row-reverse group cursor-pointer" onclick="window.activateStep(4)">
-                            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-4">4</div>
-                            <div class="ml-20 md:ml-0 md:w-1/2 md:pl-16 text-left w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-4"><h3 class="text-xl font-bold text-rose-400 mb-2">Observe & Shut In</h3><p class="text-slate-300 text-sm font-medium">Flow Check. If flowing with pumps off, ACTIVATE BOP IMMEDIATELY.</p></div></div>
-                        </div>
+                        <div class="relative flex flex-col md:flex-row items-center group cursor-pointer" onclick="window.activateStep(1)"><div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-1">1</div><div class="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-1"><h3 class="text-xl font-bold text-white mb-2">Stop Rotary Table</h3><p class="text-slate-400 text-sm">Halt drilling rotation to assess without inducing dynamic pressures.</p></div></div></div>
+                        <div class="relative flex flex-col md:flex-row items-center md:flex-row-reverse group cursor-pointer" onclick="window.activateStep(2)"><div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-2">2</div><div class="ml-20 md:ml-0 md:w-1/2 md:pl-16 text-left w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-2"><h3 class="text-xl font-bold text-white mb-2">Pick Up Off Bottom</h3><p class="text-slate-400 text-sm">Raise drill string so tool joint is positioned above the BOP rams.</p></div></div></div>
+                        <div class="relative flex flex-col md:flex-row items-center group cursor-pointer" onclick="window.activateStep(3)"><div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-3">3</div><div class="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-3"><h3 class="text-xl font-bold text-white mb-2">Stop Mud Pumps</h3><p class="text-slate-400 text-sm">Shut down active circulation to remove friction pressure (ECD).</p></div></div></div>
+                        <div class="relative flex flex-col md:flex-row items-center md:flex-row-reverse group cursor-pointer" onclick="window.activateStep(4)"><div class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-800 border-4 border-slate-600 text-slate-400 font-bold text-xl z-10 md:absolute md:left-1/2 md:-ml-7 transition-colors duration-300" id="step-icon-4">4</div><div class="ml-20 md:ml-0 md:w-1/2 md:pl-16 text-left w-full"><div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 transition-all duration-300 transform group-hover:-translate-y-1" id="step-card-4"><h3 class="text-xl font-bold text-rose-400 mb-2">Observe & Shut In</h3><p class="text-slate-300 text-sm font-medium">Flow Check. If flowing with pumps off, ACTIVATE BOP IMMEDIATELY.</p></div></div></div>
                     </div>
                 </div>
 
-                <!-- API Drills & Non-Routine Ops -->
                 <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-xl overflow-hidden mt-12 grid grid-cols-1 md:grid-cols-12 gap-px">
                     <div class="p-8 bg-slate-800/50 md:col-span-12 border-b border-slate-700">
                         <h3 class="text-2xl font-bold text-sky-400 flex items-center gap-2"><span>📋</span> Enrichment Module: API Well Control Drills & Non-Routine Operations (Onshore)</h3>
                         <p class="text-sm text-slate-400 mt-2">Drills must be conducted regularly to train crews in rapid barrier reinstatement per API/IADC standards. Reaction times must be recorded.</p>
                     </div>
                     
-                    <!-- Drill: Pit / Drilling -->
                     <div class="bg-slate-800 p-6 md:col-span-4">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="bg-sky-500/20 text-sky-400 p-2 rounded-lg text-xl">🕳️</span>
-                            <h4 class="font-bold text-lg text-white">Pit Drill (Drilling)</h4>
-                        </div>
+                        <div class="flex items-center gap-3 mb-4"><span class="bg-sky-500/20 text-sky-400 p-2 rounded-lg text-xl">🕳️</span><h4 class="font-bold text-lg text-white">Pit Drill (Drilling)</h4></div>
                         <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Frequency: Every 14 days / entering HP zones</span>
-                        <ol class="list-decimal pl-5 space-y-1 text-sm text-slate-300">
-                            <li>Recognize simulated kick (alarm).</li>
-                            <li>Hoist Kelly/Top Drive to space out tool joint.</li>
-                            <li>Stop mud pumps.</li>
-                            <li>Shut the well in (Annular or Rams).</li>
-                        </ol>
+                        <ol class="list-decimal pl-5 space-y-1 text-sm text-slate-300"><li>Recognize simulated kick (alarm).</li><li>Hoist Kelly/Top Drive to space out tool joint.</li><li>Stop mud pumps.</li><li>Shut the well in (Annular or Rams).</li></ol>
                     </div>
                     
-                    <!-- Drill: Trip -->
                     <div class="bg-slate-800 p-6 md:col-span-4">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="bg-amber-500/20 text-amber-400 p-2 rounded-lg text-xl">🏗️</span>
-                            <h4 class="font-bold text-lg text-white">Trip Drill (Tripping)</h4>
-                        </div>
+                        <div class="flex items-center gap-3 mb-4"><span class="bg-amber-500/20 text-amber-400 p-2 rounded-lg text-xl">🏗️</span><h4 class="font-bold text-lg text-white">Trip Drill (Tripping)</h4></div>
                         <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Frequency: Every 14 days</span>
-                        <ol class="list-decimal pl-5 space-y-1 text-sm text-slate-300">
-                            <li>Recognize anomaly & set stand down on slips.</li>
-                            <li>Install FOSV (open position).</li>
-                            <li>Close FOSV and close BOP.</li>
-                            <li>Make up Top Drive / Inside BOP.</li>
-                            <li>Open FOSV & HCR to choke line.</li>
-                        </ol>
+                        <ol class="list-decimal pl-5 space-y-1 text-sm text-slate-300"><li>Recognize anomaly & set stand down on slips.</li><li>Install FOSV (open position).</li><li>Close FOSV and close BOP.</li><li>Make up Top Drive / Inside BOP.</li><li>Open FOSV & HCR to choke line.</li></ol>
                     </div>
 
-                    <!-- Drill: Choke & Stripping -->
                     <div class="bg-slate-800 p-6 md:col-span-4">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="bg-rose-500/20 text-rose-400 p-2 rounded-lg text-xl">⚙️</span>
-                            <h4 class="font-bold text-lg text-white">Other Drills</h4>
-                        </div>
+                        <div class="flex items-center gap-3 mb-4"><span class="bg-rose-500/20 text-rose-400 p-2 rounded-lg text-xl">⚙️</span><h4 class="font-bold text-lg text-white">Other Drills</h4></div>
                         <div class="space-y-4 text-sm text-slate-300">
-                            <div>
-                                <strong class="text-sky-300 block mb-1">Choke Manipulation Drill</strong>
-                                <p class="text-xs leading-relaxed">Conducted strictly <strong>before drilling out shoe tracks</strong>. Discharge into trip tank to accurately monitor flow rates and pressure drops.</p>
-                            </div>
-                            <div>
-                                <strong class="text-sky-300 block mb-1">Stripping Drill</strong>
-                                <p class="text-xs leading-relaxed">Conducted after BOP test. Involves running drill pipe to bottom under pressure through a closed annular preventer.</p>
-                            </div>
+                            <div><strong class="text-sky-300 block mb-1">Choke Manipulation Drill</strong><p class="text-xs leading-relaxed">Conducted strictly <strong>before drilling out shoe tracks</strong>. Discharge into trip tank to accurately monitor flow rates and pressure drops.</p></div>
+                            <div><strong class="text-sky-300 block mb-1">Stripping Drill</strong><p class="text-xs leading-relaxed">Conducted after BOP test. Involves running drill pipe to bottom under pressure through a closed annular preventer.</p></div>
                         </div>
                     </div>
 
-                    <!-- Evaluation Criteria Block -->
                     <div class="bg-indigo-900/40 p-6 md:col-span-12 border-t border-slate-700">
                         <h4 class="font-bold text-lg text-indigo-300 mb-4 flex items-center gap-2"><span>⏱️</span> Drill Evaluation Criteria & Response Times</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-300">
-                            <div class="bg-slate-800/80 p-4 rounded-lg border border-indigo-500/30">
-                                <strong class="text-white block mb-1">Pit Drill Reaction Time</strong>
-                                <span class="text-emerald-400 font-mono text-xl font-bold block mb-1">&le; 1 Minute</span>
-                                <p class="text-xs text-slate-400">From the kick detection alarm sounding to having the well completely shut in with pumps off.</p>
-                            </div>
-                            <div class="bg-slate-800/80 p-4 rounded-lg border border-indigo-500/30">
-                                <strong class="text-white block mb-1">Trip Drill Reaction Time</strong>
-                                <span class="text-emerald-400 font-mono text-xl font-bold block mb-1">&le; 2 Minutes</span>
-                                <p class="text-xs text-slate-400">Time includes recognizing the anomaly, setting slips, installing the FOSV, and closing the BOP.</p>
-                            </div>
-                            <div class="bg-slate-800/80 p-4 rounded-lg border border-indigo-500/30">
-                                <strong class="text-white block mb-1">Competency Evaluation</strong>
-                                <ul class="list-disc pl-4 text-xs space-y-1 mt-1 text-slate-400">
-                                    <li>Crew positions taken without hesitation.</li>
-                                    <li>Correct valve sequence executed safely.</li>
-                                    <li>Accurate pressure and volume recording.</li>
-                                </ul>
-                            </div>
+                            <div class="bg-slate-800/80 p-4 rounded-lg border border-indigo-500/30"><strong class="text-white block mb-1">Pit Drill Reaction Time</strong><span class="text-emerald-400 font-mono text-xl font-bold block mb-1">&le; 1 Minute</span><p class="text-xs text-slate-400">From the kick detection alarm sounding to having the well completely shut in with pumps off.</p></div>
+                            <div class="bg-slate-800/80 p-4 rounded-lg border border-indigo-500/30"><strong class="text-white block mb-1">Trip Drill Reaction Time</strong><span class="text-emerald-400 font-mono text-xl font-bold block mb-1">&le; 2 Minutes</span><p class="text-xs text-slate-400">Time includes recognizing the anomaly, setting slips, installing the FOSV, and closing the BOP.</p></div>
+                            <div class="bg-slate-800/80 p-4 rounded-lg border border-indigo-500/30"><strong class="text-white block mb-1">Competency Evaluation</strong><ul class="list-disc pl-4 text-xs space-y-1 mt-1 text-slate-400"><li>Crew positions taken without hesitation.</li><li>Correct valve sequence executed safely.</li><li>Accurate pressure and volume recording.</li></ul></div>
                         </div>
                     </div>
 
-                    <!-- Non-Routine Ops -->
                     <div class="bg-slate-800 p-6 md:col-span-12 border-t border-slate-700">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg text-xl">🛡️</span>
-                            <h4 class="font-bold text-lg text-white">Non-Routine Ops & Casing (Onshore)</h4>
-                        </div>
+                        <div class="flex items-center gap-3 mb-4"><span class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg text-xl">🛡️</span><h4 class="font-bold text-lg text-white">Non-Routine Ops & Casing (Onshore)</h4></div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300">
-                            <div>
-                                <strong class="text-sky-300 block mb-1">Two-Barrier Policy</strong>
-                                <p>During wireline logging, running perforated liners, or setting slips without packers, <strong>two independent barriers</strong> must be strictly maintained at all times to prevent sudden influxes.</p>
-                            </div>
-                            <div>
-                                <strong class="text-sky-300 block mb-1">Wireline & Intervention</strong>
-                                <p>Wireline pressure control equipment (lubricators, wireline BOPs, and grease injection systems) must be rigorously pressure-tested to allow safe wellbore access without losing primary control.</p>
-                            </div>
-                            <div>
-                                <strong class="text-sky-300 block mb-1">Casing Running Best Practices</strong>
-                                <p>Perform a short trip to eliminate tight spots. Condition the mud by reducing Plastic Viscosity (PV) and Yield Point (YP) to minimize surge pressures. Circulate at least 120% of casing capacity before cementing.</p>
-                            </div>
+                            <div><strong class="text-sky-300 block mb-1">Two-Barrier Policy</strong><p>During wireline logging, running perforated liners, or setting slips without packers, <strong>two independent barriers</strong> must be strictly maintained at all times to prevent sudden influxes.</p></div>
+                            <div><strong class="text-sky-300 block mb-1">Wireline & Intervention</strong><p>Wireline pressure control equipment (lubricators, wireline BOPs, and grease injection systems) must be rigorously pressure-tested to allow safe wellbore access without losing primary control.</p></div>
+                            <div><strong class="text-sky-300 block mb-1">Casing Running Best Practices</strong><p>Perform a short trip to eliminate tight spots. Condition the mud by reducing Plastic Viscosity (PV) and Yield Point (YP) to minimize surge pressures. Circulate at least 120% of casing capacity before cementing.</p></div>
                         </div>
                     </div>
                 </div>
@@ -1178,7 +710,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- KWM Calculator -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                         <div class="p-6 bg-slate-800 text-white flex justify-between items-center"><h3 class="font-bold text-lg">KWM Calculator</h3><span class="text-2xl">⚖️</span></div>
                         <div class="p-6 space-y-4 flex-grow">
@@ -1192,7 +723,6 @@
                         </div>
                     </div>
 
-                    <!-- MAASP Calculator -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                         <div class="p-6 bg-slate-800 text-white flex justify-between items-center"><h3 class="font-bold text-lg">MAASP Calculator</h3><span class="text-2xl">💥</span></div>
                         <div class="p-6 space-y-4 flex-grow">
@@ -1221,71 +751,40 @@
 
                 <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-8 md:p-12 min-h-[450px] flex flex-col items-center justify-center relative overflow-hidden" id="quiz-container">
                     
-                    <!-- Start Screen -->
                     <div id="quiz-start" class="text-center w-full z-10">
                         <div class="text-6xl mb-6">🎓</div>
                         <h3 class="text-2xl font-bold text-white mb-4">Certification Prep & Gap Analysis</h3>
-                        
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8 text-left">
                             <div class="sm:col-span-2"><label class="block text-sm font-bold text-sky-400 mb-2">Full Name</label><input type="text" id="student-name" placeholder="e.g. John Doe" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500"></div>
-                            
                             <div>
                                 <label class="block text-sm font-bold text-sky-400 mb-2">Position / Role</label>
                                 <select id="student-position" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 appearance-none">
-                                    <option value="" disabled selected>Select Role...</option>
-                                    <option value="STP">STP (Senior Tool Pusher)</option>
-                                    <option value="Toolpusher">Toolpusher</option>
-                                    <option value="Company Man">Company Man</option>
-                                    <option value="Workover Supervisor/Engineer">Workover Supervisor/Engineer</option>
-                                    <option value="Well Intervention Supervisor/Engineer">Well Intervention Supervisor/Engineer</option>
-                                    <option value="Driller">Driller</option>
-                                    <option value="Asst. Driller">Asst. Driller</option>
-                                    <option value="Derrickman">Derrickman</option>
-                                    <option value="Floor man">Floor man</option>
-                                    <option value="Mud Engineer">Mud Engineer</option>
-                                    <option value="Mud Logger">Mud Logger</option>
+                                    <option value="" disabled selected>Select Role...</option><option value="STP">STP</option><option value="Toolpusher">Toolpusher</option><option value="Company Man">Company Man</option><option value="Workover Supervisor/Engineer">Workover Supervisor/Engineer</option><option value="Well Intervention Supervisor/Engineer">Well Intervention Supervisor/Engineer</option><option value="Driller">Driller</option><option value="Asst. Driller">Asst. Driller</option><option value="Derrickman">Derrickman</option><option value="Floor man">Floor man</option><option value="Mud Engineer">Mud Engineer</option><option value="Mud Logger">Mud Logger</option>
                                 </select>
                             </div>
                             <div><label class="block text-sm font-bold text-sky-400 mb-2">Years of Experience</label><input type="number" id="student-exp" min="0" max="50" placeholder="e.g. 5" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500"></div>
                         </div>
-
-                        <div class="flex justify-center">
-                            <button onclick="window.startQuiz()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-12 rounded-full transition-colors duration-300 shadow-lg shadow-sky-500/30">Start Assessment (50 Qs)</button>
-                        </div>
+                        <div class="flex justify-center"><button onclick="window.startQuiz()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-12 rounded-full transition-colors duration-300 shadow-lg shadow-sky-500/30">Start Assessment (50 Qs)</button></div>
                     </div>
 
-                    <!-- Question Screen -->
                     <div id="quiz-question" class="hidden w-full h-full flex flex-col z-10">
                         <div class="flex justify-between items-center mb-6 border-b border-slate-600 pb-4">
-                            <div>
-                                <span class="text-sky-400 font-bold uppercase tracking-widest text-xs block" id="question-counter">Question 1 of 50</span>
-                                <span class="text-slate-400 text-xs mt-1" id="active-student-display"></span>
-                            </div>
-                            <div class="text-center bg-slate-900 px-4 py-1.5 rounded-lg border border-slate-700 shadow-inner">
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest block mb-0.5">Time Remaining</span>
-                                <span id="quiz-timer" class="font-mono text-xl font-bold text-amber-400">90:00</span>
-                            </div>
+                            <div><span class="text-sky-400 font-bold uppercase tracking-widest text-xs block" id="question-counter">Question 1 of 50</span><span class="text-slate-400 text-xs mt-1" id="active-student-display"></span></div>
+                            <div class="text-center bg-slate-900 px-4 py-1.5 rounded-lg border border-slate-700 shadow-inner"><span class="text-[10px] text-slate-400 uppercase tracking-widest block mb-0.5">Time Remaining</span><span id="quiz-timer" class="font-mono text-xl font-bold text-amber-400">90:00</span></div>
                             <span class="text-slate-400 font-mono text-sm">Score: <span id="current-score" class="text-white font-bold">0</span></span>
                         </div>
                         <h3 class="text-xl md:text-2xl font-bold text-white mb-6 leading-snug" id="question-text"></h3>
                         <div class="space-y-3 flex-grow" id="options-container"></div>
-                        
-                        <!-- Explanation Box -->
                         <div id="explanation-box" class="hidden mt-4 p-4 rounded-lg text-sm border shadow-sm"></div>
-
-                        <div class="mt-6 text-right hidden" id="next-btn-container">
-                            <button onclick="window.nextQuestion()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300">Next Question →</button>
-                        </div>
+                        <div class="mt-6 text-right hidden" id="next-btn-container"><button onclick="window.nextQuestion()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300">Next Question →</button></div>
                     </div>
 
-                    <!-- Results Screen -->
                     <div id="quiz-results" class="hidden text-center w-full z-10">
                         <div id="result-icon" class="text-7xl mb-4"></div>
                         <h3 class="text-3xl font-bold text-white mb-2" id="result-title">Assessment Complete</h3>
                         <p class="text-slate-400 mb-2 text-lg">Results saved securely to the cloud for <span id="result-student-name" class="font-bold text-white"></span>.</p>
                         <div class="text-6xl font-extrabold text-sky-400 font-mono mb-6" id="final-score">0%</div>
                         
-                        <!-- NEW COMMENT SECTION -->
                         <div id="comment-section" class="max-w-2xl mx-auto w-full mb-8 bg-slate-700/50 p-5 rounded-xl border border-slate-600 text-left">
                             <label class="block text-sm font-bold text-sky-400 mb-2 flex items-center gap-2"><span>💬</span> Candidate Comments & Feedback</label>
                             <textarea id="student-comment" rows="3" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-sky-500 text-sm" placeholder="Please leave any comments regarding the assessment or your result..."></textarea>
@@ -1306,7 +805,6 @@
 
         <!-- 8. ABOUT THE AUTHOR (FANCY) -->
         <section id="about" class="py-24 px-4 bg-slate-900 border-t border-slate-800 scroll-mt-16 no-print relative overflow-hidden">
-            <!-- Decorative blobs -->
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400"></div>
             <div class="absolute -top-40 -right-40 w-96 h-96 bg-sky-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-30"></div>
             <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-30"></div>
@@ -1329,30 +827,15 @@
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-left w-full">
-                        <div class="bg-slate-800/50 backdrop-blur border border-slate-600/50 p-6 rounded-2xl shadow-lg hover:bg-slate-700/50 transition-colors">
-                            <h4 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><span class="text-emerald-400 text-2xl">🎯</span> Operational Excellence</h4>
-                            <p class="text-sm text-slate-400 leading-relaxed">Proven track record in driving cost-effective solutions, minimizing non-productive time (NPT), and enhancing well performance—while maintaining absolute HSE and QA/QC compliance.</p>
-                        </div>
-                        <div class="bg-slate-800/50 backdrop-blur border border-slate-600/50 p-6 rounded-2xl shadow-lg hover:bg-slate-700/50 transition-colors">
-                            <h4 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><span class="text-amber-400 text-2xl">⚙️</span> Technical Leadership</h4>
-                            <p class="text-sm text-slate-400 leading-relaxed">Hands-on in both routine and complex operations, providing robust technical support and troubleshooting to ensure smooth and safe execution of well activities.</p>
-                        </div>
-                        <div class="bg-slate-800/50 backdrop-blur border border-slate-600/50 p-6 rounded-2xl shadow-lg hover:bg-slate-700/50 transition-colors">
-                            <h4 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><span class="text-indigo-400 text-2xl">🌍</span> Global Knowledge Transfer</h4>
-                            <p class="text-sm text-slate-400 leading-relaxed">Passionate about capability building—conducting training for engineers and field teams in Egypt, Sudan, and China on well control, completions, and interventions.</p>
-                        </div>
+                        <div class="bg-slate-800/50 backdrop-blur border border-slate-600/50 p-6 rounded-2xl shadow-lg hover:bg-slate-700/50 transition-colors"><h4 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><span class="text-emerald-400 text-2xl">🎯</span> Operational Excellence</h4><p class="text-sm text-slate-400 leading-relaxed">Proven track record in driving cost-effective solutions, minimizing non-productive time (NPT), and enhancing well performance—while maintaining absolute HSE and QA/QC compliance.</p></div>
+                        <div class="bg-slate-800/50 backdrop-blur border border-slate-600/50 p-6 rounded-2xl shadow-lg hover:bg-slate-700/50 transition-colors"><h4 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><span class="text-amber-400 text-2xl">⚙️</span> Technical Leadership</h4><p class="text-sm text-slate-400 leading-relaxed">Hands-on in both routine and complex operations, providing robust technical support and troubleshooting to ensure smooth and safe execution of well activities.</p></div>
+                        <div class="bg-slate-800/50 backdrop-blur border border-slate-600/50 p-6 rounded-2xl shadow-lg hover:bg-slate-700/50 transition-colors"><h4 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><span class="text-indigo-400 text-2xl">🌍</span> Global Knowledge Transfer</h4><p class="text-sm text-slate-400 leading-relaxed">Passionate about capability building—conducting training for engineers and field teams in Egypt, Sudan, and China on well control, completions, and interventions.</p></div>
                     </div>
 
                     <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 bg-slate-900 border border-slate-700 text-white px-8 py-4 rounded-2xl shadow-2xl">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">📞</span>
-                            <span class="font-mono text-lg tracking-wide">+20 1271536449</span>
-                        </div>
+                        <div class="flex items-center gap-3"><span class="text-2xl">📞</span><span class="font-mono text-lg tracking-wide">+20 1271536449</span></div>
                         <div class="w-px h-8 bg-slate-600 hidden sm:block"></div>
-                        <div class="flex items-center gap-3 group">
-                            <span class="text-2xl">✉️</span>
-                            <a href="mailto:nfw_1983@yahoo.com" class="font-mono text-lg tracking-wide text-sky-400 group-hover:text-sky-300 transition-colors border-b border-transparent group-hover:border-sky-300">nfw_1983@yahoo.com</a>
-                        </div>
+                        <div class="flex items-center gap-3 group"><span class="text-2xl">✉️</span><a href="mailto:nfw_1983@yahoo.com" class="font-mono text-lg tracking-wide text-sky-400 group-hover:text-sky-300 transition-colors border-b border-transparent group-hover:border-sky-300">nfw_1983@yahoo.com</a></div>
                     </div>
                 </div>
             </div>
@@ -1361,8 +844,6 @@
         <!-- 9. SECURE GROUP ANALYTICS PORTAL -->
         <section id="instructor" class="py-20 px-4 bg-slate-50 border-t border-slate-200 scroll-mt-16 no-print">
             <div class="max-w-7xl mx-auto">
-                
-                <!-- LOCKED STATE -->
                 <div id="instructor-locked" class="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm max-w-lg mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">Group Analytics & Gap Analysis</h2>
@@ -1374,7 +855,6 @@
                     <p id="pwd-error" class="text-rose-500 text-sm font-semibold mt-4 hidden">Incorrect password.</p>
                 </div>
 
-                <!-- UNLOCKED STATE -->
                 <div id="instructor-unlocked" class="hidden">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                         <div>
@@ -1388,36 +868,17 @@
                         </div>
                     </div>
 
-                    <!-- Top KPI Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total Assessments</span>
-                            <div class="text-4xl font-extrabold text-slate-800" id="stat-total-students">0</div>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Group Avg Score</span>
-                            <div class="text-4xl font-extrabold text-sky-600 font-mono" id="stat-avg-score">0%</div>
-                        </div>
-                        <!-- Group Evaluation Summary Box -->
-                        <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 shadow-sm flex flex-col justify-center">
-                            <span class="text-sm font-bold text-indigo-700 uppercase tracking-wider mb-1">Final Group Evaluation</span>
-                            <div class="text-sm font-medium text-slate-800 leading-tight" id="stat-group-eval">Awaiting data to evaluate group competency...</div>
-                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center"><span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total Assessments</span><div class="text-4xl font-extrabold text-slate-800" id="stat-total-students">0</div></div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center"><span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Group Avg Score</span><div class="text-4xl font-extrabold text-sky-600 font-mono" id="stat-avg-score">0%</div></div>
+                        <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 shadow-sm flex flex-col justify-center"><span class="text-sm font-bold text-indigo-700 uppercase tracking-wider mb-1">Final Group Evaluation</span><div class="text-sm font-medium text-slate-800 leading-tight" id="stat-group-eval">Awaiting data to evaluate group competency...</div></div>
                     </div>
 
-                    <!-- Charts Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-                            <h3 class="font-bold text-slate-800 mb-4">Group Pass/Fail Ratio</h3>
-                            <div class="mini-chart-container w-full flex-grow"><canvas id="instructorPieChart"></canvas></div>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-                            <h3 class="font-bold text-slate-800 mb-4">Topic Performance (Avg Score)</h3>
-                            <div class="radar-chart-container w-full flex-grow"><canvas id="topicRadarChart"></canvas></div>
-                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col"><h3 class="font-bold text-slate-800 mb-4">Group Pass/Fail Ratio</h3><div class="mini-chart-container w-full flex-grow"><canvas id="instructorPieChart"></canvas></div></div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col"><h3 class="font-bold text-slate-800 mb-4">Topic Performance (Avg Score)</h3><div class="radar-chart-container w-full flex-grow"><canvas id="topicRadarChart"></canvas></div></div>
                     </div>
 
-                    <!-- Results Table -->
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                             <h3 class="font-bold text-slate-800">Assessment Logs & Individual Reports</h3>
@@ -1427,264 +888,148 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-100/50 text-slate-500 text-xs uppercase tracking-wider">
-                                        <th class="px-6 py-4 font-bold border-b border-slate-200">Date</th>
-                                        <th class="px-6 py-4 font-bold border-b border-slate-200">Name</th>
-                                        <th class="px-6 py-4 font-bold border-b border-slate-200">Role (Exp)</th>
-                                        <th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Score</th>
-                                        <th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Action</th>
+                                        <th class="px-6 py-4 font-bold border-b border-slate-200">Date</th><th class="px-6 py-4 font-bold border-b border-slate-200">Name</th><th class="px-6 py-4 font-bold border-b border-slate-200">Role (Exp)</th><th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Score</th><th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="instructor-table-body" class="divide-y divide-slate-100 text-sm">
-                                    <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400 italic">No assessments recorded yet.</td></tr>
-                                </tbody>
+                                <tbody id="instructor-table-body" class="divide-y divide-slate-100 text-sm"><tr><td colspan="5" class="px-6 py-8 text-center text-slate-400 italic">No assessments recorded yet.</td></tr></tbody>
                             </table>
                         </div>
                     </div>
                     
-                    <!-- Candidate Feedback Logs -->
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-6">
-                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-                            <span class="text-xl">💬</span>
-                            <h3 class="font-bold text-slate-800">Candidate Feedback & Comments</h3>
-                        </div>
-                        <div class="p-6 bg-slate-50/50">
-                            <div id="instructor-comments-list" class="space-y-4">
-                                <p class="text-slate-400 italic text-sm text-center py-4">No comments recorded yet.</p>
-                            </div>
-                        </div>
+                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2"><span class="text-xl">💬</span><h3 class="font-bold text-slate-800">Candidate Feedback & Comments</h3></div>
+                        <div class="p-6 bg-slate-50/50"><div id="instructor-comments-list" class="space-y-4"><p class="text-slate-400 italic text-sm text-center py-4">No comments recorded yet.</p></div></div>
                     </div>
-                    
                 </div>
             </div>
         </section>
-
     </main>
 
-    <!-- INDIVIDUAL REPORT MODAL (Hidden by Default) -->
+    <!-- MODALS -->
     <div id="report-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div id="report-modal-content" class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] print:max-h-full">
-            <!-- Header -->
             <div class="bg-slate-900 p-6 flex justify-between items-center no-print">
                 <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>📄</span> Individual Gap Analysis Report</h2>
-                <div class="flex gap-3">
-                    <button onclick="window.print()" class="text-slate-300 hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded text-sm font-medium border border-slate-600">Print Report</button>
-                    <button onclick="window.closeReport()" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button>
-                </div>
+                <div class="flex gap-3"><button onclick="window.print()" class="text-slate-300 hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded text-sm font-medium border border-slate-600">Print Report</button><button onclick="window.closeReport()" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button></div>
             </div>
-            
-            <!-- Printable Area -->
             <div class="p-8 overflow-y-auto custom-scroll">
                 <div class="border-b-4 border-slate-900 pb-4 mb-6 flex justify-between items-end">
-                    <div>
-                        <h1 class="text-3xl font-black text-slate-900 mb-1" id="rep-name">John Doe</h1>
-                        <p class="text-lg text-slate-600 font-medium" id="rep-role">Driller</p>
-                        <p class="text-sm text-slate-500 mt-1">Experience: <span id="rep-exp" class="font-bold text-slate-700"></span> Years | Date: <span id="rep-date"></span></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Final Score</p>
-                        <div class="text-5xl font-black font-mono" id="rep-score">0%</div>
-                    </div>
+                    <div><h1 class="text-3xl font-black text-slate-900 mb-1" id="rep-name">John Doe</h1><p class="text-lg text-slate-600 font-medium" id="rep-role">Driller</p><p class="text-sm text-slate-500 mt-1">Experience: <span id="rep-exp" class="font-bold text-slate-700"></span> Years | Date: <span id="rep-date"></span></p></div>
+                    <div class="text-right"><p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Final Score</p><div class="text-5xl font-black font-mono" id="rep-score">0%</div></div>
                 </div>
-
-                <!-- Individual Visual Analytics -->
                 <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-slate-50 rounded-xl p-6 border border-slate-200">
-                    <div class="md:col-span-2">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Final Evaluation</h3>
-                        <div id="rep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                    <div class="w-full h-48 relative">
-                        <canvas id="indivRadarChart"></canvas>
-                    </div>
+                    <div class="md:col-span-2"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Final Evaluation</h3><div id="rep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white"></div></div>
+                    <div class="w-full h-48 relative"><canvas id="indivRadarChart"></canvas></div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Identified Knowledge Gaps</h3>
-                        <ul id="rep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 h-full">
-                            <!-- Populated by JS -->
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3>
-                        <ul id="rep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full">
-                            <!-- Populated by JS -->
-                        </ul>
-                    </div>
+                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Identified Knowledge Gaps</h3><ul id="rep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 h-full"></ul></div>
+                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3><ul id="rep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full"></ul></div>
                 </div>
-                
-                <div class="border-t border-slate-200 pt-6 text-center text-xs text-slate-400 font-medium tracking-wide">
-                    Nasser AboYounes - Professional Training Analytics Platform
-                </div>
+                <div class="border-t border-slate-200 pt-6 text-center text-xs text-slate-400 font-medium tracking-wide">Nasser AboYounes - Professional Training Analytics Platform</div>
             </div>
         </div>
     </div>
 
-    <!-- GROUP REPORT MODAL (Hidden by Default) -->
     <div id="group-report-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div id="group-report-modal-content" class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] print:max-h-full">
             <div class="bg-indigo-900 p-6 flex justify-between items-center no-print">
                 <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>📈</span> Fleet Group Gap Analysis Report</h2>
-                <div class="flex gap-3">
-                    <button onclick="window.print()" class="text-indigo-200 hover:text-white transition-colors bg-indigo-800 px-3 py-1 rounded text-sm font-medium border border-indigo-600">Print Report</button>
-                    <button onclick="window.closeGroupReport()" class="text-indigo-400 hover:text-white transition-colors text-2xl leading-none">&times;</button>
-                </div>
+                <div class="flex gap-3"><button onclick="window.print()" class="text-indigo-200 hover:text-white transition-colors bg-indigo-800 px-3 py-1 rounded text-sm font-medium border border-indigo-600">Print Report</button><button onclick="window.closeGroupReport()" class="text-indigo-400 hover:text-white transition-colors text-2xl leading-none">&times;</button></div>
             </div>
-            
             <div class="p-8 overflow-y-auto custom-scroll">
                 <div class="border-b-4 border-indigo-900 pb-4 mb-6 flex justify-between items-end">
-                    <div>
-                        <h1 class="text-3xl font-black text-slate-900 mb-1">Fleet Assessment Summary</h1>
-                        <p class="text-sm text-slate-500 mt-1">Total Assessments: <span id="grep-total" class="font-bold text-slate-700"></span> | Pass Rate: <span id="grep-passrate" class="font-bold text-slate-700"></span></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Group Avg Score</p>
-                        <div class="text-5xl font-black font-mono" id="grep-score">0%</div>
-                    </div>
+                    <div><h1 class="text-3xl font-black text-slate-900 mb-1">Fleet Assessment Summary</h1><p class="text-sm text-slate-500 mt-1">Total Assessments: <span id="grep-total" class="font-bold text-slate-700"></span> | Pass Rate: <span id="grep-passrate" class="font-bold text-slate-700"></span></p></div>
+                    <div class="text-right"><p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Group Avg Score</p><div class="text-5xl font-black font-mono" id="grep-score">0%</div></div>
                 </div>
-
-                <div class="mb-8">
-                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Overall Fleet Evaluation</h3>
-                    <div id="grep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white">
-                    </div>
-                </div>
-
+                <div class="mb-8"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Overall Fleet Evaluation</h3><div id="grep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white"></div></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Fleet Knowledge Gaps</h3>
-                        <ul id="grep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 h-full">
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3>
-                        <ul id="grep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full">
-                        </ul>
-                    </div>
+                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Fleet Knowledge Gaps</h3><ul id="grep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 h-full"></ul></div>
+                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3><ul id="grep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full"></ul></div>
                 </div>
-                
-                <div class="border-t border-slate-200 pt-6 text-center text-xs text-slate-400 font-medium tracking-wide">
-                    Nasser AboYounes - Professional Training Analytics Platform
-                </div>
+                <div class="border-t border-slate-200 pt-6 text-center text-xs text-slate-400 font-medium tracking-wide">Nasser AboYounes - Professional Training Analytics Platform</div>
             </div>
         </div>
     </div>
 
-    <!-- DECISION TREE MODAL (Hidden by Default) -->
     <div id="decision-tree-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <!-- Header -->
-            <div class="bg-slate-900 p-6 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>🌳</span> The Kick Detection Decision Tree</h2>
-                <button onclick="document.getElementById('decision-tree-modal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button>
-            </div>
-            
-            <!-- Content -->
+            <div class="bg-slate-900 p-6 flex justify-between items-center"><h2 class="text-xl font-bold text-white flex items-center gap-2"><span>🌳</span> The Kick Detection Decision Tree</h2><button onclick="document.getElementById('decision-tree-modal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button></div>
             <div class="p-8 overflow-y-auto custom-scroll space-y-6">
-                <p class="text-slate-700 leading-relaxed">
-                    A warning sign means the well might be going underbalanced. A positive indicator means the well is actively kicking.<br><br>
-                    As per IWCF, the absolute first action to take when a <strong>Kick Warning Sign</strong> (such as a sudden drilling break, increase in background gas, or change in cuttings) is observed is to stop operations and perform a Flow Check.
-                </p>
-
+                <p class="text-slate-700 leading-relaxed">A warning sign means the well might be going underbalanced. A positive indicator means the well is actively kicking.<br><br>As per IWCF, the absolute first action to take when a <strong>Kick Warning Sign</strong> (such as a sudden drilling break, increase in background gas, or change in cuttings) is observed is to stop operations and perform a Flow Check.</p>
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
                     <h3 class="text-lg font-bold text-slate-900 mb-3 border-b border-slate-200 pb-2">Immediate Action: The Flow Check Procedure (IWCF Standard)</h3>
-                    <p class="text-sm text-slate-600 mb-4">You do not immediately shut in a well based only on a warning sign, as you may trap unnecessary pressure or damage the formation. Instead, you verify if the well is flowing statically. When a warning sign is observed, the Driller must immediately execute the following sequence:</p>
-                    <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
-                        <li><strong>Stop Rotating:</strong> Cease rotation and remove Weight on Bit (WOB).</li>
-                        <li><strong>Pick Up Off Bottom:</strong> Pick up the drill string so that the bit is off the bottom. <em>Crucial: Ensure a tool joint is positioned above the rotary table.</em> (If you have to shut in, the BOP pipe rams must close on the smooth pipe body, never on a tool joint).</li>
-                        <li><strong>Stop the Pumps:</strong> Turn off the mud pumps to remove Equivalent Circulating Density (ECD) and dynamic friction from the wellbore.</li>
-                        <li><strong>Observe the Well:</strong> Route the flow line to the trip tank (for precise volume measurement) and observe the well for flow.</li>
-                    </ol>
+                    <p class="text-sm text-slate-600 mb-4">You do not immediately shut in a well based only on a warning sign. Instead, you verify if the well is flowing statically. When a warning sign is observed, the Driller must immediately execute the following sequence:</p>
+                    <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-700"><li><strong>Stop Rotating:</strong> Cease rotation and remove Weight on Bit (WOB).</li><li><strong>Pick Up Off Bottom:</strong> Pick up the drill string so that the bit is off the bottom. <em>Crucial: Ensure a tool joint is positioned above the rotary table.</em></li><li><strong>Stop the Pumps:</strong> Turn off the mud pumps to remove Equivalent Circulating Density (ECD).</li><li><strong>Observe the Well:</strong> Route the flow line to the trip tank and observe the well for flow.</li></ol>
                 </div>
-
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
                     <h3 class="text-lg font-bold text-slate-900 mb-3 border-b border-slate-200 pb-2">The Decision Tree (Post-Flow Check)</h3>
                     <p class="text-sm text-slate-600 mb-4">Once the pumps are off and the well is static, the Driller has two paths based on their observation:</p>
-                    
                     <div class="space-y-4">
-                        <div class="bg-rose-50 border border-rose-100 p-4 rounded-lg">
-                            <h4 class="font-bold text-rose-800 mb-1 flex items-center gap-2"><span>🚨</span> Scenario A: The Well is Flowing (Positive Indicator)</h4>
-                            <p class="text-xs text-slate-700 mb-2">If fluid continues to flow out of the wellbore with the pumps off, the warning sign has escalated to a Positive Kick Indicator.</p>
-                            <p class="text-sm font-bold text-rose-700">&rarr; Action: Immediately sound the alarm and execute the Hard Shut-In Procedure.</p>
-                        </div>
-
-                        <div class="bg-sky-50 border border-sky-100 p-4 rounded-lg">
-                            <h4 class="font-bold text-sky-800 mb-1 flex items-center gap-2"><span>🛑</span> Scenario B: The Well is NOT Flowing (Static)</h4>
-                            <p class="text-xs text-slate-700 mb-2">If the well is completely dead with the pumps off, a kick is not actively entering the wellbore.</p>
-                            <p class="text-sm font-bold text-sky-700">&rarr; Action: Do not simply resume drilling at full speed. The standard procedure is to Circulate Bottoms Up through the choke manifold. This brings the fluid that was at the bottom of the hole during the "warning sign" to the surface so it can be analyzed for trip gas, connection gas, or changes in mud weight.</p>
-                        </div>
+                        <div class="bg-rose-50 border border-rose-100 p-4 rounded-lg"><h4 class="font-bold text-rose-800 mb-1 flex items-center gap-2"><span>🚨</span> Scenario A: The Well is Flowing (Positive Indicator)</h4><p class="text-xs text-slate-700 mb-2">If fluid continues to flow out of the wellbore with the pumps off, the warning sign has escalated to a Positive Kick Indicator.</p><p class="text-sm font-bold text-rose-700">&rarr; Action: Immediately sound the alarm and execute the Hard Shut-In Procedure.</p></div>
+                        <div class="bg-sky-50 border border-sky-100 p-4 rounded-lg"><h4 class="font-bold text-sky-800 mb-1 flex items-center gap-2"><span>🛑</span> Scenario B: The Well is NOT Flowing (Static)</h4><p class="text-xs text-slate-700 mb-2">If the well is completely dead with the pumps off, a kick is not actively entering the wellbore.</p><p class="text-sm font-bold text-sky-700">&rarr; Action: Do not simply resume drilling at full speed. Circulate Bottoms Up through the choke manifold.</p></div>
                     </div>
                 </div>
-
-                <!-- Golden Rule Box -->
-                <div class="bg-amber-100 border border-amber-300 p-5 rounded-xl shadow-sm flex items-center gap-4">
-                    <span class="text-4xl drop-shadow">⭐</span>
-                    <div>
-                        <span class="block font-bold text-amber-900 uppercase tracking-widest text-xs mb-1">The Golden Rule</span>
-                        <p class="font-bold text-amber-800">Warning Sign &rarr; Stop & Flow Check. Only shut in if the flow check is POSITIVE.</p>
-                    </div>
-                </div>
-
+                <div class="bg-amber-100 border border-amber-300 p-5 rounded-xl shadow-sm flex items-center gap-4"><span class="text-4xl drop-shadow">⭐</span><div><span class="block font-bold text-amber-900 uppercase tracking-widest text-xs mb-1">The Golden Rule</span><p class="font-bold text-amber-800">Warning Sign &rarr; Stop & Flow Check. Only shut in if the flow check is POSITIVE.</p></div></div>
             </div>
         </div>
     </div>
 
     <footer class="bg-slate-900 text-slate-400 py-10 border-t border-slate-800 text-center no-print">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-center gap-2 mb-4">
-                <span class="text-2xl">🛢️</span>
-                <span class="font-bold text-xl tracking-tight text-slate-300">Nasser <span class="text-sky-500">AboYounes</span> <span class="hidden sm:inline-block text-slate-500 font-normal text-sm ml-2">| WCI & Well Control Expert</span></span>
-            </div>
-            <div class="flex justify-center items-center gap-4 mt-4 text-sm text-slate-500">
-                <a href="mailto:nfw_1983@yahoo.com" class="hover:text-sky-400 transition-colors flex items-center gap-1"><span>✉️</span> nfw_1983@yahoo.com</a>
-                <span class="text-slate-700">|</span>
-                <span class="flex items-center gap-1"><span>📞</span> +20 1271536449</span>
-            </div>
+            <div class="flex items-center justify-center gap-2 mb-4"><span class="text-2xl">🛢️</span><span class="font-bold text-xl tracking-tight text-slate-300">Nasser <span class="text-sky-500">AboYounes</span> <span class="hidden sm:inline-block text-slate-500 font-normal text-sm ml-2">| WCI & Well Control Expert</span></span></div>
+            <div class="flex justify-center items-center gap-4 mt-4 text-sm text-slate-500"><a href="mailto:nfw_1983@yahoo.com" class="hover:text-sky-400 transition-colors flex items-center gap-1"><span>✉️</span> nfw_1983@yahoo.com</a><span class="text-slate-700">|</span><span class="flex items-center gap-1"><span>📞</span> +20 1271536449</span></div>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT: Modular Logic & Firebase Intergration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // FIREBASE CLOUD SETUP & HYBRID DATA LAYER
+        // 🔥 REAL-TIME CLOUD DATABASE CONFIGURATION 🔥
         // ==========================================
+        const EXTERNAL_FIREBASE_CONFIG = null; 
+
         let useFirebase = false;
         let app, auth, db, appId;
 
         try {
-            if (typeof __firebase_config !== 'undefined' && typeof __app_id !== 'undefined') {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                app = initializeApp(firebaseConfig);
+            if (EXTERNAL_FIREBASE_CONFIG) {
+                app = initializeApp(EXTERNAL_FIREBASE_CONFIG);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                appId = "nasser-well-control-platform"; 
+                useFirebase = true;
+            } else if (typeof __firebase_config !== 'undefined' && typeof __app_id !== 'undefined') {
+                const canvasConfig = JSON.parse(__firebase_config);
+                app = initializeApp(canvasConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 appId = __app_id;
                 useFirebase = true;
             }
         } catch (e) {
-            console.warn("Firebase config missing or invalid. Falling back to local storage.");
+            console.warn("Firebase setup failed:", e);
         }
 
         let currentUser = null;
-        let localAssessments = []; // Real-time cached array from Firestore or localStorage
+        let localAssessments = [];
         let currentDocId = null;
 
-        // Load local storage initial state if no cloud available
         if (!useFirebase) {
             try {
                 localAssessments = JSON.parse(localStorage.getItem('wc_assessments') || '[]');
+                console.warn("⚠️ CLOUD SYNC DISABLED: Running on external viewer without Firebase config. Falling back to local storage.");
             } catch(e) {
                 localAssessments = [];
             }
         }
 
         const initAuth = async () => {
-            if (!useFirebase) return;
+            if (!useFirebase || !auth) return;
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                if (!EXTERNAL_FIREBASE_CONFIG && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
@@ -1695,19 +1040,13 @@
         };
         initAuth();
 
-        if (useFirebase) {
+        if (useFirebase && auth) {
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
-                if (user) {
-                    // Attach a live listener to the public assessments collection
+                if (user && db) {
                     const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
                     onSnapshot(assessmentsRef, (snapshot) => {
-                        localAssessments = snapshot.docs.map(doc => ({
-                            firestoreId: doc.id,
-                            ...doc.data()
-                        }));
-                        
-                        // Refresh instructor dashboard instantly if it's currently open
+                        localAssessments = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
                         const instructorUnlocked = document.getElementById('instructor-unlocked');
                         if (instructorUnlocked && !instructorUnlocked.classList.contains('hidden')) {
                             window.updateInstructorDashboard();
@@ -1719,26 +1058,32 @@
             });
         }
 
-        // ==========================================
-        // INSTRUCTOR PASSWORD SETTING
-        // ==========================================
         const INSTRUCTOR_PASSWORD = "Nasser141983";
 
-        // Utility helpers
         const setTxt = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
         const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
         const setClass = (id, cls) => { const el = document.getElementById(id); if (el) el.className = cls; };
         const val = (id) => { const el = document.getElementById(id); return el ? el.value : null; };
 
-        // Ensure Charts initialize after DOM load
         document.addEventListener('DOMContentLoaded', () => {
             initIndicatorsChart();
             initCausesGrid();
             window.updateSimulator();
             window.updateDashboardCalculators();
+            
+            if (!useFirebase) {
+                setTimeout(() => {
+                    const dashboardEl = document.getElementById('instructor-locked');
+                    if(dashboardEl) {
+                        const warning = document.createElement('div');
+                        warning.className = "bg-amber-100 border border-amber-300 text-amber-900 p-4 rounded-xl text-xs font-bold mt-4 animate-pulse";
+                        warning.innerHTML = "⚠️ Live Sync Disabled: You are running this on an external viewer without a Firebase Config. It will only save locally to this device. See JS code to fix.";
+                        dashboardEl.appendChild(warning);
+                    }
+                }, 1000);
+            }
         });
 
-        // --- Master Dashboard Calculators & Checklists ---
         window.updateDashboardCalculators = function() {
             const mw = parseFloat(val('dash-mw')) || 0;
             const tvd = parseFloat(val('dash-tvd')) || 0;
@@ -1773,20 +1118,13 @@
             }
         };
 
-        // --- Definitions UI Logic ---
         window.showDefinition = function(defId, btnElement) {
-            document.querySelectorAll('.def-panel').forEach(panel => {
-                panel.classList.add('hidden');
-            });
+            document.querySelectorAll('.def-panel').forEach(panel => { panel.classList.add('hidden'); });
             document.getElementById(defId)?.classList.remove('hidden');
-
-            document.querySelectorAll('.def-btn').forEach(btn => {
-                btn.classList.remove('active-def');
-            });
+            document.querySelectorAll('.def-btn').forEach(btn => { btn.classList.remove('active-def'); });
             btnElement.classList.add('active-def');
         };
 
-        // --- 1. Physics Simulator Logic ---
         const wellCanvas = document.getElementById('wellCanvas');
         const ctxSim = wellCanvas ? wellCanvas.getContext('2d') : null;
         let simAnimFrame; let bubbles = []; let pumpFlowOffset = 0;
@@ -1816,6 +1154,10 @@
 
             if(isNaN(mw)) return;
 
+            setTxt('mw-val', mw.toFixed(1) + ' ppg');
+            setTxt('tvd-val', tvd + ' ft');
+            setTxt('fp-val', fp + ' psi');
+
             setTxt('pump-status-text', pumpsOn ? "ON" : "OFF");
             setClass('pump-status-text', pumpsOn ? "text-sm font-bold text-emerald-600 w-8" : "text-sm font-bold text-slate-400 w-8");
 
@@ -1838,12 +1180,10 @@
             if(pumpsOn) {
                 const baseEcd = env === 'slim' ? 450 : 200; 
                 ecdValue = baseEcd * Math.pow(spm / 100, 2);
-                
                 if(env === 'slim') { warningText = "Slim hole: High annular friction increases ECD exponentially."; }
             } else {
                 if(env === 'slim') warningText = "Slim hole: Kicks migrate upwards much faster.";
             }
-            
             setTxt('env-warning', warningText);
 
             const totalBHP = staticHyd + ecdValue;
@@ -1853,23 +1193,33 @@
             setTxt('calc-bhp', Math.round(totalBHP));
             setTxt('calc-form', fp);
 
+            const maxPressure = 15000;
+            const bhpPct = Math.min(totalBHP / maxPressure, 1);
+            const fpPct = Math.min(fp / maxPressure, 1);
+
+            const bhpPath = document.getElementById('gauge-bhp-path');
+            const fpPath = document.getElementById('gauge-fp-path');
+            if (bhpPath) bhpPath.style.strokeDashoffset = 125.66 - (bhpPct * 125.66);
+            if (fpPath) fpPath.style.strokeDashoffset = 125.66 - (fpPct * 125.66);
+
+            setTxt('gauge-bhp-text', Math.round(totalBHP) + ' psi');
+            setTxt('gauge-fp-text', Math.round(fp) + ' psi');
+
             const isKicking = fp > totalBHP;
 
             if (isKicking) {
+                if (bhpPath) bhpPath.setAttribute('stroke', '#f43f5e'); 
                 setTxt('balance-operator', '<');
                 setClass('balance-operator', 'w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-full bg-rose-100 text-3xl font-bold text-rose-600 shadow-inner');
-                
                 setTxt('status-banner', '🚨 KICK IN PROGRESS 🚨');
                 setClass('status-banner', 'w-full text-center py-3 font-bold text-white uppercase tracking-widest transition-colors duration-300 bg-rose-600 text-sm z-10 relative animate-pulse');
-                
                 document.getElementById('calc-bhp')?.classList.replace('text-sky-600', 'text-rose-600');
             } else {
+                if (bhpPath) bhpPath.setAttribute('stroke', '#0ea5e9'); 
                 setTxt('balance-operator', '≥');
                 setClass('balance-operator', 'w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-full bg-emerald-100 text-3xl font-bold text-emerald-600 shadow-inner');
-                
                 setTxt('status-banner', pumpsOn ? 'Wellbore Stable (Dynamic)' : 'Wellbore Stable (Static)');
                 setClass('status-banner', 'w-full text-center py-3 font-bold text-white uppercase tracking-widest transition-colors duration-300 bg-emerald-500 text-sm z-10 relative');
-                
                 document.getElementById('calc-bhp')?.classList.replace('text-rose-600', 'text-sky-600');
             }
             
@@ -1902,7 +1252,6 @@
 
         function drawWellbore(isKicking, pumpsOn, env, spm) {
             if (!ctxSim || !wellCanvas) return;
-            
             ctxSim.clearRect(0, 0, wellCanvas.width, wellCanvas.height);
             let holeW = env === 'slim' ? 60 : 80;
             const holeX = (wellCanvas.width - holeW) / 2;
@@ -1910,10 +1259,8 @@
 
             ctxSim.fillStyle = '#92400e'; 
             ctxSim.fillRect(0, formY, wellCanvas.width, wellCanvas.height - formY);
-            
             ctxSim.fillStyle = '#334155'; 
             ctxSim.fillRect(holeX, 0, holeW, wellCanvas.height);
-
             ctxSim.fillStyle = isKicking ? 'rgba(244, 63, 94, 0.4)' : '#0284c7'; 
             ctxSim.fillRect(holeX + 6, 0, holeW - 12, wellCanvas.height);
 
@@ -1945,16 +1292,12 @@
                     b.y -= b.s; b.x += Math.sin(b.y * 0.1) * 1.5;
                     if (b.y < -10) bubbles.splice(i, 1);
                 }
-            } else {
-                bubbles = [];
-            }
+            } else { bubbles = []; }
             
             if(isKicking || pumpsOn) {
                 cancelAnimationFrame(simAnimFrame);
                 simAnimFrame = requestAnimationFrame(() => drawWellbore(isKicking, pumpsOn, env, spm));
-            } else {
-                cancelAnimationFrame(simAnimFrame);
-            }
+            } else { cancelAnimationFrame(simAnimFrame); }
         }
         
         ['mw-slider', 'tvd-slider', 'fp-slider', 'env-select', 'spm-slider'].forEach(id => {
@@ -1962,7 +1305,6 @@
         });
         document.getElementById('pump-toggle')?.addEventListener('change', window.updateSimulator);
 
-        // --- 2. Causes Grid Initialization ---
         function initCausesGrid() {
             const causesDataGrid = [
                 { title: "Failure to Fill Hole", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-slate-800"></div><div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 bg-sky-500 anim-fluid-drop"></div></div>`, desc: "Fluid level drops during tripping because steel volume isn't replaced with mud.", prev: "Continuously monitor trip tank; fill hole systematically." },
@@ -1984,7 +1326,6 @@
             }
         }
 
-        // --- 3. Indicators Chart Initialization ---
         function initIndicatorsChart() {
             const indicatorsData = [
                 { label: 'Drilling Break (ROP↑)', urgency: 30, type: 'Early', icon: '📉', desc: 'Sudden increase in ROP.', detection: 'Surface Data Logging.' },
@@ -1995,7 +1336,7 @@
                 { label: 'Return Temp ↑', urgency: 60, type: 'Early', icon: '🌡️', desc: 'Formation fluids are typically hotter than mud.', detection: 'Flowline temp sensors.' },
                 { label: 'Shale Density ↓', urgency: 65, type: 'Early', icon: '🪨', desc: 'Indicates transition into abnormally pressured zones.', detection: 'Mud Logger.' },
                 { label: 'Salinity (Chlorides) ↑', urgency: 70, type: 'Early', icon: '🧂', desc: 'Suggests influx of formation saltwater.', detection: 'Mud Logger Chemical Analysis.' },
-                { label: 'Pump Press ↓ / Strokes ↑', urgency: 75, type: 'Early', icon: '⚙️', desc: 'U-Tube effect due to lighter fluids entering annulus (Can be a precursor to full positive flow).', detection: 'Standpipe gauge & Stroke counters.' },
+                { label: 'Pump Press ↓ / Strokes ↑', urgency: 75, type: 'Early', icon: '⚙️', desc: 'U-Tube effect due to lighter fluids entering annulus.', detection: 'Standpipe gauge & Stroke counters.' },
                 { label: 'Incorrect Fill Volume', urgency: 90, type: 'Positive', icon: '❌', desc: 'Hole takes less mud than steel volume removed.', detection: 'Trip Tank volume.' },
                 { label: 'Pit Volume Gain', urgency: 95, type: 'Positive', icon: '📈', desc: 'Influx displaces mud at bottom.', detection: 'Pit level sensors.' },
                 { label: 'Flow Rate Increase', urgency: 98, type: 'Positive', icon: '⬆️', desc: 'Formation fluid adding to volume pumped out.', detection: 'Flowmeter at bell nipple.' },
@@ -2007,23 +1348,15 @@
                 new Chart(indChartEl.getContext('2d'), {
                     type: 'bar',
                     data: { labels: indicatorsData.map(d => d.label), datasets: [{ data: indicatorsData.map(d => d.urgency), backgroundColor: indicatorsData.map(d => d.type === 'Early' ? '#fbbf24' : '#f43f5e'), borderRadius: 4, hoverBackgroundColor: indicatorsData.map(d => d.type === 'Early' ? '#d97706' : '#be123c') }] },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                        plugins: { legend: { display: false } },
-                        scales: { x: { max: 100 } },
+                    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { max: 100 } },
                         onClick: (e, elements) => {
                             if (elements.length > 0) {
                                 const data = indicatorsData[elements[0].index];
                                 document.getElementById('detail-empty')?.classList.add('hidden');
                                 document.getElementById('detail-content')?.classList.remove('hidden');
-                                
                                 const detailType = document.getElementById('detail-type');
-                                if (detailType) {
-                                    detailType.textContent = data.type === 'Early' ? 'Early Warning' : 'Positive Indicator';
-                                    detailType.className = `text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${data.type === 'Early' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400'}`;
-                                }
-                                setTxt('detail-icon', data.icon); setTxt('detail-title', data.label);
-                                setTxt('detail-desc', data.desc); setTxt('detail-detection', data.detection);
+                                if (detailType) { detailType.textContent = data.type === 'Early' ? 'Early Warning' : 'Positive Indicator'; detailType.className = `text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${data.type === 'Early' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400'}`; }
+                                setTxt('detail-icon', data.icon); setTxt('detail-title', data.label); setTxt('detail-desc', data.desc); setTxt('detail-detection', data.detection);
                             }
                         }
                     }
@@ -2031,7 +1364,6 @@
             }
         }
 
-        // --- 4. Protocol Stepper ---
         window.activateStep = function(step) {
             for(let i=1; i<=4; i++) {
                 const icon = document.getElementById(`step-icon-${i}`); const card = document.getElementById(`step-card-${i}`);
@@ -2047,7 +1379,6 @@
             }
         };
 
-        // --- 5. Kill Math (KWM & MAASP) ---
         window.calculateKWM = function() {
             const cmwStr = val('calc-current-mw'); const tvdStr = val('calc-tvd'); const sidppStr = val('calc-sidpp');
             if(!cmwStr || !tvdStr || !sidppStr) return alert("Fill all KWM inputs.");
@@ -2060,14 +1391,12 @@
             setTxt('result-maasp', Math.round((parseFloat(maxMwStr) - parseFloat(cmwStr)) * 0.052 * parseFloat(shoeTvdStr)));
         };
 
-        // --- Navigation ---
         window.scrollToSection = function(id) {
             document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             if(window.event && window.event.target && window.event.target.classList) window.event.target.classList.add('active');
         };
 
-        // --- 6. Comprehensive 50-Question Assessment Logic ---
         const quizQuestions = [
             { q: "What is the primary objective of primary well control?", options: ["Use BOP to seal.", "Maintain hydrostatic pressure >= formation pressure.", "Produce safely.", "Fracture rock."], answer: 1, topic: "Fundamentals", explanation: "Hydrostatic pressure acts as the first line of defense to prevent formation fluid influx." },
             { q: "Formula for calculating Hydrostatic Pressure (HP)?", options: ["HP = 0.052 × MW × TVD", "HP = MW × Rate × Vol", "HP = 0.052 × TVD / MW", "HP = CP + DPP"], answer: 0, topic: "Pressure Math", explanation: "HP is calculated by multiplying mud weight, true vertical depth, and the 0.052 conversion constant." },
@@ -2126,7 +1455,7 @@
         let activeStudentData = {}; let currentAttemptData = [];
         
         let timerInterval;
-        let timeRemaining = 90 * 60; // 1.5 hours in seconds
+        let timeRemaining = 90 * 60;
 
         function updateTimerDisplay() {
             const minutes = Math.floor(timeRemaining / 60);
@@ -2155,7 +1484,6 @@
             activeStudentData = { name: nameInput, role: posInput, exp: parseInt(expInput) };
             setTxt('active-student-display', `Student: ${activeStudentData.name} | Role: ${activeStudentData.role} (${activeStudentData.exp} yrs)`);
             
-            // Randomly shuffle the questions for this attempt
             activeQuizPool = [...quizQuestions].sort(() => Math.random() - 0.5);
 
             currentQuizQuestion = 0; quizScore = 0; currentAttemptData = []; setTxt('current-score', '0');
@@ -2222,7 +1550,6 @@
                 }
             }
 
-            // Show Explanation
             const expBox = document.getElementById('explanation-box');
             if (expBox) {
                 expBox.classList.remove('hidden');
@@ -2266,7 +1593,6 @@
                 timestamp: Date.now()
             };
 
-            // Save directly to Firestore Cloud
             if (useFirebase && currentUser) {
                 try {
                     const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
@@ -2293,7 +1619,6 @@
                 setClass('result-title', 'text-3xl font-bold text-amber-400 mb-2'); setClass('final-score', 'text-6xl font-extrabold text-amber-400 font-mono mb-6');
             }
 
-            // Reset Comment Box UI
             const commentInput = document.getElementById('student-comment');
             if(commentInput) {
                 commentInput.value = '';
@@ -2343,7 +1668,6 @@
             document.getElementById('quiz-results')?.classList.add('hidden');
         };
 
-        // --- 8. INDIVIDUAL REPORTING SYSTEM ---
         let indivRadarChartInstance = null;
 
         window.openIndividualReport = function(resultId, fromStudentView = false) {
@@ -2359,7 +1683,6 @@
             const scoreEl = document.getElementById('rep-score');
             if(scoreEl) scoreEl.className = `text-5xl font-black font-mono ${data.passed ? 'text-emerald-600' : 'text-rose-600'}`;
 
-            // Radar Chart Data Calculation
             const topicScores = { "Fundamentals": {c:0, t:0}, "Pressure Math": {c:0, t:0}, "Detection": {c:0, t:0}, "Mechanics & Causes": {c:0, t:0}, "Action Protocol": {c:0, t:0}, "Operations": {c:0, t:0} };
             const missedTopicsMap = {};
             
@@ -2378,7 +1701,6 @@
                 return topicScores[topic].t > 0 ? Math.round((topicScores[topic].c / topicScores[topic].t) * 100) : 0;
             });
 
-            // Draw Radar Chart
             const ctxIndivRadar = document.getElementById('indivRadarChart');
             if(ctxIndivRadar) {
                 if(indivRadarChartInstance) indivRadarChartInstance.destroy();
@@ -2440,7 +1762,6 @@
 
         window.closeReport = function() { document.getElementById('report-modal')?.classList.add('hidden'); };
 
-        // --- 9. SECURE GROUP ANALYTICS PORTAL & GROUP REPORT ---
         let instructorPieChartInstance = null; let topicRadarChartInstance = null;
 
         const pwdInputEl = document.getElementById('instructor-pwd-input');
@@ -2476,7 +1797,6 @@
 
             let passes = 0, fails = 0; results.forEach(r => { if(r.passed) passes++; else fails++; });
 
-            // Group Gap Analysis
             const topicScores = { "Fundamentals": {c:0, t:0}, "Pressure Math": {c:0, t:0}, "Detection": {c:0, t:0}, "Mechanics & Causes": {c:0, t:0}, "Action Protocol": {c:0, t:0}, "Operations": {c:0, t:0} };
             const missesMap = {};
             results.forEach(r => { 
@@ -2519,7 +1839,6 @@
                 });
             }
 
-            // Render Comments List
             const commentsList = document.getElementById('instructor-comments-list');
             if(commentsList) {
                 commentsList.innerHTML = '';
