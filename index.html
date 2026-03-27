@@ -959,26 +959,24 @@
         // ==========================================
         // 🔥 REAL-TIME CLOUD DATABASE CONFIGURATION 🔥
         // ==========================================
-        const configToUse = typeof window.EXTERNAL_FIREBASE_CONFIG !== 'undefined' ? window.EXTERNAL_FIREBASE_CONFIG : null;
+        const configToUse = {
+            apiKey: "AIzaSyBvsn9MiM-uMtqylskAK9WVb00QwUxvB6c",
+            authDomain: "kick-detection-resolution.firebaseapp.com",
+            projectId: "kick-detection-resolution",
+            storageBucket: "kick-detection-resolution.firebasestorage.app",
+            messagingSenderId: "228510236545",
+            appId: "1:228510236545:web:c251493f85cdc91a80f280"
+        };
 
         let useFirebase = false;
         let app, auth, db, appId;
 
         try {
-            if (configToUse) {
-                app = initializeApp(configToUse);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                appId = "kick-detection-resolution"; 
-                useFirebase = true;
-            } else if (typeof __firebase_config !== 'undefined' && typeof __app_id !== 'undefined') {
-                const canvasConfig = JSON.parse(__firebase_config);
-                app = initializeApp(canvasConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                appId = __app_id;
-                useFirebase = true;
-            }
+            app = initializeApp(configToUse);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = "kick-detection-resolution"; 
+            useFirebase = true;
         } catch (e) {
             console.warn("Firebase setup failed:", e);
         }
@@ -987,23 +985,12 @@
         let localAssessments = [];
         let currentDocId = null;
 
-        if (!useFirebase) {
-            try {
-                localAssessments = JSON.parse(localStorage.getItem('wc_assessments') || '[]');
-                console.warn("⚠️ CLOUD SYNC DISABLED: Running on external viewer without Firebase config. Falling back to local storage.");
-            } catch(e) {
-                localAssessments = [];
-            }
-        }
-
         const initAuth = async () => {
             if (!useFirebase || !auth) return;
             try {
-                if (!configToUse && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Connect directly to Firebase via Anonymous Authentication 
+                // Ensure "Anonymous" Auth is enabled in the Firebase Console!
+                await signInAnonymously(auth);
             } catch (e) {
                 console.error("Auth init error:", e);
                 useFirebase = false; 
@@ -1022,9 +1009,10 @@
                 }, 1000);
             }
         };
-        initAuth();
-
-        if (useFirebase && auth) {
+        
+        // Only call initAuth after checking if we have firebase setup
+        if (useFirebase) {
+            initAuth();
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
                 if (user && db) {
@@ -1040,6 +1028,11 @@
                     });
                 }
             });
+        } else {
+            // Fallback immediately if firebase wasn't setup
+            try {
+                localAssessments = JSON.parse(localStorage.getItem('wc_assessments') || '[]');
+            } catch(err) { localAssessments = []; }
         }
 
         const setTxt = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
@@ -1052,18 +1045,6 @@
             initCausesGrid();
             window.updateSimulator();
             window.updateDashboardCalculators();
-            
-            if (!useFirebase) {
-                setTimeout(() => {
-                    const dashboardEl = document.getElementById('instructor-locked');
-                    if(dashboardEl) {
-                        const warning = document.createElement('div');
-                        warning.className = "bg-amber-100 border border-amber-300 text-amber-900 p-4 rounded-xl text-xs font-bold mt-4 animate-pulse";
-                        warning.innerHTML = "⚠️ Live Sync Disabled: You are running this on an external viewer without a Firebase Config. It will only save locally to this device. See JS code to fix.";
-                        dashboardEl.appendChild(warning);
-                    }
-                }, 1000);
-            }
         });
 
         window.updateDashboardCalculators = function() {
@@ -1588,7 +1569,7 @@
                  newRecord.firestoreId = 'local_' + latestResultId;
                  currentDocId = newRecord.firestoreId;
                  localAssessments.push(newRecord);
-                 localStorage.setItem('wc_assessments', JSON.stringify(localAssessments));
+                 localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
             }
 
             setTxt('result-student-name', activeStudentData.name); setTxt('final-score', `${percentage}%`);
@@ -1629,7 +1610,7 @@
                 const idx = localAssessments.findIndex(a => a.firestoreId === currentDocId);
                 if (idx > -1) {
                     localAssessments[idx].comment = commentVal;
-                    localStorage.setItem('wc_assessments', JSON.stringify(localAssessments));
+                    localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
                     
                     document.getElementById('save-comment-btn')?.classList.add('hidden');
                     document.getElementById('comment-saved-msg')?.classList.remove('hidden');
@@ -1961,31 +1942,16 @@
 
         window.closeGroupReport = function() { document.getElementById('group-report-modal')?.classList.add('hidden'); };
 
-        window.clearResults = async function() { 
+        window.clearResults = function() { 
             if(confirm("Delete all records?")) { 
-                if(useFirebase && currentUser) {
-                    try {
-                        const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
-                        const snapshot = await getDocs(assessmentsRef);
-                        const deletePromises = snapshot.docs.map(docSnap => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'assessments', docSnap.id)));
-                        await Promise.all(deletePromises);
-                        alert('Cloud database cleared.');
-                        window.updateInstructorDashboard();
-                    } catch(e) {
-                        console.error('Error clearing database', e);
-                        alert('Failed to clear database. Ensure you have permissions.');
-                    }
-                } else {
-                    localStorage.removeItem('wc_assessments');
-                    localAssessments = [];
-                    alert('Local database cleared.');
-                    window.updateInstructorDashboard();
-                }
+                localStorage.removeItem('wc_assessment_data'); 
+                localAssessments = [];
+                window.updateInstructorDashboard(); 
             } 
         };
         
         window.exportCSV = function() {
-            const results = localAssessments;
+            const results = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]');
             if(results.length === 0) return alert("No data to export.");
             
             let csv = "Date,Name,Position,Experience(yrs),Score,Status,Comments\n" + results.map(r => {
