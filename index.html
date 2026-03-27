@@ -811,7 +811,6 @@
         <section id="instructor" class="py-20 px-4 bg-slate-50 border-t border-slate-200 scroll-mt-16 no-print">
             <div class="max-w-7xl mx-auto">
                 
-                <!-- LOCKED STATE -->
                 <div id="instructor-locked" class="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm max-w-lg mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">Group Analytics & Gap Analysis</h2>
@@ -824,7 +823,6 @@
                     <p id="pwd-error" class="text-rose-500 text-sm font-semibold mt-4 hidden">Authentication failed. Check credentials.</p>
                 </div>
 
-                <!-- UNLOCKED STATE -->
                 <div id="instructor-unlocked" class="hidden">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                         <div>
@@ -953,26 +951,26 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // 🔥 REAL-TIME CLOUD DATABASE CONFIGURATION 🔥
         // ==========================================
-        const configToUse = {
+        const EXTERNAL_FIREBASE_CONFIG = {
             apiKey: "AIzaSyBvsn9MiM-uMtqylskAK9WVb00QwUxvB6c",
             authDomain: "kick-detection-resolution.firebaseapp.com",
             projectId: "kick-detection-resolution",
             storageBucket: "kick-detection-resolution.firebasestorage.app",
             messagingSenderId: "228510236545",
             appId: "1:228510236545:web:c251493f85cdc91a80f280"
-        };
+        }; 
 
         let useFirebase = false;
         let app, auth, db, appId;
 
         try {
-            app = initializeApp(configToUse);
+            app = initializeApp(EXTERNAL_FIREBASE_CONFIG);
             auth = getAuth(app);
             db = getFirestore(app);
             appId = "kick-detection-resolution"; 
@@ -988,8 +986,6 @@
         const initAuth = async () => {
             if (!useFirebase || !auth) return;
             try {
-                // Connect directly to Firebase via Anonymous Authentication 
-                // Ensure "Anonymous" Auth is enabled in the Firebase Console!
                 await signInAnonymously(auth);
             } catch (e) {
                 console.error("Auth init error:", e);
@@ -1010,7 +1006,6 @@
             }
         };
         
-        // Only call initAuth after checking if we have firebase setup
         if (useFirebase) {
             initAuth();
             onAuthStateChanged(auth, (user) => {
@@ -1029,7 +1024,6 @@
                 }
             });
         } else {
-            // Fallback immediately if firebase wasn't setup
             try {
                 localAssessments = JSON.parse(localStorage.getItem('wc_assessments') || '[]');
             } catch(err) { localAssessments = []; }
@@ -1549,7 +1543,7 @@
                 position: activeStudentData.role, 
                 exp: activeStudentData.exp,
                 score: percentage, 
-                passed: percentage >= 80, 
+                passed: percentage >= 70, 
                 details: currentAttemptData, 
                 comment: "",
                 userId: currentUser ? currentUser.uid : 'anonymous',
@@ -1574,7 +1568,7 @@
 
             setTxt('result-student-name', activeStudentData.name); setTxt('final-score', `${percentage}%`);
             
-            if (percentage >= 80) {
+            if (percentage >= 70) {
                 setTxt('result-icon', '🏆'); setTxt('result-title', 'Passed!');
                 setClass('result-title', 'text-3xl font-bold text-emerald-400 mb-2'); setClass('final-score', 'text-6xl font-extrabold text-emerald-400 font-mono mb-6');
             } else {
@@ -1702,7 +1696,7 @@
             if(data.score >= 90) {
                 evalText = `${data.name} demonstrated exceptional competency. With ${data.exp} years of experience, they are well-suited for unsupervised well control operations and peer mentoring.`;
                 evalColor = "border-emerald-500 bg-emerald-50 text-emerald-900";
-            } else if(data.score >= 80) {
+            } else if(data.score >= 70) {
                 evalText = `${data.name} demonstrated satisfactory operational competency and passed the certification. Minor gaps highlighted above should be reviewed before the next operation.`;
                 evalColor = "border-sky-500 bg-sky-50 text-sky-900";
             } else {
@@ -1797,7 +1791,7 @@
                 let maxMisses = 0, weakestTopic = "";
                 for (const [topic, misses] of Object.entries(missesMap)) { if (misses > maxMisses) { maxMisses = misses; weakestTopic = topic; } }
                 
-                if(avgScore >= 80) groupEvalText = `The group demonstrates strong overall competency (${avgScore}% avg). However, data indicates a thematic gap in "${weakestTopic}". Recommendation: Conduct a short targeted workshop on this specific topic.`;
+                if(avgScore >= 70) groupEvalText = `The group demonstrates strong overall competency (${avgScore}% avg). However, data indicates a thematic gap in "${weakestTopic}". Recommendation: Conduct a short targeted workshop on this specific topic.`;
                 else groupEvalText = `Group performance is below the required standard. The primary systemic vulnerability is "${weakestTopic}". Recommendation: Complete retraining required before resuming unsupervised operations.`;
             } else { groupEvalText = "Flawless group performance. No systemic gaps detected."; }
             
@@ -1880,7 +1874,7 @@
             setTxt('grep-score', `${avgScore}%`);
 
             const scoreEl = document.getElementById('grep-score');
-            if(scoreEl) scoreEl.className = `text-5xl font-black font-mono ${avgScore >= 80 ? 'text-emerald-600' : 'text-rose-600'}`;
+            if(scoreEl) scoreEl.className = `text-5xl font-black font-mono ${avgScore >= 70 ? 'text-emerald-600' : 'text-rose-600'}`;
 
             const topicScores = { "Fundamentals": {c:0, t:0}, "Pressure Math": {c:0, t:0}, "Detection": {c:0, t:0}, "Mechanics & Causes": {c:0, t:0}, "Action Protocol": {c:0, t:0}, "Operations": {c:0, t:0} };
             const missedTopicsMap = {};
@@ -1923,7 +1917,7 @@
             }
 
             let evalText = "", evalColor = "";
-            if(avgScore >= 80) {
+            if(avgScore >= 70) {
                 evalText = `The fleet demonstrates satisfactory operational competency. Minor gaps highlighted above should be reviewed.`;
                 evalColor = "border-sky-500 bg-sky-50 text-sky-900";
             } else {
@@ -1942,16 +1936,31 @@
 
         window.closeGroupReport = function() { document.getElementById('group-report-modal')?.classList.add('hidden'); };
 
-        window.clearResults = function() { 
+        window.clearResults = async function() { 
             if(confirm("Delete all records?")) { 
-                localStorage.removeItem('wc_assessment_data'); 
-                localAssessments = [];
-                window.updateInstructorDashboard(); 
+                if(useFirebase && currentUser) {
+                    try {
+                        const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
+                        const snapshot = await getDocs(assessmentsRef);
+                        const deletePromises = snapshot.docs.map(docSnap => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'assessments', docSnap.id)));
+                        await Promise.all(deletePromises);
+                        alert('Cloud database cleared.');
+                        window.updateInstructorDashboard();
+                    } catch(e) {
+                        console.error('Error clearing database', e);
+                        alert('Failed to clear database. Ensure you have permissions.');
+                    }
+                } else {
+                    localStorage.removeItem('wc_assessment_data');
+                    localAssessments = [];
+                    alert('Local database cleared.');
+                    window.updateInstructorDashboard();
+                }
             } 
         };
         
         window.exportCSV = function() {
-            const results = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]');
+            const results = localAssessments;
             if(results.length === 0) return alert("No data to export.");
             
             let csv = "Date,Name,Position,Experience(yrs),Score,Status,Comments\n" + results.map(r => {
