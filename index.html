@@ -780,7 +780,7 @@
                     <h2 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-300 mb-6 tracking-tight">Nasser AboYounes</h2>
                     
                     <div class="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-6 mb-10 shadow-inner inline-block">
-                        <span class="text-sky-400 font-bold tracking-widest uppercase text-sm md:text-base block mb-3 border-b border-slate-700 pb-3">Drilling, WCI & Well Control Expert</span>
+                        <span class="text-sky-400 font-bold tracking-widest uppercase text-sm md:text-base block mb-3 border-b border-slate-700 pb-3">Drilling, WCI & Well Control Advisor</span>
                         <div class="flex flex-col gap-2 text-sm text-slate-300 font-medium">
                             <span class="flex items-center justify-center gap-2"><span>🎓</span> B.Sc. Petroleum & Mining Engineering (Suez Canal Univ. 2005)</span>
                             <span class="flex items-center justify-center gap-2"><span>🏅</span> Scholarship in Drilling & CWI (ENI Corporate Univ. 2012)</span>
@@ -810,17 +810,21 @@
         <!-- 9. SECURE GROUP ANALYTICS PORTAL -->
         <section id="instructor" class="py-20 px-4 bg-slate-50 border-t border-slate-200 scroll-mt-16 no-print">
             <div class="max-w-7xl mx-auto">
+                
+                <!-- LOCKED STATE -->
                 <div id="instructor-locked" class="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm max-w-lg mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">Group Analytics & Gap Analysis</h2>
                     <p class="text-slate-500 mb-8 text-sm px-6">Restricted to authorized instructors and managers.</p>
-                    <div class="flex flex-col sm:flex-row max-w-xs mx-auto gap-3">
+                    <div class="flex flex-col max-w-xs mx-auto gap-3">
+                        <input type="email" id="instructor-email-input" placeholder="Instructor Email" class="flex-grow bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center sm:text-left">
                         <input type="password" id="instructor-pwd-input" placeholder="Enter Password" class="flex-grow bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-center sm:text-left">
-                        <button onclick="window.unlockInstructor()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Unlock</button>
+                        <button onclick="window.unlockInstructor()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors mt-2">Secure Login</button>
                     </div>
-                    <p id="pwd-error" class="text-rose-500 text-sm font-semibold mt-4 hidden">Incorrect password.</p>
+                    <p id="pwd-error" class="text-rose-500 text-sm font-semibold mt-4 hidden">Authentication failed. Check credentials.</p>
                 </div>
 
+                <!-- UNLOCKED STATE -->
                 <div id="instructor-unlocked" class="hidden">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                         <div>
@@ -942,34 +946,27 @@
 
     <footer class="bg-slate-900 text-slate-400 py-10 border-t border-slate-800 text-center no-print">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-center gap-2 mb-4"><span class="text-2xl">🛢️</span><span class="font-bold text-xl tracking-tight text-slate-300">Nasser <span class="text-sky-500">AboYounes</span> <span class="hidden sm:inline-block text-slate-500 font-normal text-sm ml-2">| WCI & Well Control Expert</span></span></div>
+            <div class="flex items-center justify-center gap-2 mb-4"><span class="text-2xl">🛢️</span><span class="font-bold text-xl tracking-tight text-slate-300">Nasser <span class="text-sky-500">AboYounes</span> <span class="hidden sm:inline-block text-slate-500 font-normal text-sm ml-2">| WCI & Well Control Tech Advisor</span></span></div>
             <div class="flex justify-center items-center gap-4 mt-4 text-sm text-slate-500"><a href="mailto:nfw_1983@yahoo.com" class="hover:text-sky-400 transition-colors flex items-center gap-1"><span>✉️</span> nfw_1983@yahoo.com</a><span class="text-slate-700">|</span><span class="flex items-center gap-1"><span>📞</span> +20 1271536449</span></div>
         </div>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // 🔥 REAL-TIME CLOUD DATABASE CONFIGURATION 🔥
         // ==========================================
-        const EXTERNAL_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyBvsn9MiM-uMtqylskAK9WVb00QwUxvB6c",
-            authDomain: "kick-detection-resolution.firebaseapp.com",
-            projectId: "kick-detection-resolution",
-            storageBucket: "kick-detection-resolution.firebasestorage.app",
-            messagingSenderId: "228510236545",
-            appId: "1:228510236545:web:c251493f85cdc91a80f280"
-        }; 
+        const configToUse = typeof window.EXTERNAL_FIREBASE_CONFIG !== 'undefined' ? window.EXTERNAL_FIREBASE_CONFIG : null;
 
         let useFirebase = false;
         let app, auth, db, appId;
 
         try {
-            if (EXTERNAL_FIREBASE_CONFIG) {
-                app = initializeApp(EXTERNAL_FIREBASE_CONFIG);
+            if (configToUse) {
+                app = initializeApp(configToUse);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 appId = "kick-detection-resolution"; 
@@ -1002,7 +999,7 @@
         const initAuth = async () => {
             if (!useFirebase || !auth) return;
             try {
-                if (!EXTERNAL_FIREBASE_CONFIG && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                if (!configToUse && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
@@ -1044,8 +1041,6 @@
                 }
             });
         }
-
-        const INSTRUCTOR_PASSWORD = "Nasser141983";
 
         const setTxt = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
         const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
@@ -1754,14 +1749,32 @@
         const pwdInputEl = document.getElementById('instructor-pwd-input');
         if (pwdInputEl) { pwdInputEl.addEventListener('keypress', function (e) { if (e.key === 'Enter') window.unlockInstructor(); }); }
 
-        window.unlockInstructor = function() {
+        window.unlockInstructor = async function() {
+            const emailVal = val('instructor-email-input');
             const pwdVal = val('instructor-pwd-input');
-            if (pwdVal === INSTRUCTOR_PASSWORD) {
-                document.getElementById('instructor-locked')?.classList.add('hidden'); document.getElementById('instructor-unlocked')?.classList.remove('hidden');
-                document.getElementById('pwd-error')?.classList.add('hidden'); if (pwdInputEl) pwdInputEl.value = ''; 
-                window.updateInstructorDashboard();
+            
+            if (!emailVal || !pwdVal) {
+                 document.getElementById('pwd-error').textContent = "Please enter email and password.";
+                 document.getElementById('pwd-error')?.classList.remove('hidden');
+                 return;
+            }
+
+            if (useFirebase && auth) {
+                try {
+                    await signInWithEmailAndPassword(auth, emailVal, pwdVal);
+                    
+                    document.getElementById('instructor-locked')?.classList.add('hidden'); 
+                    document.getElementById('instructor-unlocked')?.classList.remove('hidden');
+                    document.getElementById('pwd-error')?.classList.add('hidden'); 
+                    if (pwdInputEl) pwdInputEl.value = ''; 
+                    window.updateInstructorDashboard();
+                } catch (error) {
+                    console.error("Login failed", error);
+                    document.getElementById('pwd-error').textContent = "Authentication failed. Invalid credentials.";
+                    document.getElementById('pwd-error')?.classList.remove('hidden'); 
+                }
             } else {
-                document.getElementById('pwd-error')?.classList.remove('hidden'); if (pwdInputEl) pwdInputEl.value = ''; 
+                 alert("Live Cloud is not configured. Cannot perform secure login.");
             }
         };
 
