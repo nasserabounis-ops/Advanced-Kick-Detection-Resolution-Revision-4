@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth snap-y snap-mandatory">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        
+        /* Snap constraints */
+        html { scroll-padding-top: 64px; } /* Accounts for sticky nav */
+        .snap-section { scroll-snap-align: start; min-height: calc(100vh - 64px); display: flex; flex-direction: column; justify-content: center; }
+        
         .chart-container { position: relative; width: 100%; max-width: 800px; margin: 0 auto; height: 50vh; max-height: 400px; min-height: 300px; }
         .mini-chart-container { position: relative; width: 100%; height: 250px; }
         .radar-chart-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto; height: 300px; }
@@ -18,12 +23,16 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .nav-link.active { color: #0284c7; border-bottom: 2px solid #0284c7; }
-        .flip-card { perspective: 1000px; height: 250px; }
-        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
+        
+        /* Enhanced Flip Cards with Hover Scaling */
+        .flip-card { perspective: 1000px; height: 250px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .flip-card:hover { transform: scale(1.05) translateY(-10px); z-index: 10; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); border-radius: 0.75rem; }
+        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
         .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .flip-card-front { background-color: white; border: 1px solid #e2e8f0; }
         .flip-card-back { background-color: #0f172a; color: white; transform: rotateY(180deg); }
+        
         .toggle-checkbox:checked { right: 0; border-color: #10b981; }
         .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
         .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
@@ -36,6 +45,8 @@
         .def-btn.active-def { background-color: #f0f9ff; color: #0284c7; border-left-color: #0ea5e9; font-weight: 700; }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
+        
+        /* CSS Animations */
         @keyframes fluidDrop { 0%, 100% { height: 100%; } 50% { height: 40%; } }
         @keyframes pipeMove { 0%, 100% { transform: translate(-50%, 0); } 25% { transform: translate(-50%, 25%); } 75% { transform: translate(-50%, -25%); } }
         @keyframes pipePullOut { 0% { transform: translate(-50%, 20px); } 100% { transform: translate(-50%, -40px); } }
@@ -52,6 +63,7 @@
         @keyframes rockCrack { 0%, 100% { width: 0px; opacity: 0; } 20%, 80% { width: 16px; opacity: 1; } }
         @keyframes chokeRestrict { 0%, 100% { transform: translateY(0); opacity: 0.2; } 50% { transform: translateY(15px); opacity: 1; } }
         @keyframes pulseFriction { 0%, 100% { background-color: #ef4444; opacity: 0.5; box-shadow: 0 0 0px #ef4444; } 50% { background-color: #b91c1c; opacity: 1; box-shadow: 0 0 15px #ef4444; } }
+        
         .anim-fluid-drop { animation: fluidDrop 4s ease-in-out infinite; }
         .anim-pipe-move { animation: pipeMove 2.5s ease-in-out infinite; }
         .anim-pipe-pull { animation: pipePullOut 3s ease-out infinite; }
@@ -70,6 +82,7 @@
         .anim-rock-crack { animation: rockCrack 3s ease-in-out infinite; }
         .anim-choke-restrict { animation: chokeRestrict 1.5s ease-in-out infinite; }
         .anim-pulse-friction { animation: pulseFriction 1.5s ease-in-out infinite; }
+        
         @media print { body * { visibility: hidden; } #report-modal, #report-modal *, #group-report-modal, #group-report-modal * { visibility: visible; } #report-modal, #group-report-modal { position: absolute; left: 0; top: 0; width: 100%; min-height: 100vh; background: white; z-index: 9999; } #report-modal-content, #group-report-modal-content { box-shadow: none; border: none; max-height: none; overflow: visible; } .no-print { display: none !important; } }
     </style>
 </head>
@@ -99,38 +112,81 @@
     </nav>
 
     <main class="flex-grow">
-        <header class="bg-slate-900 text-white pt-20 pb-24 px-4 relative overflow-hidden no-print">
-            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 30px 30px;"></div>
-            <div class="max-w-4xl mx-auto text-center relative z-10">
-                <span class="bg-sky-500/20 text-sky-400 border border-sky-500/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 inline-block">Professional Training Module</span>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight">Advanced Kick Detection & Resolution</h1>
-                <p class="text-lg md:text-xl text-sky-100 font-medium mb-4 max-w-3xl mx-auto leading-relaxed">
+        <!-- Header Section -->
+        <header class="snap-section bg-slate-950 text-white relative overflow-hidden no-print">
+            <!-- Dynamic Wellbore Animation Background -->
+            <div class="absolute inset-0 z-0 flex justify-center overflow-hidden">
+                <!-- Side Formations -->
+                <div class="absolute left-0 w-1/2 h-full bg-amber-900/10 border-r border-amber-800/30"></div>
+                <div class="absolute right-0 w-1/2 h-full bg-amber-900/10 border-l border-amber-800/30"></div>
+                
+                <!-- Central Wellbore -->
+                <div class="w-32 md:w-64 h-full bg-slate-800 border-x-4 border-slate-700 relative shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
+                    <!-- Mud flowing down -->
+                    <div class="absolute w-full h-full bg-sky-500/5 opacity-50 anim-flow-down"></div>
+                    
+                    <!-- Dynamic Bubbles (Kicks) Rising -->
+                    <div class="absolute w-4 h-4 bg-white/40 rounded-full anim-bubble-1 blur-[1px]" style="left: 20%; animation-duration: 3s;"></div>
+                    <div class="absolute w-8 h-8 bg-white/20 rounded-full anim-bubble-2 blur-[2px]" style="left: 50%; animation-duration: 4.5s;"></div>
+                    <div class="absolute w-3 h-3 bg-white/50 rounded-full anim-bubble-3" style="left: 75%; animation-duration: 2.2s;"></div>
+                    <div class="absolute w-5 h-5 bg-white/30 rounded-full anim-bubble-1 blur-[1px]" style="left: 30%; animation-duration: 3.8s; animation-delay: 1.5s;"></div>
+                    <div class="absolute w-10 h-10 bg-white/10 rounded-full anim-bubble-2 blur-[3px]" style="left: 65%; animation-duration: 5.5s; animation-delay: 0.8s;"></div>
+                    <div class="absolute w-6 h-6 bg-white/20 rounded-full anim-bubble-3 blur-[1px]" style="left: 45%; animation-duration: 3.1s; animation-delay: 2.1s;"></div>
+                    <div class="absolute w-4 h-4 bg-white/40 rounded-full anim-bubble-1 blur-[1px]" style="left: 15%; animation-duration: 2.9s; animation-delay: 3s;"></div>
+                    <div class="absolute w-7 h-7 bg-white/25 rounded-full anim-bubble-2 blur-[2px]" style="left: 85%; animation-duration: 4.2s; animation-delay: 1.2s;"></div>
+                </div>
+
+                <!-- Abstract grid overlay and gradient fade for text readability -->
+                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 40px 40px;"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-transparent"></div>
+            </div>
+
+            <div class="max-w-4xl mx-auto text-center relative z-10 px-4">
+                <span class="bg-sky-500/20 text-sky-400 border border-sky-500/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 inline-block">Professional Training Module</span>
+                <h1 class="text-4xl md:text-5xl lg:text-7xl font-extrabold mb-6 tracking-tight">Advanced Kick Detection & Resolution</h1>
+                <p class="text-lg md:text-xl text-sky-100 font-medium mb-8 max-w-3xl mx-auto leading-relaxed">
                     Equipping drilling personnel with the crucial knowledge to understand wellbore mechanics, identify early warning signs, and execute immediate shut-in protocols to prevent blowouts.
                 </p>
+                <div class="animate-bounce mt-10">
+                    <span class="text-slate-400 text-sm font-bold uppercase tracking-widest">Scroll to Begin</span>
+                    <div class="text-slate-400 mt-2">↓</div>
+                </div>
             </div>
         </header>
 
-        <section id="resources" class="pt-12 pb-4 px-4 bg-slate-50 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
-                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center gap-6">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-3xl flex-shrink-0 shadow-sm border border-indigo-100">📂</div>
-                    <div class="flex-grow text-center md:text-left">
-                        <h2 class="text-xl font-bold text-indigo-900 mb-2">Learning Resources</h2>
-                        <p class="text-sm text-indigo-800 leading-relaxed mb-4 max-w-4xl">These files are hosted in a secure Google Drive to ensure you always have access to the latest, high-resolution versions. You can view them directly in your browser or download them to your device for offline use in the field.</p>
-                        <a href="https://drive.google.com/drive/folders/1McQn7EYrk179UFjViMZ_tgSj602VAfa2?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-lg transition-colors shadow-sm text-sm"><span>🔗</span> Access Google Drive</a>
+        <!-- Learning Resources -->
+        <section id="resources" class="snap-section px-4 bg-slate-50 no-print">
+            <div class="max-w-7xl mx-auto w-full">
+                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 md:p-12 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-8">
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl flex-shrink-0 shadow-sm border border-indigo-100 mx-auto md:mx-0 md:mt-2">📂</div>
+                    <div class="flex-grow text-center md:text-left w-full">
+                        <h2 class="text-2xl font-bold text-indigo-900 mb-3">Learning Resources</h2>
+                        <p class="text-base text-indigo-800 leading-relaxed mb-6 max-w-4xl mx-auto md:mx-0">These files are hosted in a secure Google Drive to ensure you always have access to the latest, high-resolution versions. You can view them directly in your browser or download them to your device for offline use in the field.</p>
+                        
+                        <div class="flex flex-col xl:flex-row items-center gap-6 xl:gap-8 bg-white/60 p-5 rounded-xl border border-indigo-100/50 inline-flex w-full xl:w-auto">
+                            <a href="https://drive.google.com/drive/folders/1McQn7EYrk179UFjViMZ_tgSj602VAfa2?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-sm text-sm whitespace-nowrap shrink-0 w-full sm:w-auto">
+                                <span>🔗</span> Access Google Drive
+                            </a>
+                            
+                            <div class="xl:border-l xl:border-indigo-200 xl:pl-6 text-xs text-indigo-800/80 font-medium leading-relaxed max-w-xl text-center xl:text-left">
+                                <strong class="block text-indigo-900 mb-1 flex items-center justify-center xl:justify-start gap-1"><span class="text-sm">©</span> Nasser AboYounes. All rights reserved.</strong>
+                                This intellectual property and associated training materials are provided exclusively for educational and operational reference. Unauthorized reproduction, distribution, or commercial use is strictly prohibited without prior written consent.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="definitions" class="py-12 px-4 bg-slate-50 border-b border-slate-200 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
+        <!-- DEFINITIONS SECTION (Interactive List) -->
+        <section id="definitions" class="snap-section px-4 bg-slate-50 border-b border-slate-200 no-print">
+            <div class="max-w-7xl mx-auto w-full">
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3"><span class="text-4xl">📖</span> Core Terminology & Physics</h2>
                     <p class="text-slate-600 leading-relaxed">Expand the categories below and select a term to explore its definition and visual simulation in compliance with IWCF standards.</p>
                 </div>
-                <div class="flex flex-col lg:flex-row gap-6 items-stretch">
-                    <div class="w-full lg:w-1/3 space-y-3">
+                <div class="flex flex-col lg:flex-row gap-6 items-stretch h-[600px]">
+                    <div class="w-full lg:w-1/3 space-y-3 overflow-y-auto custom-scroll pr-2">
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm" open><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Reservoir Rock Properties <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-rock', this)" class="def-btn active-def text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Porosity & Permeability</button></div></details>
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Fundamental Pressures <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-hp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Hydrostatic Pressure (HP)</button><button onclick="showDefinition('def-fp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Pore / Formation Pressure</button><button onclick="showDefinition('def-gradients', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Pressure Gradients</button><button onclick="showDefinition('def-frac', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Fracture Pressure</button><button onclick="showDefinition('def-overburden', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Overburden Pressure</button></div></details>
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Bottom Hole Pressure (BHP) <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-bhp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Static vs. Dynamic BHP</button><button onclick="showDefinition('def-choke', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Choke vs. Bell Nipple</button></div></details>
@@ -138,14 +194,14 @@
                         <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Circulating Friction Losses <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-friction', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Friction Losses & APL</button><button onclick="showDefinition('def-distinctions', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Key Distinctions in the System</button></div></details>
                     </div>
 
-                    <div class="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative min-h-[500px]">
+                    <div class="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative h-full">
                         <div id="def-rock" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-start custom-scroll overflow-y-auto">
                             <div class="relative w-32 h-48 bg-amber-900 rounded flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-slate-300"><div class="absolute w-12 h-12 bg-amber-700 rounded-full top-2 left-2 shadow"></div><div class="absolute w-16 h-16 bg-amber-700 rounded-full bottom-2 right-1 shadow"></div><div class="absolute w-10 h-10 bg-amber-700 rounded-full bottom-10 left-4 shadow"></div><div class="absolute w-12 h-12 bg-amber-700 rounded-full top-6 right-2 shadow"></div><div class="absolute w-2 bg-sky-400 opacity-80 anim-perm-flow rounded-full blur-[1px]" style="left:40%; top:0; z-index: 10;"></div></div>
                             <div class="space-y-4">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Reservoir Rock Properties</h3>
                                 <div><strong class="text-sky-700 block">Porosity:</strong><p class="text-sm text-slate-600">The measure of the void (empty) space within a formation rock, expressed as a percentage or fraction of the total bulk volume.</p></div>
                                 <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1"><li><strong>Absolute Porosity:</strong> Ratio of total void space to bulk volume, regardless of connectivity.</li><li><strong>Effective Porosity:</strong> Ratio of interconnected pore space to bulk volume. This is critical for production, as isolated pores cannot flow fluid.</li></ul>
-                                <div class="mt-4"><strong class="text-sky-700 block">Permeability ($k$):</strong><p class="text-sm text-slate-600">A measure of the formation rock's ability to transmit fluids through its interconnected pore spaces. Measured in Darcies or millidarcies (mD).</p></div>
+                                <div class="mt-4"><strong class="text-sky-700 block">Permeability (k):</strong><p class="text-sm text-slate-600">A measure of the formation rock's ability to transmit fluids through its interconnected pore spaces. Measured in Darcies or millidarcies (mD).</p></div>
                             </div>
                         </div>
 
@@ -286,113 +342,32 @@
             </div>
         </section>
 
-        <!-- MASTER DASHBOARD SECTION -->
-        <section id="dashboard" class="py-8 px-4 bg-slate-50 border-b border-slate-200 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
-                <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2"><span class="text-3xl">🎛️</span> Command Dashboard</h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Training Modules</h3>
-                        <div class="grid grid-cols-2 gap-2 mb-6">
-                            <button onclick="scrollToSection('physics')" class="bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded p-2 text-left transition-colors flex items-center gap-2"><span class="text-lg">⚖️</span><span class="text-xs font-semibold text-slate-700">Physics</span></button>
-                            <button onclick="scrollToSection('causes')" class="bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded p-2 text-left transition-colors flex items-center gap-2"><span class="text-lg">🔍</span><span class="text-xs font-semibold text-slate-700">Causes</span></button>
-                            <button onclick="scrollToSection('indicators')" class="bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded p-2 text-left transition-colors flex items-center gap-2"><span class="text-lg">📊</span><span class="text-xs font-semibold text-slate-700">Detection</span></button>
-                            <button onclick="scrollToSection('protocol')" class="bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded p-2 text-left transition-colors flex items-center gap-2"><span class="text-lg">🚨</span><span class="text-xs font-semibold text-slate-700">Protocol</span></button>
-                            <button onclick="scrollToSection('kill-math')" class="bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded p-2 text-left transition-colors flex items-center gap-2"><span class="text-lg">🧮</span><span class="text-xs font-semibold text-slate-700">Math</span></button>
-                            <button onclick="scrollToSection('assessment')" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-400 rounded p-2 text-left transition-colors flex items-center gap-2"><span class="text-lg">🎓</span><span class="text-xs font-semibold text-emerald-800">Exam</span></button>
-                        </div>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2">Core Equations Reference</h3>
-                        <div class="bg-slate-800 rounded-lg p-4 space-y-2 text-[11px] font-mono text-slate-300 shadow-inner flex-grow">
-                            <p><strong class="text-sky-400">Hydrostatic (HP)</strong> = 0.052 × MW × TVD</p>
-                            <p><strong class="text-emerald-400">Static BHP</strong> = HP</p>
-                            <p><strong class="text-emerald-400">Dynamic BHP</strong> = HP + ECD <span class="text-slate-500">(Friction)</span></p>
-                            <p><strong class="text-rose-400">KWM</strong> = MW + [SIDPP ÷ (0.052 × TVD)]</p>
-                            <p><strong class="text-amber-400">MAASP</strong> = (MaxMW - MW) × 0.052 × ShoeTVD</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Quick Pressures</h3>
-                        <div class="grid grid-cols-3 gap-3 mb-4">
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">MW (ppg)</label><input type="number" id="dash-mw" value="11.5" step="0.1" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1.5 text-sm font-mono text-slate-800 outline-none focus:border-sky-500"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">TVD (ft)</label><input type="number" id="dash-tvd" value="10000" step="100" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1.5 text-sm font-mono text-slate-800 outline-none focus:border-sky-500"></div>
-                            <div><label class="block text-xs font-bold text-slate-500 mb-1">ECD Fric.</label><input type="number" id="dash-friction" value="200" step="10" class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1.5 text-sm font-mono text-slate-800 outline-none focus:border-sky-500"></div>
-                        </div>
-                        <div class="bg-slate-900 rounded-lg p-5 flex-grow flex flex-col justify-center space-y-4 shadow-inner">
-                            <div class="flex justify-between items-center border-b border-slate-700 pb-3"><span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Hydrostatic (HP)</span><span class="font-mono font-bold text-sky-400 text-lg"><span id="dash-hyd">5980</span> psi</span></div>
-                            <div class="flex justify-between items-center border-b border-slate-700 pb-3"><span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Static BHP<br><span class="text-[9px] lowercase font-normal opacity-70">(Pumps Off)</span></span><span class="font-mono font-bold text-slate-200 text-lg"><span id="dash-static-bhp">5980</span> psi</span></div>
-                            <div class="flex justify-between items-center"><span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Dynamic BHP<br><span class="text-[9px] lowercase font-normal opacity-70">(Pumps On)</span></span><span class="font-mono font-bold text-emerald-400 text-lg"><span id="dash-dynamic-bhp">6180</span> psi</span></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden lg:col-span-2">
-                        <div class="p-5 pb-2">
-                            <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
-                                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Complete Kick Detection Checklist</h3>
-                                <button onclick="document.getElementById('decision-tree-modal').classList.remove('hidden')" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-sm border border-indigo-100">
-                                    <span>🌳</span> The Kick Detection Decision Tree
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <span class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2 block flex items-center gap-1"><span>⚠️</span> Early Warning Signs (Abnormal Trends)</span>
-                                    <div class="space-y-1 text-[11px] text-slate-700 font-medium">
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Drilling Break (ROP ↑)</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Pump Press ↓ / Strokes ↑ (U-Tube Effect)</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Gas Spikes (Connection/Background)</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Torque & Drag ↑</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> D-Exponent ↓</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Cutting size/shape changes</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Return Mud Temperature ↑</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Shale Density ↓</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-amber-50 p-1.5 rounded border border-transparent hover:border-amber-100"><input type="checkbox" class="custom-checkbox early-check" onchange="window.updateChecklistAction()"> Return Mud Salinity (Chlorides) ↑</label>
-                                    </div>
-                                </div>
-                                <div>
-                                    <span class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-2 block flex items-center gap-1"><span>🚨</span> Positive Indicators (Active Influx)</span>
-                                    <div class="space-y-1 text-[11px] text-slate-700 font-medium">
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-rose-50 p-1.5 rounded border border-transparent hover:border-rose-100"><input type="checkbox" class="custom-checkbox pos-check" onchange="window.updateChecklistAction()"> Well Flows with Pumps OFF</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-rose-50 p-1.5 rounded border border-transparent hover:border-rose-100"><input type="checkbox" class="custom-checkbox pos-check" onchange="window.updateChecklistAction()"> Flow Rate Increase</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-rose-50 p-1.5 rounded border border-transparent hover:border-rose-100"><input type="checkbox" class="custom-checkbox pos-check" onchange="window.updateChecklistAction()"> Pit Volume Gain</label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer hover:bg-rose-50 p-1.5 rounded border border-transparent hover:border-rose-100"><input type="checkbox" class="custom-checkbox pos-check" onchange="window.updateChecklistAction()"> Incorrect Fill Volume (Tripping)</label>
-                                    </div>
-                                    
-                                    <div id="checklist-action-panel" class="bg-slate-100 p-4 mt-6 rounded-lg border border-slate-200 transition-all duration-300 h-32 flex flex-col justify-center">
-                                        <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Dynamic First Action Protocol</span>
-                                        <div id="dynamic-action-text" class="text-sm font-medium text-slate-700 leading-snug">
-                                            <span class="text-slate-500 font-bold">🟢 MONITORING</span><br>Maintain standard drilling parameters. Observe closely for anomalies.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- 1. PHYSICS SECTION (Enhanced with ECD & MPD) -->
-        <section id="physics" class="py-20 px-4 bg-white border-b border-slate-200 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
-                <div class="max-w-3xl mb-12">
+        <section id="physics" class="snap-section px-4 bg-white border-b border-slate-200 no-print">
+            <div class="max-w-7xl mx-auto w-full">
+                <div class="max-w-3xl mb-8">
                     <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3"><span class="text-4xl">⚖️</span> Dynamic Pressure Mechanics</h2>
                     <p class="text-slate-600 text-lg leading-relaxed">
                         Primary well control is dynamic. While static Hydrostatic Pressure (<span class="font-mono text-sky-600 font-semibold text-sm bg-sky-50 px-1 rounded">HP</span>) is key, turning the mud pumps ON adds friction pressure—Equivalent Circulating Density (ECD)—to the bottom of the hole. Notice how turning pumps OFF removes ECD and can instantly trigger a kick if the static mud weight is too low.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-slate-50 p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
-                    <div class="lg:col-span-7 space-y-6 flex flex-col">
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <div class="w-full sm:w-1/2">
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Wellbore Environment (Onshore)</label>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center bg-slate-50 p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
+                    
+                    <!-- Left Column: Controls -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-full flex flex-col justify-center">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">Environment Variables</h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Wellbore Profile (Onshore)</label>
                                 <select id="env-select" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:ring-sky-500 focus:border-sky-500 outline-none">
                                     <option value="standard">Standard Onshore Well</option>
                                     <option value="slim">Slim Hole (High Friction)</option>
                                 </select>
                             </div>
-                            <div class="w-full sm:w-1/2 flex items-center justify-between sm:justify-end gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                            
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
                                 <span class="text-sm font-bold text-slate-700">Mud Pumps (ECD)</span>
                                 <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
                                     <input type="checkbox" name="toggle" id="pump-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
@@ -400,79 +375,75 @@
                                 </div>
                                 <span id="pump-status-text" class="text-sm font-bold text-emerald-600 w-8">ON</span>
                             </div>
-                        </div>
 
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex-grow">
-                            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Variables</h3>
-                            <div class="space-y-6">
-                                <div>
-                                    <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">Mud Weight (MW)</label><span id="mw-val" class="font-mono text-sky-700 bg-sky-100 px-3 py-1 rounded-md font-bold">11.8 ppg</span></div>
-                                    <input type="range" id="mw-slider" min="8" max="18" step="0.1" value="11.8" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
-                                </div>
-                                <div>
-                                    <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">True Vertical Depth (TVD)</label><span id="tvd-val" class="font-mono text-slate-700 bg-slate-200 px-3 py-1 rounded-md font-bold">10000 ft</span></div>
-                                    <input type="range" id="tvd-slider" min="5000" max="15000" step="100" value="10000" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-600">
-                                </div>
-                                <div>
-                                    <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">Pump Rate (SPM)</label><span id="spm-val" class="font-mono text-emerald-700 bg-emerald-100 px-3 py-1 rounded-md font-bold transition-colors">100 SPM</span></div>
-                                    <input type="range" id="spm-slider" min="20" max="150" step="5" value="100" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600 transition-opacity">
-                                </div>
-                                <div class="pt-4 border-t border-slate-100">
-                                    <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">Formation Pore Pressure</label><span id="fp-val" class="font-mono text-amber-700 bg-amber-100 px-3 py-1 rounded-md font-bold">6200 psi</span></div>
-                                    <input type="range" id="fp-slider" min="3000" max="10000" step="100" value="6200" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
-                                </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">Mud Weight (MW)</label><span id="mw-val" class="font-mono text-sky-700 bg-sky-100 px-3 py-1 rounded-md font-bold">11.8 ppg</span></div>
+                                <input type="range" id="mw-slider" min="8" max="18" step="0.1" value="11.8" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
                             </div>
-
-                            <div class="flex flex-row gap-4 mt-8 pt-6 border-t border-slate-200">
-                                <div class="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Bottom Hole (BHP)</span>
-                                    <div class="relative w-32 h-16">
-                                        <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible">
-                                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"></path>
-                                            <path id="gauge-bhp-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#0ea5e9" stroke-width="10" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" class="transition-all duration-500 ease-out"></path>
-                                        </svg>
-                                        <div class="absolute bottom-0 left-0 w-full text-center translate-y-3">
-                                            <span class="font-mono text-lg font-bold text-slate-800" id="gauge-bhp-text">0 psi</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Formation (FP)</span>
-                                    <div class="relative w-32 h-16">
-                                        <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible">
-                                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"></path>
-                                            <path id="gauge-fp-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" class="transition-all duration-500 ease-out"></path>
-                                        </svg>
-                                        <div class="absolute bottom-0 left-0 w-full text-center translate-y-3">
-                                            <span class="font-mono text-lg font-bold text-slate-800" id="gauge-fp-text">0 psi</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">True Vertical Depth (TVD)</label><span id="tvd-val" class="font-mono text-slate-700 bg-slate-200 px-3 py-1 rounded-md font-bold">10000 ft</span></div>
+                                <input type="range" id="tvd-slider" min="5000" max="15000" step="100" value="10000" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">Pump Rate (SPM)</label><span id="spm-val" class="font-mono text-emerald-700 bg-emerald-100 px-3 py-1 rounded-md font-bold transition-colors">100 SPM</span></div>
+                                <input type="range" id="spm-slider" min="20" max="150" step="5" value="100" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600 transition-opacity">
+                            </div>
+                            <div class="pt-4 border-t border-slate-100">
+                                <div class="flex justify-between items-end mb-2"><label class="font-semibold text-slate-700">Formation Pore Pressure</label><span id="fp-val" class="font-mono text-amber-700 bg-amber-100 px-3 py-1 rounded-md font-bold">6200 psi</span></div>
+                                <input type="range" id="fp-slider" min="3000" max="10000" step="100" value="6200" class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
                             </div>
                         </div>
                     </div>
 
-                    <div class="lg:col-span-5 flex flex-col items-center">
-                        <div class="w-full bg-white p-4 rounded-t-xl border-x border-t border-slate-200 shadow-sm flex justify-between items-center text-center">
-                            <div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Static Hyd</div><div id="calc-static" class="text-lg font-bold text-slate-700 font-mono">6136</div></div>
-                            <div class="text-slate-400 font-bold">+</div>
-                            <div><div class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">ECD (Friction)</div><div id="calc-ecd" class="text-lg font-bold text-emerald-600 font-mono">200</div></div>
-                            <div class="text-slate-400 font-bold">=</div>
-                            <div class="bg-slate-100 px-3 py-1 rounded"><div class="text-[10px] font-bold text-sky-600 uppercase tracking-widest">Total BHP</div><div id="calc-bhp" class="text-xl font-bold text-sky-600 font-mono">6336</div></div>
-                        </div>
-                        <div id="status-banner" class="w-full text-center py-3 font-bold text-white uppercase tracking-widest transition-colors duration-300 bg-emerald-500 text-sm z-10 relative">Wellbore Stable (Dynamic)</div>
-                        <div id="well-simulator-container" class="border-x-8 border-b-8 border-slate-800 rounded-b-xl relative bg-amber-900 -mt-1 w-full max-w-full"><canvas id="wellCanvas" class="absolute inset-0 w-full h-full"></canvas></div>
-                        
-                        <div id="balance-state-container" class="mt-4 p-4 rounded-xl border text-left w-full max-w-md transition-colors duration-300 hidden">
-                            <h4 id="balance-state-title" class="font-bold text-lg mb-1 flex items-center gap-2"></h4>
-                            <p id="balance-state-desc" class="text-sm"></p>
+                    <!-- Center Column: Live Telemetry -->
+                    <div class="bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col items-center justify-between h-full gap-6 relative overflow-hidden">
+                        <h3 class="text-sky-400 font-bold uppercase tracking-widest text-xs w-full text-center border-b border-slate-700 pb-2">Live Telemetry</h3>
+
+                        <!-- BHP Gauge -->
+                        <div class="flex flex-col items-center w-full">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Bottom Hole Pressure (BHP)</span>
+                            <div class="relative w-40 h-20">
+                                <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible">
+                                    <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round"></path>
+                                    <path id="gauge-bhp-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#0ea5e9" stroke-width="10" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" class="transition-all duration-500 ease-out"></path>
+                                </svg>
+                                <div class="absolute bottom-0 left-0 w-full text-center translate-y-3">
+                                    <span class="font-mono text-xl font-bold text-white" id="gauge-bhp-text">0 psi</span>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- FP Gauge -->
+                        <div class="flex flex-col items-center w-full">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Formation Pressure (FP)</span>
+                            <div class="relative w-40 h-20">
+                                <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible">
+                                    <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round"></path>
+                                    <path id="gauge-fp-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66" class="transition-all duration-500 ease-out"></path>
+                                </svg>
+                                <div class="absolute bottom-0 left-0 w-full text-center translate-y-3">
+                                    <span class="font-mono text-xl font-bold text-white" id="gauge-fp-text">0 psi</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Differential Gauge (New) -->
+                        <div class="flex flex-col items-center w-full bg-slate-800 p-4 rounded-xl border border-slate-700 transition-colors duration-300" id="gauge-diff-container">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Differential (ΔP)</span>
+                            <span class="font-mono text-2xl font-black text-white" id="gauge-diff-text">0 psi</span>
+                            <span class="text-[9px] font-bold uppercase tracking-wider mt-1 px-2 py-0.5 rounded text-white" id="gauge-diff-label">BALANCED</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Simulator -->
+                    <div class="flex flex-col items-center h-full justify-center">
+                        <div id="status-banner" class="w-full text-center py-3 font-bold text-white uppercase tracking-widest transition-colors duration-300 bg-emerald-500 text-sm z-10 relative rounded-t-xl">Wellbore Stable (Dynamic)</div>
+                        <div id="well-simulator-container" class="border-x-8 border-b-8 border-slate-800 rounded-b-xl relative bg-amber-900 -mt-1 w-full max-w-full"><canvas id="wellCanvas" class="absolute inset-0 w-full h-full"></canvas></div>
                         <p id="env-warning" class="text-xs text-amber-600 font-bold mt-4 text-center h-4"></p>
                     </div>
                 </div>
 
-                <div class="mt-10 bg-indigo-50 border border-indigo-200 rounded-2xl p-8 shadow-sm">
+                <div class="mt-8 bg-indigo-50 border border-indigo-200 rounded-2xl p-8 shadow-sm">
                     <h3 class="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2"><span>⚙️</span> Enrichment Module: Managed Pressure Drilling (MPD)</h3>
                     <p class="text-sm text-indigo-800 leading-relaxed">
                         Modern onshore drilling often utilizes <strong>Managed Pressure Drilling (MPD)</strong> to overcome narrow pressure windows. During MPD operations, the Bottom Hole Pressure (BHP) is kept constant by dynamically applying or relieving surface backpressure via an automated choke. 
@@ -484,8 +455,8 @@
         </section>
 
         <!-- 2. CAUSES & TRIPPING SECTION -->
-        <section id="causes" class="py-20 px-4 bg-slate-50 border-b border-slate-200 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
+        <section id="causes" class="snap-section px-4 bg-slate-50 border-b border-slate-200 no-print">
+            <div class="max-w-7xl mx-auto w-full">
                 <div class="max-w-3xl mb-12">
                     <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3"><span class="text-4xl">🔍</span> The "Big 6" Root Causes</h2>
                     <p class="text-slate-600 text-lg leading-relaxed">
@@ -493,9 +464,9 @@
                     </p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="causes-grid"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="causes-grid"></div>
                 
-                <div class="mt-10 bg-indigo-50 border border-indigo-200 rounded-2xl p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center">
+                <div class="mt-12 bg-indigo-50 border border-indigo-200 rounded-2xl p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center">
                     <div class="flex-grow">
                         <h3 class="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2"><span>📘</span> Advanced Enrichment: Tripping Mechanics & Pumping Out</h3>
                         <p class="text-sm text-indigo-800 mb-4">Statistically, the majority of well control incidents occur during tripping. Swab and surge pressures are dictated by pipe speed, mud viscosity, and annular clearance.</p>
@@ -532,8 +503,8 @@
         </section>
 
         <!-- 3. INDICATORS SECTION -->
-        <section id="indicators" class="py-20 px-4 bg-white border-b border-slate-200 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
+        <section id="indicators" class="snap-section px-4 bg-white border-b border-slate-200 no-print">
+            <div class="max-w-7xl mx-auto w-full">
                 <div class="max-w-3xl mb-12">
                     <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3"><span class="text-4xl">📊</span> Advanced Detection Analysis</h2>
                     <p class="text-slate-600 text-lg leading-relaxed">
@@ -600,8 +571,8 @@
         </section>
 
         <!-- 4. PROTOCOL SECTION & API DRILLS -->
-        <section id="protocol" class="py-20 px-4 bg-slate-900 text-white scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
+        <section id="protocol" class="snap-section px-4 bg-slate-900 text-white no-print">
+            <div class="max-w-7xl mx-auto w-full">
                 <div class="text-center mb-12 max-w-4xl mx-auto">
                     <h2 class="text-3xl font-bold mb-4 flex items-center justify-center gap-3"><span class="text-4xl">🚨</span> The Action Protocol</h2>
                     <p class="text-slate-400 text-lg leading-relaxed">Upon observing a positive indicator, immediately execute the Flow Check and Shut-In procedures.</p>
@@ -666,8 +637,8 @@
         </section>
 
         <!-- 5. KILL MATH SECTION -->
-        <section id="kill-math" class="py-20 px-4 bg-slate-50 border-b border-slate-200 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
+        <section id="kill-math" class="snap-section px-4 bg-slate-50 border-b border-slate-200 no-print">
+            <div class="max-w-7xl mx-auto w-full">
                 <div class="max-w-3xl mb-12">
                     <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3"><span class="text-4xl">🧮</span> Post-Shut-In: Kill Sheet Math</h2>
                     <p class="text-slate-600 text-lg leading-relaxed">
@@ -706,8 +677,8 @@
         </section>
 
         <!-- 6. ASSESSMENT SECTION (50 Questions) -->
-        <section id="assessment" class="py-20 px-4 bg-slate-900 text-white scroll-mt-16 no-print">
-            <div class="max-w-4xl mx-auto">
+        <section id="assessment" class="snap-section px-4 bg-slate-900 text-white no-print">
+            <div class="max-w-4xl mx-auto w-full">
                 <div class="text-center mb-10">
                     <h2 class="text-3xl font-bold mb-4 flex items-center justify-center gap-3"><span class="text-4xl">📝</span> Comprehensive Assessment</h2>
                     <p class="text-slate-400 text-lg leading-relaxed">
@@ -721,7 +692,8 @@
                         <div class="text-6xl mb-6">🎓</div>
                         <h3 class="text-2xl font-bold text-white mb-4">Certification Prep & Gap Analysis</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8 text-left">
-                            <div class="sm:col-span-2"><label class="block text-sm font-bold text-sky-400 mb-2">Full Name</label><input type="text" id="student-name" placeholder="e.g. John Doe" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500"></div>
+                            <div><label class="block text-sm font-bold text-sky-400 mb-2">Full Name</label><input type="text" id="student-name" placeholder="e.g. John Doe" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500"></div>
+                            <div><label class="block text-sm font-bold text-sky-400 mb-2">Email Address</label><input type="email" id="student-email" placeholder="john@example.com" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500"></div>
                             <div>
                                 <label class="block text-sm font-bold text-sky-400 mb-2">Position / Role</label>
                                 <select id="student-position" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-sky-500 appearance-none">
@@ -733,16 +705,47 @@
                         <div class="flex justify-center"><button onclick="window.startQuiz()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-12 rounded-full transition-colors duration-300 shadow-lg shadow-sky-500/30">Start Assessment (50 Qs)</button></div>
                     </div>
 
-                    <div id="quiz-question" class="hidden w-full h-full flex flex-col z-10">
-                        <div class="flex justify-between items-center mb-6 border-b border-slate-600 pb-4">
-                            <div><span class="text-sky-400 font-bold uppercase tracking-widest text-xs block" id="question-counter">Question 1 of 50</span><span class="text-slate-400 text-xs mt-1" id="active-student-display"></span></div>
-                            <div class="text-center bg-slate-900 px-4 py-1.5 rounded-lg border border-slate-700 shadow-inner"><span class="text-[10px] text-slate-400 uppercase tracking-widest block mb-0.5">Time Remaining</span><span id="quiz-timer" class="font-mono text-xl font-bold text-amber-400">90:00</span></div>
-                            <span class="text-slate-400 font-mono text-sm">Score: <span id="current-score" class="text-white font-bold">0</span></span>
+                    <!-- Full Screen Quiz Modal -->
+                    <div id="quiz-question-modal" class="fixed inset-0 bg-slate-900 z-[100] hidden flex-col">
+                        <!-- Header -->
+                        <div class="bg-slate-950 p-4 border-b border-slate-800 flex justify-between items-center shadow-lg shrink-0">
+                            <div>
+                                <span class="text-sky-400 font-bold uppercase tracking-widest text-xs block" id="modal-question-counter">Question 1 of 50</span>
+                                <span class="text-slate-400 text-xs mt-1" id="modal-student-display"></span>
+                            </div>
+                            <div class="text-center bg-slate-900 px-6 py-2 rounded-lg border border-slate-700 shadow-inner">
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest block mb-0.5">Time Remaining</span>
+                                <span id="quiz-timer" class="font-mono text-2xl font-bold text-amber-400">60:00</span>
+                            </div>
+                            <button onclick="window.submitQuizEarly()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-sm">Submit Assessment</button>
                         </div>
-                        <h3 class="text-xl md:text-2xl font-bold text-white mb-6 leading-snug" id="question-text"></h3>
-                        <div class="space-y-3 flex-grow" id="options-container"></div>
-                        <div id="explanation-box" class="hidden mt-4 p-4 rounded-lg text-sm border shadow-sm"></div>
-                        <div class="mt-6 text-right hidden" id="next-btn-container"><button onclick="window.nextQuestion()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300">Next Question →</button></div>
+                        
+                        <!-- Body -->
+                        <div class="flex flex-col md:flex-row flex-grow overflow-hidden bg-slate-900">
+                            <!-- Nav Grid -->
+                            <div class="w-full md:w-1/4 lg:w-1/5 bg-slate-800 border-r border-slate-700 p-4 overflow-y-auto custom-scroll flex flex-col shadow-inner shrink-0">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Question Navigator</h4>
+                                <div id="quiz-nav-grid" class="flex flex-wrap gap-2 w-full"></div>
+                                <div class="mt-6 text-xs text-slate-500 space-y-1">
+                                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-sky-600 rounded-sm"></div> Answered</div>
+                                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-slate-800 border border-slate-600 rounded-sm"></div> Unanswered</div>
+                                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-slate-800 border-2 border-amber-400 rounded-sm"></div> Current</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Question Content -->
+                            <div class="w-full md:w-3/4 lg:w-4/5 p-6 md:p-12 overflow-y-auto custom-scroll flex flex-col relative text-left">
+                                <div class="max-w-3xl mx-auto w-full flex-grow flex flex-col">
+                                    <h3 class="text-xl md:text-3xl font-bold text-white mb-8 leading-snug" id="question-text"></h3>
+                                    <div class="space-y-4 flex-grow" id="options-container"></div>
+                                    
+                                    <div class="mt-12 flex justify-between items-center border-t border-slate-700 pt-6 pb-20 md:pb-0">
+                                        <button onclick="window.prevQuestion()" id="prev-btn" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed">← Previous</button>
+                                        <button onclick="window.nextQuestion()" id="next-btn" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-8 rounded-lg transition-colors">Next →</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="quiz-results" class="hidden text-center w-full z-10">
@@ -770,12 +773,12 @@
         </section>
 
         <!-- 8. ABOUT THE AUTHOR (FANCY) -->
-        <section id="about" class="py-24 px-4 bg-slate-900 border-t border-slate-800 scroll-mt-16 no-print relative overflow-hidden">
+        <section id="about" class="snap-section py-24 px-4 bg-slate-900 border-t border-slate-800 no-print relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400"></div>
             <div class="absolute -top-40 -right-40 w-96 h-96 bg-sky-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-30"></div>
             <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-30"></div>
 
-            <div class="max-w-5xl mx-auto relative z-10">
+            <div class="max-w-5xl mx-auto relative z-10 w-full">
                 <div class="bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-slate-700 shadow-2xl p-10 md:p-16 flex flex-col items-center text-center">
                     <h2 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-300 mb-6 tracking-tight">Nasser AboYounes</h2>
                     
@@ -799,8 +802,6 @@
                     </div>
 
                     <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 bg-slate-900 border border-slate-700 text-white px-8 py-4 rounded-2xl shadow-2xl">
-                        <div class="flex items-center gap-3"><span class="text-2xl">📞</span><span class="font-mono text-lg tracking-wide">+20 1271536449</span></div>
-                        <div class="w-px h-8 bg-slate-600 hidden sm:block"></div>
                         <div class="flex items-center gap-3 group"><span class="text-2xl">✉️</span><a href="mailto:nfw_1983@yahoo.com" class="font-mono text-lg tracking-wide text-sky-400 group-hover:text-sky-300 transition-colors border-b border-transparent group-hover:border-sky-300">nfw_1983@yahoo.com</a></div>
                     </div>
                 </div>
@@ -808,8 +809,8 @@
         </section>
 
         <!-- 9. SECURE GROUP ANALYTICS PORTAL -->
-        <section id="instructor" class="py-20 px-4 bg-slate-50 border-t border-slate-200 scroll-mt-16 no-print">
-            <div class="max-w-7xl mx-auto">
+        <section id="instructor" class="snap-section py-20 px-4 bg-slate-50 border-t border-slate-200 no-print">
+            <div class="max-w-7xl mx-auto w-full">
                 
                 <div id="instructor-locked" class="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm max-w-lg mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
@@ -856,7 +857,7 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-100/50 text-slate-500 text-xs uppercase tracking-wider">
-                                        <th class="px-6 py-4 font-bold border-b border-slate-200">Date</th><th class="px-6 py-4 font-bold border-b border-slate-200">Name</th><th class="px-6 py-4 font-bold border-b border-slate-200">Role (Exp)</th><th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Score</th><th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Action</th>
+                                        <th class="px-6 py-4 font-bold border-b border-slate-200">Date</th><th class="px-6 py-4 font-bold border-b border-slate-200">Name & Email</th><th class="px-6 py-4 font-bold border-b border-slate-200">Role (Exp)</th><th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Score</th><th class="px-6 py-4 font-bold border-b border-slate-200 text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="instructor-table-body" class="divide-y divide-slate-100 text-sm"><tr><td colspan="5" class="px-6 py-8 text-center text-slate-400 italic">No assessments recorded yet.</td></tr></tbody>
@@ -874,6 +875,30 @@
     </main>
 
     <!-- MODALS -->
+    <!-- CAUSE MODAL -->
+    <div id="cause-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100 opacity-100">
+            <div class="bg-slate-900 p-6 flex justify-between items-center relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:20px_20px]"></div>
+                <h2 class="text-2xl font-bold text-white flex items-center gap-3 relative z-10" id="cause-modal-title">Title</h2>
+                <button onclick="window.closeCauseModal()" class="text-slate-400 hover:text-white transition-colors text-3xl leading-none relative z-10">&times;</button>
+            </div>
+            <div class="p-8 md:p-10 bg-slate-50 flex flex-col items-center">
+                <div id="cause-modal-anim" class="scale-150 mb-10 mt-4 origin-top"></div>
+                <div class="w-full space-y-6 text-left">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-sky-600 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2 text-lg"><span class="text-2xl">⚙️</span> Mechanism</h4>
+                        <p class="text-slate-700 text-base leading-relaxed" id="cause-modal-desc"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
+                        <h4 class="font-bold text-emerald-600 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2 text-lg"><span class="text-2xl">🛡️</span> Prevention</h4>
+                        <p class="text-slate-700 text-base leading-relaxed" id="cause-modal-prev"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="report-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div id="report-modal-content" class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] print:max-h-full">
             <div class="bg-slate-900 p-6 flex justify-between items-center no-print">
@@ -890,10 +915,21 @@
                     <div class="w-full h-48 relative"><canvas id="indivRadarChart"></canvas></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Identified Knowledge Gaps</h3><ul id="rep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 h-full"></ul></div>
-                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3><ul id="rep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full"></ul></div>
+                    <div class="flex flex-col h-full">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Identified Knowledge Gaps</h3>
+                        <ul id="rep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 mb-4 max-h-40 overflow-y-auto shadow-inner"></ul>
+                        <div class="w-full h-40 relative mt-auto border-t border-slate-200 pt-4"><canvas id="indivGapsChart"></canvas></div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3>
+                        <ul id="rep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full"></ul>
+                    </div>
                 </div>
-                <div class="border-t border-slate-200 pt-6 text-center text-xs text-slate-400 font-medium tracking-wide">Nasser AboYounes - Professional Training Analytics Platform</div>
+                <div class="mt-8 border-t border-slate-200 pt-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="text-rose-500">❌</span> Question Review & Explanations</h3>
+                    <div id="rep-wrong-answers" class="space-y-4"></div>
+                </div>
+                <div class="border-t border-slate-200 pt-6 mt-6 text-center text-xs text-slate-400 font-medium tracking-wide">Nasser AboYounes - Professional Training Analytics Platform</div>
             </div>
         </div>
     </div>
@@ -911,8 +947,15 @@
                 </div>
                 <div class="mb-8"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Overall Fleet Evaluation</h3><div id="grep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white"></div></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Fleet Knowledge Gaps</h3><ul id="grep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 h-full"></ul></div>
-                    <div><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3><ul id="grep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full"></ul></div>
+                    <div class="flex flex-col h-full">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Fleet Knowledge Gaps</h3>
+                        <ul id="grep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 mb-4 max-h-40 overflow-y-auto shadow-inner"></ul>
+                        <div class="w-full h-40 relative mt-auto border-t border-slate-200 pt-4"><canvas id="groupGapsChart"></canvas></div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-emerald-500">📈</span> Strategic Recommendations</h3>
+                        <ul id="grep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full"></ul>
+                    </div>
                 </div>
                 <div class="border-t border-slate-200 pt-6 text-center text-xs text-slate-400 font-medium tracking-wide">Nasser AboYounes - Professional Training Analytics Platform</div>
             </div>
@@ -945,7 +988,7 @@
     <footer class="bg-slate-900 text-slate-400 py-10 border-t border-slate-800 text-center no-print">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center justify-center gap-2 mb-4"><span class="text-2xl">🛢️</span><span class="font-bold text-xl tracking-tight text-slate-300">Nasser <span class="text-sky-500">AboYounes</span> <span class="hidden sm:inline-block text-slate-500 font-normal text-sm ml-2">| WCI & Well Control Tech Advisor</span></span></div>
-            <div class="flex justify-center items-center gap-4 mt-4 text-sm text-slate-500"><a href="mailto:nfw_1983@yahoo.com" class="hover:text-sky-400 transition-colors flex items-center gap-1"><span>✉️</span> nfw_1983@yahoo.com</a><span class="text-slate-700">|</span><span class="flex items-center gap-1"><span>📞</span> +20 1271536449</span></div>
+            <div class="flex justify-center items-center gap-4 mt-4 text-sm text-slate-500"><a href="mailto:nfw_1983@yahoo.com" class="hover:text-sky-400 transition-colors flex items-center gap-1"><span>✉️</span> nfw_1983@yahoo.com</a></div>
         </div>
     </footer>
 
@@ -991,7 +1034,7 @@
                 console.error("Auth init error:", e);
                 useFirebase = false; 
                 try {
-                    localAssessments = JSON.parse(localStorage.getItem('wc_assessments') || '[]');
+                    localAssessments = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]');
                 } catch(err) { localAssessments = []; }
                 
                 setTimeout(() => {
@@ -1011,21 +1054,24 @@
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
                 if (user && db) {
-                    const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
-                    onSnapshot(assessmentsRef, (snapshot) => {
-                        localAssessments = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
-                        const instructorUnlocked = document.getElementById('instructor-unlocked');
-                        if (instructorUnlocked && !instructorUnlocked.classList.contains('hidden')) {
-                            window.updateInstructorDashboard();
-                        }
-                    }, (error) => {
-                        console.error("Firestore listen error", error);
-                    });
+                    const isInstructor = user.providerData.some(p => p.providerId === 'password');
+                    if (isInstructor) {
+                        const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
+                        onSnapshot(assessmentsRef, (snapshot) => {
+                            localAssessments = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
+                            const instructorUnlocked = document.getElementById('instructor-unlocked');
+                            if (instructorUnlocked && !instructorUnlocked.classList.contains('hidden')) {
+                                window.updateInstructorDashboard();
+                            }
+                        }, (error) => {
+                            console.error("Firestore listen error", error);
+                        });
+                    }
                 }
             });
         } else {
             try {
-                localAssessments = JSON.parse(localStorage.getItem('wc_assessments') || '[]');
+                localAssessments = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]');
             } catch(err) { localAssessments = []; }
         }
 
@@ -1162,6 +1208,27 @@
             setTxt('gauge-bhp-text', Math.round(totalBHP) + ' psi');
             setTxt('gauge-fp-text', Math.round(fp) + ' psi');
 
+            const diffP = Math.round(totalBHP - fp);
+            setTxt('gauge-diff-text', Math.abs(diffP) + ' psi');
+            
+            const diffContainer = document.getElementById('gauge-diff-container');
+            const diffLabel = document.getElementById('gauge-diff-label');
+            if (diffContainer && diffLabel) {
+                if (diffP > 0) {
+                    diffLabel.textContent = "OVERBALANCED";
+                    diffLabel.className = "text-[9px] font-bold uppercase tracking-wider mt-1 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400";
+                    diffContainer.className = "flex flex-col items-center w-full bg-slate-800 p-4 rounded-xl border border-emerald-500/50 transition-colors duration-300";
+                } else if (diffP === 0) {
+                    diffLabel.textContent = "BALANCED";
+                    diffLabel.className = "text-[9px] font-bold uppercase tracking-wider mt-1 px-2 py-0.5 rounded bg-amber-500/20 text-amber-400";
+                    diffContainer.className = "flex flex-col items-center w-full bg-slate-800 p-4 rounded-xl border border-amber-500/50 transition-colors duration-300";
+                } else {
+                    diffLabel.textContent = "UNDERBALANCED";
+                    diffLabel.className = "text-[9px] font-bold uppercase tracking-wider mt-1 px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 animate-pulse";
+                    diffContainer.className = "flex flex-col items-center w-full bg-slate-800 p-4 rounded-xl border border-rose-500/50 transition-colors duration-300 shadow-[0_0_15px_rgba(225,29,72,0.3)]";
+                }
+            }
+
             const isKicking = fp > totalBHP;
 
             if (isKicking) {
@@ -1262,26 +1329,47 @@
         });
         document.getElementById('pump-toggle')?.addEventListener('change', window.updateSimulator);
 
+        const causesDataGrid = [
+            { title: "Failure to Fill Hole", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-slate-800"></div><div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 bg-sky-500 anim-fluid-drop"></div></div>`, desc: "Fluid level drops during tripping because steel volume isn't replaced with mud.", prev: "Continuously monitor trip tank; fill hole systematically." },
+            { title: "Swabbing & Surging", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-600"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-10 bg-slate-200 border-b-2 border-slate-800 anim-pipe-move z-10"></div></div>`, desc: "Moving pipe too fast creates mechanical pressure spikes (suction or fracture).", prev: "Control tripping speeds; apply Trip Margin." },
+            { title: "Insufficient Mud Weight", animationHTML: `<div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center"><div class="absolute bottom-1 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[20px] border-transparent border-b-slate-400"></div><div class="w-12 h-1.5 bg-slate-400 rounded anim-tilt relative bottom-1"><div class="absolute -top-5 -left-2 w-5 h-5 bg-sky-400 rounded flex items-center justify-center text-[7px] text-white">MW</div><div class="absolute -top-6 -right-3 w-7 h-7 bg-rose-500 rounded flex items-center justify-center text-[9px] text-white">FP</div></div></div>`, desc: "Base density of drilling fluid is too low to hold back pore pressure.", prev: "Accurate pore pressure prediction; timely mud weight increases." },
+            { title: "Lost Circulation", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-500"></div><div class="absolute top-[40%] left-[50%] h-1.5 bg-sky-500 anim-leak-right origin-left"></div></div>`, desc: "Mud lost to fractured formation, causing annular fluid level to drop.", prev: "Treat with LCM; minimize ECD." },
+            { title: "Abnormal Pressures", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4 flex items-end justify-center"><div class="absolute bottom-[-10px] w-14 h-10 bg-rose-600 rounded-t-full anim-pulse-pressure"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-8 bg-sky-600 z-10"></div></div>`, desc: "Drilling into unexpectedly over-pressurized geological pockets.", prev: "Monitor D-exponent and gas trends." },
+            { title: "Gas Cut Mud", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-sky-700 overflow-hidden mx-auto mb-4"><div class="absolute bottom-0 w-full h-4 bg-amber-900"></div><div class="absolute left-[20%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-1"></div><div class="absolute left-[50%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-2"></div></div>`, desc: "Entrained gas expands massively near surface, reducing overall hydrostatic column.", prev: "Time drill gas caps; utilize degassers." }
+        ];
+
         function initCausesGrid() {
-            const causesDataGrid = [
-                { title: "Failure to Fill Hole", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-slate-800"></div><div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 bg-sky-500 anim-fluid-drop"></div></div>`, desc: "Fluid level drops during tripping because steel volume isn't replaced with mud.", prev: "Continuously monitor trip tank; fill hole systematically." },
-                { title: "Swabbing & Surging", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-600"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-10 bg-slate-200 border-b-2 border-slate-800 anim-pipe-move z-10"></div></div>`, desc: "Moving pipe too fast creates mechanical pressure spikes (suction or fracture).", prev: "Control tripping speeds; apply Trip Margin." },
-                { title: "Insufficient Mud Weight", animationHTML: `<div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center"><div class="absolute bottom-1 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[20px] border-transparent border-b-slate-400"></div><div class="w-12 h-1.5 bg-slate-400 rounded anim-tilt relative bottom-1"><div class="absolute -top-5 -left-2 w-5 h-5 bg-sky-400 rounded flex items-center justify-center text-[7px] text-white">MW</div><div class="absolute -top-6 -right-3 w-7 h-7 bg-rose-500 rounded flex items-center justify-center text-[9px] text-white">FP</div></div></div>`, desc: "Base density of drilling fluid is too low to hold back pore pressure.", prev: "Accurate pore pressure prediction; timely mud weight increases." },
-                { title: "Lost Circulation", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-500"></div><div class="absolute top-[40%] left-[50%] h-1.5 bg-sky-500 anim-leak-right origin-left"></div></div>`, desc: "Mud lost to fractured formation, causing annular fluid level to drop.", prev: "Treat with LCM; minimize ECD." },
-                { title: "Abnormal Pressures", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4 flex items-end justify-center"><div class="absolute bottom-[-10px] w-14 h-10 bg-rose-600 rounded-t-full anim-pulse-pressure"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-8 bg-sky-600 z-10"></div></div>`, desc: "Drilling into unexpectedly over-pressurized geological pockets.", prev: "Monitor D-exponent and gas trends." },
-                { title: "Gas Cut Mud", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-sky-700 overflow-hidden mx-auto mb-4"><div class="absolute bottom-0 w-full h-4 bg-amber-900"></div><div class="absolute left-[20%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-1"></div><div class="absolute left-[50%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-2"></div></div>`, desc: "Entrained gas expands massively near surface, reducing overall hydrostatic column.", prev: "Time drill gas caps; utilize degassers." }
-            ];
-            
             const causesGridEl = document.getElementById('causes-grid');
             if(causesGridEl) {
-                causesDataGrid.forEach(cause => {
+                causesGridEl.innerHTML = '';
+                causesDataGrid.forEach((cause, index) => {
                     const card = document.createElement('div');
-                    card.className = "flip-card bg-transparent cursor-pointer";
-                    card.innerHTML = `<div class="flip-card-inner shadow-sm rounded-xl"><div class="flip-card-front">${cause.animationHTML}<h3 class="font-bold text-lg text-slate-800 leading-tight">${cause.title}</h3><p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-bold">Hover</p></div><div class="flip-card-back"><h4 class="font-bold text-sky-400 mb-2 border-b border-slate-700 pb-1 text-left text-sm">Mechanism</h4><p class="text-xs text-slate-300 text-left mb-3">${cause.desc}</p><h4 class="font-bold text-emerald-400 mb-1 text-left text-sm">Prevention</h4><p class="text-xs text-slate-300 text-left">${cause.prev}</p></div></div>`;
+                    card.className = "bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group h-64";
+                    card.onclick = () => window.openCauseModal(index);
+                    card.innerHTML = `
+                        <div class="mb-6 transform group-hover:scale-110 transition-transform duration-300">${cause.animationHTML}</div>
+                        <h3 class="font-bold text-xl text-slate-800 leading-tight mb-4">${cause.title}</h3>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-sky-600 bg-sky-50 px-3 py-1 rounded-full group-hover:bg-sky-500 group-hover:text-white transition-colors">Click to Enlarge</span>
+                    `;
                     causesGridEl.appendChild(card);
                 });
             }
         }
+
+        window.openCauseModal = function(index) {
+            const cause = causesDataGrid[index];
+            setTxt('cause-modal-title', cause.title);
+            setHtml('cause-modal-anim', cause.animationHTML);
+            setTxt('cause-modal-desc', cause.desc);
+            setTxt('cause-modal-prev', cause.prev);
+            document.getElementById('cause-modal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        };
+
+        window.closeCauseModal = function() {
+            document.getElementById('cause-modal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        };
 
         function initIndicatorsChart() {
             const indicatorsData = [
@@ -1408,11 +1496,12 @@
         ];
 
         let activeQuizPool = [];
-        let currentQuizQuestion = 0; let quizScore = 0; let isAnswered = false; 
+        let currentQuizQuestion = 0; let quizScore = 0; 
         let activeStudentData = {}; let currentAttemptData = [];
+        let userAnswers = [];
         
         let timerInterval;
-        let timeRemaining = 90 * 60;
+        let timeRemaining = 60 * 60; // 60 minutes
 
         function updateTimerDisplay() {
             const minutes = Math.floor(timeRemaining / 60);
@@ -1431,22 +1520,58 @@
             }
         }
 
+        window.buildNavGrid = function() {
+            const grid = document.getElementById('quiz-nav-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            for(let i=0; i<activeQuizPool.length; i++) {
+                const btn = document.createElement('button');
+                btn.id = `nav-btn-${i}`;
+                btn.textContent = i + 1;
+                btn.onclick = () => { currentQuizQuestion = i; window.loadQuestion(); };
+                grid.appendChild(btn);
+            }
+        };
+
+        window.updateNavGridUI = function() {
+            for(let i=0; i<activeQuizPool.length; i++) {
+                const btn = document.getElementById(`nav-btn-${i}`);
+                if(!btn) continue;
+                btn.className = "w-10 h-10 rounded font-bold text-xs flex items-center justify-center transition-colors border " + 
+                                (userAnswers[i] !== null ? "bg-sky-600 text-white border-sky-500 " : "bg-slate-800 text-slate-400 border-slate-600 hover:bg-slate-700 ");
+                if(i === currentQuizQuestion) {
+                    btn.classList.add("ring-2", "ring-amber-400", "ring-offset-2", "ring-offset-slate-900");
+                } else {
+                    btn.classList.remove("ring-2", "ring-amber-400", "ring-offset-2", "ring-offset-slate-900");
+                }
+            }
+        };
+
         window.startQuiz = function() {
             const nameInput = val('student-name')?.trim();
+            const emailInput = val('student-email')?.trim();
             const posInput = val('student-position');
             const expInput = val('student-exp');
 
-            if(!nameInput || !posInput || expInput === "") return alert("Please fill in all details, including years of experience.");
+            if(!nameInput || !emailInput || !posInput || expInput === "") return alert("Please fill in all details, including email and years of experience.");
             
-            activeStudentData = { name: nameInput, role: posInput, exp: parseInt(expInput) };
-            setTxt('active-student-display', `Student: ${activeStudentData.name} | Role: ${activeStudentData.role} (${activeStudentData.exp} yrs)`);
+            activeStudentData = { name: nameInput, email: emailInput, role: posInput, exp: parseInt(expInput) };
+            setTxt('modal-student-display', `${activeStudentData.name} | ${activeStudentData.role}`);
             
             activeQuizPool = [...quizQuestions].sort(() => Math.random() - 0.5);
 
-            currentQuizQuestion = 0; quizScore = 0; currentAttemptData = []; setTxt('current-score', '0');
-            document.getElementById('quiz-start')?.classList.add('hidden'); document.getElementById('quiz-results')?.classList.add('hidden'); document.getElementById('quiz-question')?.classList.remove('hidden');
+            currentQuizQuestion = 0; quizScore = 0; currentAttemptData = []; 
+            userAnswers = new Array(activeQuizPool.length).fill(null);
             
-            timeRemaining = 90 * 60;
+            document.getElementById('quiz-start')?.classList.add('hidden'); 
+            document.getElementById('quiz-results')?.classList.add('hidden'); 
+            document.getElementById('quiz-question-modal')?.classList.remove('hidden', 'flex');
+            document.getElementById('quiz-question-modal')?.classList.add('flex');
+            
+            document.body.classList.add('overflow-hidden');
+            window.scrollTo(0, 0);
+            
+            timeRemaining = 60 * 60; 
             updateTimerDisplay();
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -1455,21 +1580,17 @@
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
                     alert("Time is up! Your assessment will now be submitted.");
-                    window.showQuizResults();
+                    window.finishQuiz();
                 }
             }, 1000);
 
-            loadQuestion();
+            window.buildNavGrid();
+            window.loadQuestion();
         };
 
-        function loadQuestion() {
-            isAnswered = false; 
-            document.getElementById('next-btn-container')?.classList.add('hidden');
-            const expBox = document.getElementById('explanation-box');
-            if (expBox) expBox.classList.add('hidden');
-
+        window.loadQuestion = function() {
             const qData = activeQuizPool[currentQuizQuestion];
-            setTxt('question-counter', `Question ${currentQuizQuestion + 1} of ${activeQuizPool.length}`); 
+            setTxt('modal-question-counter', `Question ${currentQuizQuestion + 1} of ${activeQuizPool.length}`); 
             setTxt('question-text', qData.q);
             
             const optsContainer = document.getElementById('options-container');
@@ -1477,61 +1598,87 @@
                 optsContainer.innerHTML = '';
                 qData.options.forEach((opt, index) => {
                     const btn = document.createElement('button');
-                    btn.className = 'w-full text-left p-4 rounded-xl border border-slate-600 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:border-sky-500 transition-colors';
+                    const isSelected = userAnswers[currentQuizQuestion] === index;
+                    btn.className = 'w-full text-left p-5 rounded-xl border-2 transition-all duration-200 text-lg font-medium shadow-sm ' + 
+                                    (isSelected ? 'border-sky-500 bg-sky-900/40 text-sky-300' : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500 hover:bg-slate-700');
                     btn.textContent = opt; 
-                    btn.onclick = () => window.checkAnswer(index, btn);
+                    btn.onclick = () => window.selectAnswer(index);
                     optsContainer.appendChild(btn);
                 });
             }
-        }
-
-        window.checkAnswer = function(selectedIndex, btnElement) {
-            if (isAnswered) return; isAnswered = true;
-            const qData = activeQuizPool[currentQuizQuestion]; const allBtns = document.getElementById('options-container').querySelectorAll('button');
-            const isCorrect = selectedIndex === qData.answer;
             
-            currentAttemptData.push({ qIndex: currentQuizQuestion, isCorrect: isCorrect, topic: qData.topic });
-
-            if(allBtns) {
-                allBtns.forEach(btn => { btn.classList.remove('hover:bg-slate-700', 'hover:border-sky-500'); btn.classList.add('opacity-50', 'cursor-default'); });
-            }
-
-            if (isCorrect) {
-                btnElement.classList.replace('bg-slate-800', 'bg-emerald-900'); btnElement.classList.replace('border-slate-600', 'border-emerald-500');
-                btnElement.classList.add('text-emerald-400', 'font-bold', 'opacity-100');
-                quizScore++; setTxt('current-score', quizScore);
+            document.getElementById('prev-btn').disabled = (currentQuizQuestion === 0);
+            const nextBtn = document.getElementById('next-btn');
+            if(currentQuizQuestion === activeQuizPool.length - 1) {
+                nextBtn.textContent = "Submit";
+                nextBtn.classList.replace('bg-sky-600', 'bg-emerald-600');
+                nextBtn.classList.replace('hover:bg-sky-500', 'hover:bg-emerald-500');
             } else {
-                btnElement.classList.replace('bg-slate-800', 'bg-rose-900'); btnElement.classList.replace('border-slate-600', 'border-rose-500'); btnElement.classList.add('text-rose-400', 'opacity-100');
-                if(allBtns && allBtns[qData.answer]) {
-                    allBtns[qData.answer].classList.replace('bg-slate-800', 'bg-emerald-900'); allBtns[qData.answer].classList.replace('border-slate-600', 'border-emerald-500'); allBtns[qData.answer].classList.add('text-emerald-400', 'opacity-100');
-                }
+                nextBtn.textContent = "Next →";
+                nextBtn.classList.replace('bg-emerald-600', 'bg-sky-600');
+                nextBtn.classList.replace('hover:bg-emerald-500', 'hover:bg-sky-500');
             }
+            
+            window.updateNavGridUI();
+        };
 
-            const expBox = document.getElementById('explanation-box');
-            if (expBox) {
-                expBox.classList.remove('hidden');
-                if (isCorrect) {
-                    expBox.className = 'mt-4 p-4 rounded-lg text-sm border border-emerald-200 bg-emerald-50 text-emerald-900';
-                    expBox.innerHTML = `<strong>✅ Correct!</strong> ${qData.explanation}`;
-                } else {
-                    expBox.className = 'mt-4 p-4 rounded-lg text-sm border border-rose-200 bg-rose-50 text-rose-900';
-                    expBox.innerHTML = `<strong>❌ Incorrect.</strong> ${qData.explanation}`;
-                }
-            }
+        window.selectAnswer = function(index) {
+            userAnswers[currentQuizQuestion] = index;
+            window.loadQuestion();
+        };
 
-            document.getElementById('next-btn-container')?.classList.remove('hidden');
+        window.prevQuestion = function() {
+            if(currentQuizQuestion > 0) { currentQuizQuestion--; window.loadQuestion(); }
         };
 
         window.nextQuestion = function() {
-            currentQuizQuestion++;
-            if (currentQuizQuestion < activeQuizPool.length) loadQuestion(); else window.showQuizResults();
+            if(currentQuizQuestion < activeQuizPool.length - 1) { 
+                currentQuizQuestion++; window.loadQuestion(); 
+            } else {
+                window.submitQuizEarly();
+            }
+        };
+
+        window.submitQuizEarly = function() {
+            const unanswered = userAnswers.filter(a => a === null).length;
+            const msg = unanswered > 0 ? `You have ${unanswered} unanswered questions. Are you sure you want to submit?` : "Are you sure you want to submit your assessment?";
+            if(confirm(msg)) {
+                window.finishQuiz();
+            }
+        };
+
+        window.finishQuiz = function() {
+            clearInterval(timerInterval);
+            document.body.classList.remove('overflow-hidden');
+            document.getElementById('quiz-question-modal').classList.add('hidden');
+            document.getElementById('quiz-question-modal').classList.remove('flex');
+            
+            quizScore = 0;
+            currentAttemptData = [];
+            
+            for(let i=0; i<activeQuizPool.length; i++) {
+                const isCorrect = userAnswers[i] === activeQuizPool[i].answer;
+                if(isCorrect) quizScore++;
+                currentAttemptData.push({ 
+                    qIndex: i, 
+                    isCorrect: isCorrect, 
+                    topic: activeQuizPool[i].topic,
+                    questionText: activeQuizPool[i].q,
+                    correctAnswerText: activeQuizPool[i].options[activeQuizPool[i].answer],
+                    explanation: activeQuizPool[i].explanation,
+                    userAnswerText: userAnswers[i] !== null ? activeQuizPool[i].options[userAnswers[i]] : "No Answer Provided"
+                });
+            }
+            
+            window.showQuizResults();
         };
 
         let latestResultId = null;
 
         window.showQuizResults = async function() {
-            clearInterval(timerInterval);
-            document.getElementById('quiz-question')?.classList.add('hidden'); document.getElementById('quiz-results')?.classList.remove('hidden');
+            document.getElementById('quiz-results')?.classList.remove('hidden');
+            window.scrollToSection('assessment');
+            
             const percentage = Math.round((quizScore / activeQuizPool.length) * 100);
             
             latestResultId = Date.now();
@@ -1540,6 +1687,7 @@
                 id: latestResultId, 
                 date: new Date().toLocaleDateString(), 
                 name: activeStudentData.name, 
+                email: activeStudentData.email,
                 position: activeStudentData.role, 
                 exp: activeStudentData.exp,
                 score: percentage, 
@@ -1555,15 +1703,20 @@
                     const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
                     const docRef = await addDoc(assessmentsRef, newRecord);
                     currentDocId = docRef.id;
+                    newRecord.firestoreId = currentDocId;
                 } catch (e) {
                     console.error("Failed to save assessment to cloud.", e);
+                    currentDocId = 'local_' + latestResultId;
+                    newRecord.firestoreId = currentDocId;
                 }
             } else {
-                 console.warn("Saving to local storage (External Viewer Mode).");
                  newRecord.firestoreId = 'local_' + latestResultId;
                  currentDocId = newRecord.firestoreId;
-                 localAssessments.push(newRecord);
-                 localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
+            }
+            
+            localAssessments.push(newRecord);
+            if(!useFirebase) {
+                localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
             }
 
             setTxt('result-student-name', activeStudentData.name); setTxt('final-score', `${percentage}%`);
@@ -1589,7 +1742,12 @@
             const commentVal = document.getElementById('student-comment')?.value.trim();
             if(!commentVal) return;
             
-            if (useFirebase && currentUser && currentDocId) {
+            const idx = localAssessments.findIndex(a => a.firestoreId === currentDocId);
+            if (idx > -1) {
+                localAssessments[idx].comment = commentVal;
+            }
+            
+            if (useFirebase && currentUser && currentDocId && !currentDocId.startsWith('local_')) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'assessments', currentDocId);
                     await updateDoc(docRef, { comment: commentVal });
@@ -1600,16 +1758,11 @@
                 } catch (e) {
                     console.error("Failed to sync comment to cloud.", e);
                 }
-            } else if (!useFirebase && currentDocId) {
-                const idx = localAssessments.findIndex(a => a.firestoreId === currentDocId);
-                if (idx > -1) {
-                    localAssessments[idx].comment = commentVal;
-                    localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
-                    
-                    document.getElementById('save-comment-btn')?.classList.add('hidden');
-                    document.getElementById('comment-saved-msg')?.classList.remove('hidden');
-                    document.getElementById('student-comment').disabled = true;
-                }
+            } else {
+                localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
+                document.getElementById('save-comment-btn')?.classList.add('hidden');
+                document.getElementById('comment-saved-msg')?.classList.remove('hidden');
+                document.getElementById('student-comment').disabled = true;
             }
         };
 
@@ -1618,14 +1771,18 @@
             const sn = document.getElementById('student-name');
             const sp = document.getElementById('student-position');
             const se = document.getElementById('student-exp');
+            const sm = document.getElementById('student-email');
             if(sn) sn.value = '';
             if(sp) sp.value = '';
             if(se) se.value = '';
+            if(sm) sm.value = '';
             document.getElementById('quiz-start')?.classList.remove('hidden');
             document.getElementById('quiz-results')?.classList.add('hidden');
         };
 
         let indivRadarChartInstance = null;
+        let indivGapsChartInstance = null;
+        let groupGapsChartInstance = null;
 
         window.openIndividualReport = function(resultId, fromStudentView = false) {
             const idToLoad = fromStudentView ? latestResultId : resultId;
@@ -1670,6 +1827,8 @@
 
             const gapsList = document.getElementById('rep-gaps-list');
             const recList = document.getElementById('rep-rec-list');
+            const wrongAnswersContainer = document.getElementById('rep-wrong-answers');
+
             if(gapsList && recList) {
                 gapsList.innerHTML = ''; recList.innerHTML = '';
 
@@ -1689,6 +1848,56 @@
                         
                         recList.innerHTML += `<li class="flex items-start gap-2 bg-white p-2 rounded shadow-sm border border-sky-50"><span class="text-sky-500 mt-0.5">↳</span> <span>${rec}</span></li>`;
                     }
+                }
+            }
+            
+            // Bar Chart for Individual Gaps
+            const ctxIndivGaps = document.getElementById('indivGapsChart');
+            if(ctxIndivGaps) {
+                if(indivGapsChartInstance) indivGapsChartInstance.destroy();
+                indivGapsChartInstance = new Chart(ctxIndivGaps.getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: Object.keys(missedTopicsMap), datasets: [{ label: 'Incorrect Answers', data: Object.values(missedTopicsMap), backgroundColor: '#f43f5e', borderRadius: 4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } } }
+                });
+            }
+
+            if (wrongAnswersContainer) {
+                wrongAnswersContainer.innerHTML = '';
+                let wrongHtml = '';
+                
+                if(data.details) {
+                    const incorrectDetails = data.details.filter(ans => !ans.isCorrect);
+                    
+                    if (incorrectDetails.length === 0) {
+                        wrongHtml = '<p class="text-emerald-600 font-bold bg-emerald-50 p-4 rounded-lg">Perfect Assessment! No incorrect answers.</p>';
+                    } else {
+                        incorrectDetails.forEach(ans => {
+                            let qText = ans.questionText || (activeQuizPool[ans.qIndex] ? activeQuizPool[ans.qIndex].q : "Question text unavailable.");
+                            let cAnsText = ans.correctAnswerText || (activeQuizPool[ans.qIndex] ? activeQuizPool[ans.qIndex].options[activeQuizPool[ans.qIndex].answer] : "Correct answer unavailable.");
+                            let expText = ans.explanation || (activeQuizPool[ans.qIndex] ? activeQuizPool[ans.qIndex].explanation : "Explanation unavailable.");
+                            let uAnsText = ans.userAnswerText || "Incorrect / Not Answered";
+
+                            wrongHtml += `
+                            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm relative">
+                                <span class="absolute top-4 right-4 text-xs font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded border border-rose-200">${ans.topic}</span>
+                                <h4 class="font-bold text-slate-800 mb-3 pr-20">Q: ${qText}</h4>
+                                <div class="bg-rose-50 border border-rose-200 p-3 rounded mb-3">
+                                    <span class="text-xs font-bold text-rose-700 uppercase tracking-widest block mb-1">Your Answer</span>
+                                    <p class="text-sm text-rose-900 font-medium">${uAnsText}</p>
+                                </div>
+                                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded mb-3">
+                                    <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest block mb-1">Correct Answer</span>
+                                    <p class="text-sm text-emerald-900 font-medium">${cAnsText}</p>
+                                </div>
+                                <div class="bg-sky-50 border border-sky-100 p-3 rounded">
+                                    <span class="text-xs font-bold text-sky-700 uppercase tracking-widest block mb-1">Technical Comment / Explanation</span>
+                                    <p class="text-sm text-slate-700">${expText}</p>
+                                </div>
+                            </div>`;
+                        });
+                    }
+                    wrongAnswersContainer.innerHTML = wrongHtml;
                 }
             }
 
@@ -1737,19 +1946,18 @@
             if (useFirebase && auth) {
                 try {
                     await signInWithEmailAndPassword(auth, emailVal, pwdVal);
-                    
                     document.getElementById('instructor-locked')?.classList.add('hidden'); 
                     document.getElementById('instructor-unlocked')?.classList.remove('hidden');
                     document.getElementById('pwd-error')?.classList.add('hidden'); 
                     if (pwdInputEl) pwdInputEl.value = ''; 
-                    window.updateInstructorDashboard();
+                    setTimeout(() => window.updateInstructorDashboard(), 500);
                 } catch (error) {
                     console.error("Login failed", error);
                     document.getElementById('pwd-error').textContent = "Authentication failed. Invalid credentials.";
                     document.getElementById('pwd-error')?.classList.remove('hidden'); 
                 }
             } else {
-                 alert("Live Cloud is not configured. Cannot perform secure login.");
+                alert("Live Cloud is not configured. Cannot perform secure login.");
             }
         };
 
@@ -1764,13 +1972,14 @@
                 setHtml('instructor-table-body', `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400 italic">No assessments recorded.</td></tr>`);
                 const commentsList = document.getElementById('instructor-comments-list');
                 if (commentsList) commentsList.innerHTML = '<p class="text-slate-400 italic text-sm text-center py-4">No comments recorded yet.</p>';
-                window.renderGroupCharts(0, 0, {labels:[], data:[]}); return;
+                window.renderGroupCharts([], [], {labels:[], data:[]}); return;
             }
 
             const totalScore = results.reduce((sum, r) => sum + r.score, 0); const avgScore = Math.round(totalScore / results.length);
             setTxt('stat-avg-score', `${avgScore}%`);
 
-            let passes = 0, fails = 0; results.forEach(r => { if(r.passed) passes++; else fails++; });
+            let passList = [], failList = []; 
+            results.forEach(r => { if(r.passed) passList.push(r.name); else failList.push(r.name); });
 
             const topicScores = { "Fundamentals": {c:0, t:0}, "Pressure Math": {c:0, t:0}, "Detection": {c:0, t:0}, "Mechanics & Causes": {c:0, t:0}, "Action Protocol": {c:0, t:0}, "Operations": {c:0, t:0} };
             const missesMap = {};
@@ -1806,10 +2015,13 @@
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 border-b border-slate-100 text-slate-500">${r.date}</td>
-                            <td class="px-6 py-4 border-b border-slate-100 font-bold text-slate-800">${r.name}</td>
+                            <td class="px-6 py-4 border-b border-slate-100 font-bold text-slate-800">${r.name}<br><span class="text-xs font-normal text-slate-500">${r.email || 'N/A'}</span></td>
                             <td class="px-6 py-4 border-b border-slate-100 text-slate-600">${r.position} <span class="text-xs text-slate-400">(${r.exp}y)</span></td>
                             <td class="px-6 py-4 border-b border-slate-100 text-center font-mono font-bold ${r.passed ? 'text-emerald-600' : 'text-rose-600'}">${r.score}%</td>
-                            <td class="px-6 py-4 border-b border-slate-100 text-center"><button onclick="window.openIndividualReport(${r.id || `'${r.firestoreId}'`})" class="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 font-bold px-3 py-1 rounded text-xs transition-colors mx-auto">View Report</button></td>
+                            <td class="px-6 py-4 border-b border-slate-100 text-center space-x-2">
+                                <button onclick="window.openIndividualReport(${r.id || `'${r.firestoreId}'`})" class="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 font-bold px-3 py-1 rounded text-xs transition-colors mb-1 md:mb-0">View Report</button>
+                                <button onclick="window.deleteRecord(${r.id ? r.id : `'${r.firestoreId}'`})" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold px-3 py-1 rounded text-xs transition-colors">Delete</button>
+                            </td>
                         </tr>`;
                 });
             }
@@ -1836,17 +2048,39 @@
                 }
             }
 
-            window.renderGroupCharts(passes, fails, topicData);
+            window.renderGroupCharts(passList, failList, topicData);
         };
 
-        window.renderGroupCharts = function(passes, fails, topicData) {
+        window.renderGroupCharts = function(passList, failList, topicData) {
             if (instructorPieChartInstance) instructorPieChartInstance.destroy(); if (topicRadarChartInstance) topicRadarChartInstance.destroy();
             
             const pieEl = document.getElementById('instructorPieChart');
             if (pieEl) {
+                let passes = passList.length;
+                let fails = failList.length;
                 instructorPieChartInstance = new Chart(pieEl.getContext('2d'), {
                     type: 'doughnut', data: { labels: ['Passed', 'Failed'], datasets: [{ data: [passes||1, fails||0], backgroundColor: passes||fails ? ['#10b981', '#f43f5e'] : ['#e2e8f0'], borderWidth: 2, borderColor: '#ffffff' }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed !== null) { label += context.parsed; }
+                                    return label;
+                                },
+                                afterLabel: function(context) {
+                                    const isPass = context.dataIndex === 0;
+                                    const list = isPass ? passList : failList;
+                                    if(!list || list.length === 0) return ['No students'];
+                                    let displayList = list.slice(0, 10).map(n => '• ' + n);
+                                    if(list.length > 10) displayList.push(`...and ${list.length - 10} more`);
+                                    return displayList;
+                                }
+                            }
+                        } 
+                    } }
                 });
             }
 
@@ -1857,6 +2091,35 @@
                     data: { labels: topicData.labels && topicData.labels.length ? topicData.labels : ['Fundamentals', 'Pressure Math', 'Detection'], datasets: [{ label: 'Avg Group Score', data: topicData.data && topicData.data.length ? topicData.data : [0,0,0], backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: '#6366f1', pointBackgroundColor: '#4f46e5', pointBorderColor: '#fff', borderWidth: 2 }] },
                     options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#e2e8f0' }, grid: { color: '#e2e8f0' }, pointLabels: { font: { family: 'Inter', size: 10, weight: 'bold' }, color: '#475569' }, suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } }
                 });
+            }
+        };
+
+        window.deleteRecord = async function(id) {
+            if(!confirm("Are you sure you want to completely delete this record?")) return;
+            
+            if(useFirebase && currentUser) {
+                try {
+                    const docId = typeof id === 'string' ? id : null;
+                    let firestoreId = docId;
+                    if (!firestoreId) {
+                        const rec = localAssessments.find(a => a.id === id);
+                        if(rec) firestoreId = rec.firestoreId;
+                    }
+                    if (firestoreId && !firestoreId.startsWith('local_')) {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'assessments', firestoreId));
+                    } else {
+                        localAssessments = localAssessments.filter(a => a.id !== id && a.firestoreId !== firestoreId);
+                        localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
+                    }
+                    window.updateInstructorDashboard();
+                } catch(e) {
+                    console.error('Delete error', e);
+                    alert('Failed to delete. Please check your database permissions.');
+                }
+            } else {
+                localAssessments = localAssessments.filter(a => a.id !== id && a.firestoreId !== id);
+                localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
+                window.updateInstructorDashboard();
             }
         };
 
@@ -1963,9 +2226,9 @@
             const results = localAssessments;
             if(results.length === 0) return alert("No data to export.");
             
-            let csv = "Date,Name,Position,Experience(yrs),Score,Status,Comments\n" + results.map(r => {
+            let csv = "Date,Name,Email,Position,Experience(yrs),Score,Status,Comments\n" + results.map(r => {
                 const commentStr = r.comment ? r.comment.replace(/"/g, '""') : '';
-                return `"${r.date}","${r.name}","${r.position || ''}",${r.exp},${r.score},"${r.passed ? 'Pass' : 'Fail'}","${commentStr}"`;
+                return `"${r.date}","${r.name}","${r.email || ''}","${r.position || ''}",${r.exp},${r.score},"${r.passed ? 'Pass' : 'Fail'}","${commentStr}"`;
             }).join("\n");
             
             const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8," + csv); link.download = `Group_Analytics.csv`;
