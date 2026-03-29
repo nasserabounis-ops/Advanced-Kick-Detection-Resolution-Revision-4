@@ -1,92 +1,156 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth snap-y snap-mandatory">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nasser AboYounes | WCI & Well Control Tech Advisor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf library for Save As PDF functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Code Protection Deterrents -->
+    <script>
+        // Disable Right-Click (Context Menu)
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Disable common Developer Tools keyboard shortcuts
+        document.onkeydown = function(e) {
+            // F12
+            if (e.keyCode === 123) return false;
+            // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) return false;
+            // Ctrl+U (View Source)
+            if (e.ctrlKey && e.keyCode === 85) return false;
+            // Ctrl+S (Save Page)
+            if (e.ctrlKey && e.keyCode === 83) return false;
+        };
+    </script>
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
-        
-        /* Snap constraints */
-        html { scroll-padding-top: 64px; } /* Accounts for sticky nav */
-        .snap-section { scroll-snap-align: start; min-height: calc(100vh - 64px); display: flex; flex-direction: column; justify-content: center; }
+        html { scroll-padding-top: 64px; }
+        .snap-section { min-height: calc(100vh - 64px); display: flex; flex-direction: column; justify-content: center; padding-top: 4rem; padding-bottom: 4rem; }
         
         .chart-container { position: relative; width: 100%; max-width: 800px; margin: 0 auto; height: 50vh; max-height: 400px; min-height: 300px; }
         .mini-chart-container { position: relative; width: 100%; height: 250px; }
         .radar-chart-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto; height: 300px; }
-        #well-simulator-container { position: relative; width: 100%; max-width: 350px; margin: 0 auto; height: 450px; background-color: #cbd5e1; border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 4px 6px -1px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
+        #well-simulator-container { position: relative; width: 100%; max-width: 350px; margin: 0 auto; height: 450px; background-color: #cbd5e1; border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .nav-link.active { color: #0284c7; border-bottom: 2px solid #0284c7; }
         
-        /* Enhanced Flip Cards with Hover Scaling */
-        .flip-card { perspective: 1000px; height: 250px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .flip-card:hover { transform: scale(1.05) translateY(-10px); z-index: 10; }
-        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); border-radius: 0.75rem; }
-        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
-        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .flip-card-front { background-color: white; border: 1px solid #e2e8f0; }
-        .flip-card-back { background-color: #0f172a; color: white; transform: rotateY(180deg); }
-        
         .toggle-checkbox:checked { right: 0; border-color: #10b981; }
         .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
         .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
         .toggle-label { width: 3rem; height: 1.5rem; background-color: #cbd5e1; border-radius: 9999px; transition: all 0.3s; }
-        .custom-checkbox { width: 1.25rem; height: 1.25rem; border-radius: 0.25rem; border: 2px solid #cbd5e1; appearance: none; outline: none; cursor: pointer; transition: all 0.2s; position: relative; flex-shrink: 0; }
-        .custom-checkbox:checked { background-color: #f43f5e; border-color: #f43f5e; }
-        .custom-checkbox.early-check:checked { background-color: #fbbf24; border-color: #fbbf24; }
-        .custom-checkbox:checked::after { content: '✔'; position: absolute; color: white; font-size: 0.8rem; left: 50%; top: 50%; transform: translate(-50%, -50%); }
         .def-btn { border-left: 4px solid transparent; }
         .def-btn.active-def { background-color: #f0f9ff; color: #0284c7; border-left-color: #0ea5e9; font-weight: 700; }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         
-        /* CSS Animations */
+        /* General Animations */
         @keyframes fluidDrop { 0%, 100% { height: 100%; } 50% { height: 40%; } }
         @keyframes pipeMove { 0%, 100% { transform: translate(-50%, 0); } 25% { transform: translate(-50%, 25%); } 75% { transform: translate(-50%, -25%); } }
         @keyframes pipePullOut { 0% { transform: translate(-50%, 20px); } 100% { transform: translate(-50%, -40px); } }
-        @keyframes pipeRunIn { 0% { transform: translate(-50%, -40px); } 100% { transform: translate(-50%, 20px); } }
         @keyframes tankDrop { 0% { height: 100%; } 100% { height: 60%; } }
-        @keyframes tilt { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(25deg); } }
         @keyframes leakRight { 0% { width: 0; opacity: 1; } 50% { width: 24px; opacity: 1; } 100% { width: 32px; opacity: 0; } }
         @keyframes pulsePressure { 0%, 100% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 10px #e11d48; } 50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 20px #be123c; } }
-        @keyframes bubbleRise { 0% { bottom: -10%; transform: scale(0.5); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { bottom: 110%; transform: scale(3); opacity: 0; } }
-        @keyframes balloonBreathe { 0%, 100% { width: 40px; } 50% { width: 60px; background-color: #38bdf8; } }
         @keyframes flowDown { 0% { top: -20px; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        @keyframes geyserErupt { 0% { height: 0; opacity: 0; } 20% { height: 60px; opacity: 1; } 80% { height: 80px; opacity: 1; } 100% { height: 100px; opacity: 0; } }
-        @keyframes permFlow { 0% { height: 0%; opacity: 0.8; } 50% { height: 100%; opacity: 0.8; } 100% { height: 100%; opacity: 0; } }
         @keyframes rockCrack { 0%, 100% { width: 0px; opacity: 0; } 20%, 80% { width: 16px; opacity: 1; } }
         @keyframes chokeRestrict { 0%, 100% { transform: translateY(0); opacity: 0.2; } 50% { transform: translateY(15px); opacity: 1; } }
-        @keyframes pulseFriction { 0%, 100% { background-color: #ef4444; opacity: 0.5; box-shadow: 0 0 0px #ef4444; } 50% { background-color: #b91c1c; opacity: 1; box-shadow: 0 0 15px #ef4444; } }
         
+        /* Dynamic Expanding Gas Bubble Animation */
+        @keyframes bubbleRise { 
+            0% { bottom: -20px; transform: translateX(0px) scale(0.5); opacity: 0; } 
+            20% { opacity: 0.8; } 
+            50% { transform: translateX(15px) scale(1.5); } 
+            80% { opacity: 0.8; transform: translateX(-15px) scale(2.5); } 
+            100% { bottom: 120%; transform: translateX(0px) scale(4); opacity: 0; } 
+        }
+
         .anim-fluid-drop { animation: fluidDrop 4s ease-in-out infinite; }
         .anim-pipe-move { animation: pipeMove 2.5s ease-in-out infinite; }
         .anim-pipe-pull { animation: pipePullOut 3s ease-out infinite; }
-        .anim-pipe-run { animation: pipeRunIn 3s ease-in infinite; }
         .anim-tank-drop { animation: tankDrop 3s ease-out infinite; transform-origin: bottom; }
-        .anim-tilt { animation: tilt 3s ease-in-out infinite; }
         .anim-leak-right { animation: leakRight 2s ease-out infinite; }
         .anim-pulse-pressure { animation: pulsePressure 1.5s infinite; }
-        .anim-bubble-1 { animation: bubbleRise 2s ease-in infinite; }
-        .anim-bubble-2 { animation: bubbleRise 2.5s ease-in infinite 0.5s; }
-        .anim-bubble-3 { animation: bubbleRise 1.8s ease-in infinite 0.2s; }
-        .anim-balloon { animation: balloonBreathe 4s ease-in-out infinite; }
         .anim-flow-down { animation: flowDown 1.5s linear infinite; }
-        .anim-geyser { animation: geyserErupt 1.2s ease-out infinite; transform-origin: bottom; }
-        .anim-perm-flow { animation: permFlow 3s ease-in-out infinite; }
         .anim-rock-crack { animation: rockCrack 3s ease-in-out infinite; }
         .anim-choke-restrict { animation: chokeRestrict 1.5s ease-in-out infinite; }
-        .anim-pulse-friction { animation: pulseFriction 1.5s ease-in-out infinite; }
+
+        .anim-bubble-1 { animation: bubbleRise 3s ease-in infinite; }
+        .anim-bubble-2 { animation: bubbleRise 4s ease-in infinite 0.5s; }
+        .anim-bubble-3 { animation: bubbleRise 2.5s ease-in infinite 0.2s; }
+
+        /* SVG Simulator Specific Animations */
+        @keyframes svgFlowDown { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
+        @keyframes svgFlowUp { 0% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 20; } }
+        @keyframes pulseArrow { 0%, 100% { opacity: 0.3; transform: scaleX(0.9); } 50% { opacity: 1; transform: scaleX(1.1); } }
+        @keyframes fracOpen { 0%, 100% { stroke-width: 2; opacity: 0.7; } 50% { stroke-width: 4; opacity: 1; stroke: #38bdf8; } }
+        @keyframes fracClose { 0%, 100% { stroke-width: 1; opacity: 0.4; } 50% { stroke-width: 2; opacity: 0.8; stroke: #f43f5e; } }
         
-        @media print { body * { visibility: hidden; } #report-modal, #report-modal *, #group-report-modal, #group-report-modal * { visibility: visible; } #report-modal, #group-report-modal { position: absolute; left: 0; top: 0; width: 100%; min-height: 100vh; background: white; z-index: 9999; } #report-modal-content, #group-report-modal-content { box-shadow: none; border: none; max-height: none; overflow: visible; } .no-print { display: none !important; } }
+        .flow-down-active { stroke-dasharray: 5 5; animation: svgFlowDown 0.5s linear infinite; }
+        .flow-up-active { stroke-dasharray: 5 5; animation: svgFlowUp 0.5s linear infinite; }
+        .flow-up-fast { stroke-dasharray: 8 8; animation: svgFlowUp 0.2s linear infinite; }
+        
+        .frac-state-open path { animation: fracOpen 2s ease-in-out infinite; }
+        .frac-state-closing path { animation: fracClose 2s ease-in-out infinite; }
+        
+        .arrow-pulse { animation: pulseArrow 1s ease-in-out infinite; transform-origin: center; }
+        .arrow-pulse-fast { animation: pulseArrow 0.4s ease-in-out infinite; transform-origin: center; }
+
+        /* Print Mode Fixes */
+        .pdf-mode { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: auto !important; max-height: none !important; min-height: 100vh !important; overflow: visible !important; background-color: white !important; z-index: 99999 !important; border: none !important; box-shadow: none !important; transform: none !important; border-radius: 0 !important; }
+        .pdf-mode * { overflow: visible !important; max-height: none !important; height: auto !important; }
+        .pdf-mode .no-print { display: none !important; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            html, body { height: auto !important; min-height: auto !important; overflow: visible !important; background-color: white !important; color: black !important; }
+            body > * { display: none !important; }
+            body > .print-container:not(.hidden) { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: auto !important; min-height: auto !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; background: white !important; }
+            .print-container > div { display: block !important; position: static !important; width: 100% !important; max-width: 100% !important; height: auto !important; max-height: none !important; min-height: auto !important; overflow: visible !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; transform: none !important; }
+            
+            /* FORCE ALL LISTS & SCROLL BOXES TO FULLY EXPAND */
+            .print-container:not(.hidden) .custom-scroll, 
+            .print-container:not(.hidden) .overflow-y-auto, 
+            .print-container:not(.hidden) .overflow-x-auto, 
+            .print-container:not(.hidden) .flex-grow, 
+            .print-container:not(.hidden) .max-h-[90vh], 
+            .print-container:not(.hidden) .print-expand-list, 
+            .print-container:not(.hidden) .max-h-40,
+            .print-container:not(.hidden) #rep-wrong-answers { 
+                overflow: visible !important; 
+                height: auto !important; 
+                max-height: none !important; 
+                display: block !important; 
+                flex: none !important; 
+            }
+            
+            .no-print { display: none !important; }
+            canvas { max-width: 100% !important; height: auto !important; page-break-inside: avoid !important; }
+            .page-break-before { page-break-before: always !important; display: block; }
+            .page-break-inside-avoid { page-break-inside: avoid !important; display: block; }
+            * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen relative select-none">
+    <!-- CUSTOM MODAL -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/90 z-[999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full text-center">
+            <h3 id="custom-modal-title" class="text-xl font-bold text-slate-900 mb-2">Notice</h3>
+            <p id="custom-modal-message" class="text-slate-600 mb-6 font-medium"></p>
+            <div id="custom-modal-actions" class="flex justify-center gap-3"></div>
+        </div>
+    </div>
+
+    <!-- MAIN NAVIGATION -->
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -95,48 +159,38 @@
                     <span class="font-bold text-xl tracking-tight text-slate-800">Nasser <span class="text-sky-600">AboYounes</span> <span class="hidden lg:inline-block text-slate-500 font-normal text-sm ml-2">| WCI & Well Control Tech Advisor</span></span>
                 </div>
                 <div class="hidden xl:flex items-center space-x-4 overflow-x-auto custom-scroll">
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('resources')">Resources</button>
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('definitions')">Definitions</button>
-                    <button class="nav-link active font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('dashboard')">Dashboard</button>
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('physics')">1. Physics</button>
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('causes')">2. Causes</button>
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('indicators')">3. Detection</button>
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('protocol')">4. Protocol</button>
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('kill-math')">5. Kill Math</button>
-                    <button class="nav-link font-bold text-sm text-emerald-600 hover:text-emerald-800 transition-colors py-5 whitespace-nowrap" onclick="scrollToSection('assessment')">6. Assessment</button>
-                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap flex items-center gap-1" onclick="scrollToSection('about')"><span>👤</span> About Me</button>
-                    <button class="nav-link font-bold text-sm text-indigo-600 hover:text-indigo-800 transition-colors py-5 whitespace-nowrap flex items-center gap-1" onclick="scrollToSection('instructor')"><span>🔒</span> Group Analytics</button>
+                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('resources')">Resources</button>
+                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('definitions')">Definitions</button>
+                    <button class="nav-link active font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('physics')">1. Physics</button>
+                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('causes')">2. Causes</button>
+                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('indicators')">3. Detection</button>
+                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('protocol')">4. Protocol</button>
+                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('kill-math')">5. Kill Math</button>
+                    <button class="nav-link font-bold text-sm text-emerald-600 hover:text-emerald-800 transition-colors py-5 whitespace-nowrap" onclick="window.scrollToSection('assessment')">6. Assessment</button>
+                    <button class="nav-link font-medium text-sm text-slate-600 hover:text-sky-600 transition-colors py-5 whitespace-nowrap flex items-center gap-1" onclick="window.scrollToSection('about')"><span>👤</span> About Me</button>
+                    <button class="nav-link font-bold text-sm text-indigo-600 hover:text-indigo-800 transition-colors py-5 whitespace-nowrap flex items-center gap-1" onclick="window.openInstructorModal()"><span>🔒</span> Group Analytics</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="flex-grow">
-        <!-- Header Section -->
-        <header class="snap-section bg-slate-950 text-white relative overflow-hidden no-print">
-            <!-- Dynamic Wellbore Animation Background -->
+        <!-- HEADER -->
+        <header class="snap-section bg-slate-950 text-white relative overflow-hidden no-print pt-20">
             <div class="absolute inset-0 z-0 flex justify-center overflow-hidden">
-                <!-- Side Formations -->
                 <div class="absolute left-0 w-1/2 h-full bg-amber-900/10 border-r border-amber-800/30"></div>
                 <div class="absolute right-0 w-1/2 h-full bg-amber-900/10 border-l border-amber-800/30"></div>
-                
-                <!-- Central Wellbore -->
                 <div class="w-32 md:w-64 h-full bg-slate-800 border-x-4 border-slate-700 relative shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
-                    <!-- Mud flowing down -->
                     <div class="absolute w-full h-full bg-sky-500/5 opacity-50 anim-flow-down"></div>
-                    
-                    <!-- Dynamic Bubbles (Kicks) Rising -->
-                    <div class="absolute w-4 h-4 bg-white/40 rounded-full anim-bubble-1 blur-[1px]" style="left: 20%; animation-duration: 3s;"></div>
-                    <div class="absolute w-8 h-8 bg-white/20 rounded-full anim-bubble-2 blur-[2px]" style="left: 50%; animation-duration: 4.5s;"></div>
-                    <div class="absolute w-3 h-3 bg-white/50 rounded-full anim-bubble-3" style="left: 75%; animation-duration: 2.2s;"></div>
-                    <div class="absolute w-5 h-5 bg-white/30 rounded-full anim-bubble-1 blur-[1px]" style="left: 30%; animation-duration: 3.8s; animation-delay: 1.5s;"></div>
-                    <div class="absolute w-10 h-10 bg-white/10 rounded-full anim-bubble-2 blur-[3px]" style="left: 65%; animation-duration: 5.5s; animation-delay: 0.8s;"></div>
-                    <div class="absolute w-6 h-6 bg-white/20 rounded-full anim-bubble-3 blur-[1px]" style="left: 45%; animation-duration: 3.1s; animation-delay: 2.1s;"></div>
-                    <div class="absolute w-4 h-4 bg-white/40 rounded-full anim-bubble-1 blur-[1px]" style="left: 15%; animation-duration: 2.9s; animation-delay: 3s;"></div>
-                    <div class="absolute w-7 h-7 bg-white/25 rounded-full anim-bubble-2 blur-[2px]" style="left: 85%; animation-duration: 4.2s; animation-delay: 1.2s;"></div>
+                    <div class="absolute w-4 h-4 bg-white/40 rounded-full anim-bubble-1 blur-[1px]" style="left: 20%;"></div>
+                    <div class="absolute w-8 h-8 bg-white/20 rounded-full anim-bubble-2 blur-[2px]" style="left: 50%;"></div>
+                    <div class="absolute w-3 h-3 bg-white/50 rounded-full anim-bubble-3" style="left: 75%;"></div>
+                    <div class="absolute w-5 h-5 bg-white/30 rounded-full anim-bubble-1 blur-[1px]" style="left: 30%; animation-delay: 1.5s;"></div>
+                    <div class="absolute w-10 h-10 bg-white/10 rounded-full anim-bubble-2 blur-[3px]" style="left: 65%; animation-delay: 0.8s;"></div>
+                    <div class="absolute w-6 h-6 bg-white/20 rounded-full anim-bubble-3 blur-[1px]" style="left: 45%; animation-delay: 2.1s;"></div>
+                    <div class="absolute w-4 h-4 bg-white/40 rounded-full anim-bubble-1 blur-[1px]" style="left: 15%; animation-delay: 3s;"></div>
+                    <div class="absolute w-7 h-7 bg-white/25 rounded-full anim-bubble-2 blur-[2px]" style="left: 85%; animation-delay: 1.2s;"></div>
                 </div>
-
-                <!-- Abstract grid overlay and gradient fade for text readability -->
                 <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 40px 40px;"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-transparent"></div>
             </div>
@@ -154,7 +208,7 @@
             </div>
         </header>
 
-        <!-- Learning Resources -->
+        <!-- RESOURCES -->
         <section id="resources" class="snap-section px-4 bg-slate-50 no-print">
             <div class="max-w-7xl mx-auto w-full">
                 <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 md:p-12 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-8">
@@ -167,7 +221,6 @@
                             <a href="https://drive.google.com/drive/folders/1McQn7EYrk179UFjViMZ_tgSj602VAfa2?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-sm text-sm whitespace-nowrap shrink-0 w-full sm:w-auto">
                                 <span>🔗</span> Access Google Drive
                             </a>
-                            
                             <div class="xl:border-l xl:border-indigo-200 xl:pl-6 text-xs text-indigo-800/80 font-medium leading-relaxed max-w-xl text-center xl:text-left">
                                 <strong class="block text-indigo-900 mb-1 flex items-center justify-center xl:justify-start gap-1"><span class="text-sm">©</span> Nasser AboYounes. All rights reserved.</strong>
                                 This intellectual property and associated training materials are provided exclusively for educational and operational reference. Unauthorized reproduction, distribution, or commercial use is strictly prohibited without prior written consent.
@@ -178,36 +231,36 @@
             </div>
         </section>
 
-        <!-- DEFINITIONS SECTION (Interactive List) -->
+        <!-- 1. DEFINITIONS -->
         <section id="definitions" class="snap-section px-4 bg-slate-50 border-b border-slate-200 no-print">
             <div class="max-w-7xl mx-auto w-full">
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3"><span class="text-4xl">📖</span> Core Terminology & Physics</h2>
                     <p class="text-slate-600 leading-relaxed">Expand the categories below and select a term to explore its definition and visual simulation in compliance with IWCF standards.</p>
                 </div>
-                <div class="flex flex-col lg:flex-row gap-6 items-stretch h-[600px]">
-                    <div class="w-full lg:w-1/3 space-y-3 overflow-y-auto custom-scroll pr-2">
-                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm" open><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Reservoir Rock Properties <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-rock', this)" class="def-btn active-def text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Porosity & Permeability</button></div></details>
-                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Fundamental Pressures <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-hp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Hydrostatic Pressure (HP)</button><button onclick="showDefinition('def-fp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Pore / Formation Pressure</button><button onclick="showDefinition('def-gradients', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Pressure Gradients</button><button onclick="showDefinition('def-frac', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Fracture Pressure</button><button onclick="showDefinition('def-overburden', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Overburden Pressure</button></div></details>
-                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Bottom Hole Pressure (BHP) <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-bhp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Static vs. Dynamic BHP</button><button onclick="showDefinition('def-choke', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Choke vs. Bell Nipple</button></div></details>
-                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Surface Pressure Limits <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-limits', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">MAASP, MASP, & MAWP</button></div></details>
-                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Circulating Friction Losses <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="showDefinition('def-friction', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Friction Losses & APL</button><button onclick="showDefinition('def-distinctions', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Key Distinctions in the System</button></div></details>
+                <div class="flex flex-col lg:flex-row gap-6 items-stretch h-auto lg:h-[600px]">
+                    <div class="w-full lg:w-1/3 space-y-3 overflow-y-auto custom-scroll pr-2 max-h-[400px] lg:max-h-full">
+                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm" open><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Reservoir Rock Properties <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="window.showDefinition('def-rock', this)" class="def-btn active-def text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Porosity & Permeability</button></div></details>
+                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Fundamental Pressures <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="window.showDefinition('def-hp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Hydrostatic Pressure (HP)</button><button onclick="window.showDefinition('def-fp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Pore / Formation Pressure</button><button onclick="window.showDefinition('def-gradients', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Pressure Gradients</button><button onclick="window.showDefinition('def-frac', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Fracture Pressure</button><button onclick="window.showDefinition('def-overburden', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Overburden Pressure</button></div></details>
+                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Bottom Hole Pressure (BHP) <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="window.showDefinition('def-bhp', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Static vs. Dynamic BHP</button><button onclick="window.showDefinition('def-choke', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Choke vs. Bell Nipple</button></div></details>
+                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Surface Pressure Limits <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="window.showDefinition('def-limits', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">MAASP, MASP, & MAWP</button></div></details>
+                        <details class="group bg-white border border-slate-200 rounded-lg shadow-sm"><summary class="font-bold px-5 py-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center text-slate-800 outline-none select-none">Circulating Friction Losses <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span></summary><div class="flex flex-col border-t border-slate-100 bg-slate-50"><button onclick="window.showDefinition('def-friction', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full border-b border-slate-100">Friction Losses & APL</button><button onclick="window.showDefinition('def-distinctions', this)" class="def-btn text-left px-6 py-3 text-sm font-medium hover:bg-sky-50/50 transition-colors w-full">Key Distinctions in the System</button></div></details>
                     </div>
 
-                    <div class="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative h-full">
+                    <div class="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative h-auto min-h-[400px] lg:h-full">
                         <div id="def-rock" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-start custom-scroll overflow-y-auto">
-                            <div class="relative w-32 h-48 bg-amber-900 rounded flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-slate-300"><div class="absolute w-12 h-12 bg-amber-700 rounded-full top-2 left-2 shadow"></div><div class="absolute w-16 h-16 bg-amber-700 rounded-full bottom-2 right-1 shadow"></div><div class="absolute w-10 h-10 bg-amber-700 rounded-full bottom-10 left-4 shadow"></div><div class="absolute w-12 h-12 bg-amber-700 rounded-full top-6 right-2 shadow"></div><div class="absolute w-2 bg-sky-400 opacity-80 anim-perm-flow rounded-full blur-[1px]" style="left:40%; top:0; z-index: 10;"></div></div>
-                            <div class="space-y-4">
+                            <div class="relative w-32 h-48 bg-amber-900 rounded flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-slate-300 mx-auto md:mx-0"><div class="absolute w-12 h-12 bg-amber-700 rounded-full top-2 left-2 shadow"></div><div class="absolute w-16 h-16 bg-amber-700 rounded-full bottom-2 right-1 shadow"></div><div class="absolute w-10 h-10 bg-amber-700 rounded-full bottom-10 left-4 shadow"></div><div class="absolute w-12 h-12 bg-amber-700 rounded-full top-6 right-2 shadow"></div><div class="absolute w-2 bg-sky-400 opacity-80 anim-perm-flow rounded-full blur-[1px]" style="left:40%; top:0; z-index: 10;"></div></div>
+                            <div class="space-y-4 text-center md:text-left w-full">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Reservoir Rock Properties</h3>
                                 <div><strong class="text-sky-700 block">Porosity:</strong><p class="text-sm text-slate-600">The measure of the void (empty) space within a formation rock, expressed as a percentage or fraction of the total bulk volume.</p></div>
-                                <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1"><li><strong>Absolute Porosity:</strong> Ratio of total void space to bulk volume, regardless of connectivity.</li><li><strong>Effective Porosity:</strong> Ratio of interconnected pore space to bulk volume. This is critical for production, as isolated pores cannot flow fluid.</li></ul>
+                                <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1 text-left"><li><strong>Absolute Porosity:</strong> Ratio of total void space to bulk volume, regardless of connectivity.</li><li><strong>Effective Porosity:</strong> Ratio of interconnected pore space to bulk volume. This is critical for production, as isolated pores cannot flow fluid.</li></ul>
                                 <div class="mt-4"><strong class="text-sky-700 block">Permeability (k):</strong><p class="text-sm text-slate-600">A measure of the formation rock's ability to transmit fluids through its interconnected pore spaces. Measured in Darcies or millidarcies (mD).</p></div>
                             </div>
                         </div>
 
                         <div id="def-hp" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
-                            <div class="relative w-32 h-48 bg-slate-100 border-2 border-slate-300 rounded-b-lg flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner"><div class="absolute bottom-0 w-full h-[80%] bg-sky-500"></div><div class="absolute top-[35%] flex flex-col items-center"><div class="w-1.5 h-12 bg-white"></div><div class="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[10px] border-transparent border-t-white"></div></div><div class="absolute bottom-2 text-white font-bold text-xs">HP</div></div>
-                            <div class="space-y-4">
+                            <div class="relative w-32 h-48 bg-slate-100 border-2 border-slate-300 rounded-b-lg flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner mx-auto md:mx-0"><div class="absolute bottom-0 w-full h-[80%] bg-sky-500"></div><div class="absolute top-[35%] flex flex-col items-center"><div class="w-1.5 h-12 bg-white"></div><div class="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[10px] border-transparent border-t-white"></div></div><div class="absolute bottom-2 text-white font-bold text-xs">HP</div></div>
+                            <div class="space-y-4 text-center md:text-left w-full">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2">Pressure Fundamentals</h3>
                                 <div><strong class="text-sky-700 block">Pressure:</strong><p class="text-sm text-slate-600">The force exerted per unit area, typically measured in psi (pounds per square inch) or bar.</p></div>
                                 <div><strong class="text-sky-700 block">Hydrostatic Pressure (HP):</strong><p class="text-sm text-slate-600 mb-2">The pressure exerted by a column of stationary fluid at a specific true vertical depth (TVD). It is entirely dependent on fluid density and vertical height.</p><div class="bg-slate-100 border border-slate-200 p-2 rounded text-sm font-mono text-slate-700 inline-block font-semibold">HP = 0.052 × Mud Weight (ppg) × TVD (ft)</div></div>
@@ -215,8 +268,8 @@
                         </div>
 
                         <div id="def-fp" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
-                            <div class="relative w-32 h-48 bg-amber-900 border-2 border-slate-300 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner"><div class="absolute w-12 h-full bg-slate-300 shadow-lg"></div><div class="absolute left-1 top-[30%] text-rose-400 font-bold text-2xl animate-pulse">→</div><div class="absolute left-1 top-[60%] text-rose-400 font-bold text-2xl animate-pulse">→</div><div class="absolute right-1 top-[40%] text-rose-400 font-bold text-2xl animate-pulse">←</div><div class="absolute right-1 top-[70%] text-rose-400 font-bold text-2xl animate-pulse">←</div></div>
-                            <div>
+                            <div class="relative w-32 h-48 bg-amber-900 border-2 border-slate-300 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner mx-auto md:mx-0"><div class="absolute w-12 h-full bg-slate-300 shadow-lg"></div><div class="absolute left-1 top-[30%] text-rose-400 font-bold text-2xl animate-pulse">→</div><div class="absolute left-1 top-[60%] text-rose-400 font-bold text-2xl animate-pulse">→</div><div class="absolute right-1 top-[40%] text-rose-400 font-bold text-2xl animate-pulse">←</div><div class="absolute right-1 top-[70%] text-rose-400 font-bold text-2xl animate-pulse">←</div></div>
+                            <div class="text-center md:text-left w-full">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Pore Pressure / Formation Pressure</h3>
                                 <p class="text-slate-600 leading-relaxed mb-4">The pressure exerted by the fluids (water, oil, or gas) contained within the pore spaces of the formation rock. It can be categorized as normal, subnormal, or abnormal (overpressured).</p>
                                 <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wider">The Target to Balance</span>
@@ -266,11 +319,11 @@
                         </div>
 
                         <div id="def-frac" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
-                            <div class="relative w-32 h-48 bg-amber-900 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col items-center justify-center">
+                            <div class="relative w-32 h-48 bg-amber-900 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col items-center justify-center mx-auto md:mx-0">
                                 <div class="w-12 h-full bg-sky-500 relative z-10 flex items-center justify-center"><div class="text-white font-bold text-xl anim-pulse-pressure rounded-full px-1">💥</div></div>
                                 <div class="absolute top-[40%] left-0 w-[50%] h-1 bg-sky-400 anim-rock-crack origin-right"></div><div class="absolute top-[70%] right-0 w-[50%] h-1 bg-sky-400 anim-rock-crack origin-left" style="animation-delay: 0.5s"></div>
                             </div>
-                            <div>
+                            <div class="text-center md:text-left w-full">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Fracture Pressure</h3>
                                 <p class="text-slate-600 leading-relaxed mb-4">The pressure at which the formation rock matrix breaks or splits, allowing wellbore fluids to enter the induced fractures. Exceeding this pressure causes severe lost circulation.</p>
                                 <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wider">Upper Operating Limit</span>
@@ -278,11 +331,11 @@
                         </div>
 
                         <div id="def-overburden" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
-                            <div class="relative w-32 h-48 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col">
+                            <div class="relative w-32 h-48 border-2 border-slate-300 rounded flex-shrink-0 overflow-hidden flex flex-col mx-auto md:mx-0">
                                 <div class="h-1/3 bg-slate-300 border-b-2 border-slate-400 w-full flex justify-center items-end pb-1 text-slate-500 font-bold text-lg">↓</div><div class="h-1/3 bg-slate-500 border-b-2 border-slate-600 w-full flex justify-center items-end pb-1 text-slate-700 font-bold text-lg">↓</div><div class="h-1/3 bg-amber-900 w-full flex justify-center items-end pb-1 text-amber-700 font-bold text-lg">↓</div>
                                 <div class="absolute inset-0 flex items-center justify-center opacity-40"><div class="w-2 h-32 bg-slate-800"></div><div class="absolute bottom-6 w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-transparent border-t-slate-800"></div></div>
                             </div>
-                            <div>
+                            <div class="text-center md:text-left w-full">
                                 <h3 class="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Overburden Pressure</h3>
                                 <p class="text-slate-600 leading-relaxed">The pressure exerted by the total weight of the overlying rock matrix and the fluids contained within its pore spaces at a specific depth. It represents the absolute maximum stress at any given point.</p>
                             </div>
@@ -314,7 +367,7 @@
                         </div>
 
                         <div id="def-friction" class="def-panel p-8 h-full flex flex-col md:flex-row gap-8 items-center hidden custom-scroll overflow-y-auto">
-                            <div class="relative w-32 h-64 bg-slate-100 border-2 border-slate-300 rounded-b-xl flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
+                            <div class="relative w-32 h-64 bg-slate-100 border-2 border-slate-300 rounded-b-xl flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner mx-auto md:mx-0">
                                 <div class="absolute bottom-0 w-full h-[90%] bg-sky-500 opacity-50"></div><div class="absolute top-0 w-8 h-[80%] bg-slate-400 border-x-2 border-slate-500"></div><div class="absolute top-[80%] w-10 h-[10%] bg-slate-600 border-x-2 border-slate-700"></div><div class="absolute top-[90%] w-12 h-2 anim-pulse-friction rounded-full"></div><div class="absolute right-2 top-[30%] w-3 h-32 bg-orange-400 opacity-40 blur-[2px] rounded-full"></div><div class="absolute left-2 top-[30%] w-3 h-32 bg-orange-400 opacity-40 blur-[2px] rounded-full"></div>
                             </div>
                             <div class="space-y-4 w-full">
@@ -342,7 +395,7 @@
             </div>
         </section>
 
-        <!-- 1. PHYSICS SECTION (Enhanced with ECD & MPD) -->
+        <!-- 2. PHYSICS SECTION -->
         <section id="physics" class="snap-section px-4 bg-white border-b border-slate-200 no-print">
             <div class="max-w-7xl mx-auto w-full">
                 <div class="max-w-3xl mb-8">
@@ -370,7 +423,7 @@
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
                                 <span class="text-sm font-bold text-slate-700">Mud Pumps (ECD)</span>
                                 <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                                    <input type="checkbox" name="toggle" id="pump-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                                    <input type="checkbox" id="pump-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
                                     <label for="pump-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                                 </div>
                                 <span id="pump-status-text" class="text-sm font-bold text-emerald-600 w-8">ON</span>
@@ -427,7 +480,7 @@
                             </div>
                         </div>
 
-                        <!-- Differential Gauge (New) -->
+                        <!-- Differential Gauge -->
                         <div class="flex flex-col items-center w-full bg-slate-800 p-4 rounded-xl border border-slate-700 transition-colors duration-300" id="gauge-diff-container">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Differential (ΔP)</span>
                             <span class="font-mono text-2xl font-black text-white" id="gauge-diff-text">0 psi</span>
@@ -454,13 +507,13 @@
             </div>
         </section>
 
-        <!-- 2. CAUSES & TRIPPING SECTION -->
+        <!-- 3. CAUSES & TRIPPING SECTION -->
         <section id="causes" class="snap-section px-4 bg-slate-50 border-b border-slate-200 no-print">
             <div class="max-w-7xl mx-auto w-full">
                 <div class="max-w-3xl mb-12">
                     <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3"><span class="text-4xl">🔍</span> The "Big 6" Root Causes</h2>
                     <p class="text-slate-600 text-lg leading-relaxed">
-                        Operational failures or geological surprises cause pressure imbalances. Hover over each card to reveal the mechanisms and prevention strategies.
+                        Operational failures or geological surprises cause pressure imbalances. Hover over over each card to reveal the mechanisms and prevention strategies.
                     </p>
                 </div>
                 
@@ -490,11 +543,11 @@
                         </div>
                     </div>
                     
-                    <div class="flex-shrink-0 w-48 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-end h-64">
+                    <div class="flex-shrink-0 w-48 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-end h-64 mx-auto md:mx-0">
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center block">Trip Out<br>Simulation</span>
                         <div class="flex gap-4 items-end h-32 w-full justify-center">
                             <div class="relative w-8 h-full bg-slate-200 border-x border-slate-300 overflow-hidden"><div class="absolute bottom-0 w-full h-full bg-slate-800 anim-pipe-pull origin-bottom"></div></div>
-                            <div class="relative w-12 h-full bg-slate-100 border-b-4 border-x-2 border-slate-300 rounded-b"><div class="absolute bottom-0 w-full h-full bg-sky-500 anim-tank-drop"></div><div class="absolute right-0 w-2 h-px bg-white top-1/4"></div><div class="absolute right-0 w-2 h-px bg-white top-1/2"></div><div class="absolute right-0 w-2 h-px bg-white top-3/4"></div></div>
+                            <div class="relative w-12 h-full bg-slate-100 border-b-4 border-x-2 border-slate-300 rounded-b"><div class="absolute bottom-0 w-full h-full bg-sky-50 anim-tank-drop"></div><div class="absolute right-0 w-2 h-px bg-white top-1/4"></div><div class="absolute right-0 w-2 h-px bg-white top-1/2"></div><div class="absolute right-0 w-2 h-px bg-white top-3/4"></div></div>
                         </div>
                         <span class="text-[10px] font-bold text-indigo-600 mt-3 text-center block leading-tight">Tank level drops to replace<br>metal volume removed</span>
                     </div>
@@ -502,7 +555,7 @@
             </div>
         </section>
 
-        <!-- 3. INDICATORS SECTION -->
+        <!-- 4. INDICATORS SECTION -->
         <section id="indicators" class="snap-section px-4 bg-white border-b border-slate-200 no-print">
             <div class="max-w-7xl mx-auto w-full">
                 <div class="max-w-3xl mb-12">
@@ -534,11 +587,11 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-8 shadow-sm">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-8 shadow-sm flex flex-col">
                         <h3 class="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2"><span>🕵️‍♂️</span> Onshore Masking Factors</h3>
                         <p class="text-amber-800 text-sm leading-relaxed mb-6">A "False Negative." Routine onshore operations cause fluctuations in pit volume or flow rate that can hide an influx, causing crews to ignore positive indicators.</p>
-                        <ul class="space-y-3">
+                        <ul class="space-y-3 flex-grow">
                             <li class="flex items-start gap-3 bg-white p-3 rounded-lg border border-amber-100 shadow-sm"><span class="text-lg">🔀</span><div><strong class="text-slate-800 text-sm block">Mud Transfers (Active/Reserve)</strong><span class="text-xs text-slate-600">Transferring fluid between pits bypasses total volume tracking.</span></div></li>
                             <li class="flex items-start gap-3 bg-white p-3 rounded-lg border border-amber-100 shadow-sm"><span class="text-lg">⚖️</span><div><strong class="text-slate-800 text-sm block">Mud Additions & Dilution</strong><span class="text-xs text-slate-600">Adding barite/chemicals alters pit levels, masking slow gains from a kick.</span></div></li>
                             <li class="flex items-start gap-3 bg-white p-3 rounded-lg border border-amber-100 shadow-sm"><span class="text-lg">🚿</span><div><strong class="text-slate-800 text-sm block">Pump Start/Stop & Drain Back</strong><span class="text-xs text-slate-600">Flowline drain back and ECD changes cause temporary volume surges in pits.</span></div></li>
@@ -547,13 +600,148 @@
                         <div class="mt-4 bg-amber-100/50 border border-amber-200 p-3 rounded-lg text-xs text-amber-900"><strong class="block mb-1">Important Definitions:</strong><ul class="list-disc pl-4 space-y-1"><li><strong>Drain Back:</strong> Mud draining from the flowline and surface equipment back into the active pits after pumps are stopped, causing a temporary, false pit volume increase.</li><li><strong>Flow Return:</strong> The normal return of mud from the wellbore. Once pumps are stopped and drain back completes, flow returns must cease. Any continuous flow return is a positive kick indicator.</li></ul></div>
                     </div>
 
-                    <div class="bg-sky-50 border border-sky-200 rounded-2xl p-8 shadow-sm flex flex-col">
-                        <h3 class="text-xl font-bold text-sky-900 mb-2 flex items-center gap-2"><span>🎈</span> Ballooning vs. True Kick</h3>
-                        <p class="text-sky-800 text-sm leading-relaxed mb-6"><strong>Ballooning</strong> occurs when dynamic ECD forces mud into formation micro-fractures. When pumps turn off, rock squeezes mud back out. <br><br><em>Rule: Ballooning flow is FINITE (slows down and stops). Kick flow is CONTINUOUS.</em></p>
-                        <div class="flex-grow flex items-end justify-center gap-8 bg-white p-4 rounded-xl border border-sky-100 shadow-inner mt-auto">
-                            <div class="flex flex-col items-center"><span class="text-xs font-bold text-slate-500 mb-2 uppercase">Ballooning</span><div class="relative w-16 h-32 border-x-4 border-slate-400 bg-sky-100 flex items-center justify-center anim-balloon"><span class="text-[10px] text-sky-800 font-bold text-center leading-tight">Mud In<br>↔<br>Mud Out</span></div><span class="text-xs font-bold text-emerald-600 mt-2">Finite Flow</span></div>
-                            <div class="w-px h-32 bg-slate-200"></div>
-                            <div class="flex flex-col items-center"><span class="text-xs font-bold text-slate-500 mb-2 uppercase">True Kick</span><div class="relative w-16 h-32 border-x-4 border-slate-400 bg-rose-100 overflow-hidden"><div class="absolute bottom-0 w-full h-1/2 bg-rose-500 opacity-50"></div><div class="absolute left-1/2 -ml-1 w-2 h-2 bg-rose-600 rounded-full anim-bubble-1"></div><div class="absolute left-1/4 w-3 h-3 bg-rose-600 rounded-full anim-bubble-2"></div><div class="absolute left-3/4 w-2 h-2 bg-rose-600 rounded-full anim-bubble-3"></div></div><span class="text-xs font-bold text-rose-600 mt-2">Continuous Flow</span></div>
+                    <div class="bg-sky-50 border border-sky-200 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col">
+                        <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mb-4 gap-4">
+                            <h3 class="text-xl font-bold text-sky-900 flex items-center gap-2"><span>🎈</span> Ballooning vs. True Kick Simulator</h3>
+                            <!-- INTERACTIVE PUMP CONTROLS -->
+                            <div class="flex items-center gap-3 bg-white p-2 rounded-xl border border-sky-200 shadow-sm">
+                                <span class="font-bold text-slate-600 text-xs uppercase tracking-wider">Mud Pumps</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="mini-pump-toggle" class="sr-only peer" onchange="window.toggleMiniSimulator()" checked>
+                                    <div class="w-11 h-6 bg-rose-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                </label>
+                                <span id="mini-pump-status" class="font-bold text-emerald-600 text-sm w-8 text-center">ON</span>
+                            </div>
+                        </div>
+                        <p class="text-sky-800 text-sm leading-relaxed mb-6"><strong>Ballooning</strong> occurs when dynamic ECD forces mud into formation micro-fractures. When pumps turn off, the rock squeezes the mud back out. <br><em>Rule: Ballooning flow is FINITE. Kick flow is CONTINUOUS.</em></p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 flex-grow">
+                            <!-- Ballooning Simulator -->
+                            <div class="bg-white p-4 rounded-xl border border-sky-100 shadow-inner flex flex-col items-center relative overflow-hidden">
+                                <span class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest z-10 text-center">Wellbore Ballooning</span>
+                                
+                                <div class="absolute top-10 w-full flex justify-center z-10 font-bold text-[10px] sm:text-xs text-center px-2">
+                                    <span id="balloon-status" class="bg-sky-100/90 backdrop-blur px-2 py-1 rounded border border-sky-200 shadow-sm transition-colors duration-300"><span class="text-sky-700 font-black">PUMPS ON:</span> High ECD forces mud into micro-fractures (Losses).</span>
+                                </div>
+
+                                <!-- SVG BALLOONING -->
+                                <svg viewBox="0 0 200 250" class="w-full h-56 mt-8 border-2 border-slate-400 bg-[#d8aa72] rounded overflow-hidden shadow-md">
+                                    <!-- Rig & Top background -->
+                                    <rect x="0" y="0" width="200" height="40" fill="#dbeafe"/>
+                                    <!-- Derrick (simplified) -->
+                                    <path d="M 90 40 L 95 0 M 110 40 L 105 0 M 90 30 L 110 30 M 92 15 L 108 15 M 95 0 L 105 0" stroke="#0f172a" stroke-width="2"/>
+                                    
+                                    <!-- Casing -->
+                                    <rect x="80" y="40" width="40" height="50" fill="#cbd5e1" stroke="#334155" stroke-width="2"/> 
+                                    <rect x="70" y="40" width="60" height="20" fill="#94a3b8" stroke="#334155" stroke-width="2"/> <!-- BOP simplified -->
+                                    
+                                    <!-- Open hole -->
+                                    <rect x="82" y="90" width="36" height="160" fill="#1e293b"/> 
+                                    
+                                    <!-- Drill Pipe -->
+                                    <rect x="94" y="0" width="12" height="230" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/> 
+                                    <rect x="90" y="230" width="20" height="15" fill="#ea580c"/> <!-- Drill Bit -->
+                                    
+                                    <!-- Circulation Mud Down -->
+                                    <g id="balloon-circ-down">
+                                        <line x1="100" y1="10" x2="100" y2="225" stroke="#0ea5e9" stroke-width="4" class="flow-down-active"/>
+                                    </g>
+                                    <!-- Circulation Mud Up -->
+                                    <g id="balloon-circ-up">
+                                        <line x1="88" y1="240" x2="88" y2="40" stroke="#0ea5e9" stroke-width="4" class="flow-up-active"/>
+                                        <line x1="112" y1="240" x2="112" y2="40" stroke="#0ea5e9" stroke-width="4" class="flow-up-active"/>
+                                    </g>
+
+                                    <!-- Fluid in Fractures -->
+                                    <g id="balloon-fluid" class="transition-opacity duration-1000 frac-state-open" opacity="1">
+                                        <path d="M 82 150 Q 50 140 20 160 Q 40 170 82 160" fill="none" stroke="#38bdf8" stroke-width="4"/>
+                                        <path d="M 118 160 Q 150 170 180 150 Q 160 140 118 150" fill="none" stroke="#38bdf8" stroke-width="4"/>
+                                        <path d="M 82 180 Q 40 190 10 170" fill="none" stroke="#38bdf8" stroke-width="4"/>
+                                        <path d="M 118 190 Q 160 200 190 180" fill="none" stroke="#38bdf8" stroke-width="4"/>
+                                    </g>
+                                    
+                                    <!-- Losses Arrow (Pumps On) -->
+                                    <g id="balloon-arrows-out" class="arrow-pulse" style="display:block;">
+                                        <path d="M 75 155 L 45 150" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+                                        <path d="M 75 175 L 45 180" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+                                        <path d="M 125 155 L 155 150" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+                                        <path d="M 125 175 L 155 180" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+                                    </g>
+
+                                    <!-- Gain Arrow (Pumps Off) -->
+                                    <g id="balloon-arrows-in" class="arrow-pulse" style="display:none;">
+                                        <path d="M 45 150 L 75 155" stroke="#f43f5e" stroke-width="3" fill="none" marker-end="url(#arrow-red)"/>
+                                        <path d="M 45 180 L 75 175" stroke="#f43f5e" stroke-width="3" fill="none" marker-end="url(#arrow-red)"/>
+                                        <path d="M 155 150 L 125 155" stroke="#f43f5e" stroke-width="3" fill="none" marker-end="url(#arrow-red)"/>
+                                        <path d="M 155 180 L 125 175" stroke="#f43f5e" stroke-width="3" fill="none" marker-end="url(#arrow-red)"/>
+                                        <!-- small arrows going up inside the annulus indicating finite return -->
+                                        <line x1="88" y1="150" x2="88" y2="100" stroke="#f43f5e" stroke-width="3" class="flow-up-active"/>
+                                        <line x1="112" y1="150" x2="112" y2="100" stroke="#f43f5e" stroke-width="3" class="flow-up-active"/>
+                                    </g>
+                                    
+                                    <defs>
+                                        <marker id="arrow-blue" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><polygon points="0 0, 5 2.5, 0 5" fill="#38bdf8"/></marker>
+                                        <marker id="arrow-red" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><polygon points="0 0, 5 2.5, 0 5" fill="#f43f5e"/></marker>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <!-- True Kick Simulator -->
+                            <div class="bg-white p-4 rounded-xl border border-sky-100 shadow-inner flex flex-col items-center relative overflow-hidden">
+                                <span class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest z-10 text-center">True Kick</span>
+                                
+                                <div class="absolute top-10 w-full flex justify-center z-10 font-bold text-[10px] sm:text-xs text-center px-2">
+                                    <span id="kick-status" class="bg-rose-100/90 backdrop-blur px-2 py-1 rounded border border-rose-200 shadow-sm transition-colors duration-300"><span class="text-sky-700 font-black">PUMPS ON:</span> Influx continues, but might be masked by circulation.</span>
+                                </div>
+
+                                <!-- SVG KICK -->
+                                <svg viewBox="0 0 200 250" class="w-full h-56 mt-8 border-2 border-slate-400 bg-[#d8aa72] rounded overflow-hidden shadow-md">
+                                    <!-- Rig & Top background -->
+                                    <rect x="0" y="0" width="200" height="40" fill="#dbeafe"/>
+                                    <!-- Derrick -->
+                                    <path d="M 90 40 L 95 0 M 110 40 L 105 0 M 90 30 L 110 30 M 92 15 L 108 15 M 95 0 L 105 0" stroke="#0f172a" stroke-width="2"/>
+                                    
+                                    <!-- Casing -->
+                                    <rect x="80" y="40" width="40" height="50" fill="#cbd5e1" stroke="#334155" stroke-width="2"/> 
+                                    <rect x="70" y="40" width="60" height="20" fill="#94a3b8" stroke="#334155" stroke-width="2"/> <!-- BOP -->
+                                    
+                                    <!-- Open hole -->
+                                    <rect x="82" y="90" width="36" height="160" fill="#1e293b"/> 
+                                    
+                                    <!-- Drill Pipe -->
+                                    <rect x="94" y="0" width="12" height="230" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/> 
+                                    <rect x="90" y="230" width="20" height="15" fill="#ea580c"/> <!-- Drill Bit -->
+                                    
+                                    <!-- Circulation Mud Down -->
+                                    <g id="kick-circ-down">
+                                        <line x1="100" y1="10" x2="100" y2="225" stroke="#0ea5e9" stroke-width="4" class="flow-down-active"/>
+                                    </g>
+                                    <!-- Circulation Mud Up -->
+                                    <g id="kick-circ-up">
+                                        <line x1="88" y1="240" x2="88" y2="40" stroke="#0ea5e9" stroke-width="4" class="flow-up-active"/>
+                                        <line x1="112" y1="240" x2="112" y2="40" stroke="#0ea5e9" stroke-width="4" class="flow-up-active"/>
+                                    </g>
+
+                                    <!-- Kick fluid in annulus -->
+                                    <rect id="kick-fluid" x="82" y="90" width="36" height="160" fill="#f43f5e" class="transition-opacity duration-1000" opacity="0.3"/>
+                                    
+                                    <!-- Kick Influx Arrows (Pumps ON) - Masked/Moderate -->
+                                    <g id="kick-arrows-on" class="arrow-pulse" style="display:block;">
+                                        <path d="M 40 230 L 75 230" stroke="#f43f5e" stroke-width="3" fill="none" marker-end="url(#arrow-red)"/>
+                                        <path d="M 160 230 L 125 230" stroke="#f43f5e" stroke-width="3" fill="none" marker-end="url(#arrow-red)"/>
+                                    </g>
+
+                                    <!-- Kick Influx Arrows (Pumps OFF) - Heavy/Fast -->
+                                    <g id="kick-arrows-off" class="arrow-pulse-fast" style="display:none;">
+                                        <!-- Formation to annulus -->
+                                        <path d="M 30 200 L 75 200 M 30 220 L 75 220 M 30 240 L 75 240" stroke="#f43f5e" stroke-width="5" fill="none" marker-end="url(#arrow-red)"/>
+                                        <path d="M 170 200 L 125 200 M 170 220 L 125 220 M 170 240 L 125 240" stroke="#f43f5e" stroke-width="5" fill="none" marker-end="url(#arrow-red)"/>
+                                        <!-- Massive flow up annulus -->
+                                        <line x1="88" y1="240" x2="88" y2="40" stroke="#f43f5e" stroke-width="6" class="flow-up-fast"/>
+                                        <line x1="112" y1="240" x2="112" y2="40" stroke="#f43f5e" stroke-width="6" class="flow-up-fast"/>
+                                    </g>
+                                </svg>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -570,7 +758,7 @@
             </div>
         </section>
 
-        <!-- 4. PROTOCOL SECTION & API DRILLS -->
+        <!-- 5. PROTOCOL SECTION -->
         <section id="protocol" class="snap-section px-4 bg-slate-900 text-white no-print">
             <div class="max-w-7xl mx-auto w-full">
                 <div class="text-center mb-12 max-w-4xl mx-auto">
@@ -636,7 +824,7 @@
             </div>
         </section>
 
-        <!-- 5. KILL MATH SECTION -->
+        <!-- 6. KILL MATH SECTION -->
         <section id="kill-math" class="snap-section px-4 bg-slate-50 border-b border-slate-200 no-print">
             <div class="max-w-7xl mx-auto w-full">
                 <div class="max-w-3xl mb-12">
@@ -676,7 +864,7 @@
             </div>
         </section>
 
-        <!-- 6. ASSESSMENT SECTION (50 Questions) -->
+        <!-- 7. ASSESSMENT SECTION -->
         <section id="assessment" class="snap-section px-4 bg-slate-900 text-white no-print">
             <div class="max-w-4xl mx-auto w-full">
                 <div class="text-center mb-10">
@@ -772,7 +960,7 @@
             </div>
         </section>
 
-        <!-- 8. ABOUT THE AUTHOR (FANCY) -->
+        <!-- 8. ABOUT THE AUTHOR -->
         <section id="about" class="snap-section py-24 px-4 bg-slate-900 border-t border-slate-800 no-print relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400"></div>
             <div class="absolute -top-40 -right-40 w-96 h-96 bg-sky-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-30"></div>
@@ -808,10 +996,17 @@
             </div>
         </section>
 
-        <!-- 9. SECURE GROUP ANALYTICS PORTAL -->
-        <section id="instructor" class="snap-section py-20 px-4 bg-slate-50 border-t border-slate-200 no-print">
-            <div class="max-w-7xl mx-auto w-full">
-                
+    </main>
+
+    <!-- 9. SECURE GROUP ANALYTICS PORTAL MODAL -->
+    <div id="instructor-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto no-print">
+        <div class="bg-white w-full max-w-7xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto relative">
+            <div class="bg-slate-900 p-6 flex justify-between items-center shrink-0">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>🔒</span> Group Analytics Portal</h2>
+                <button onclick="window.closeInstructorModal()" class="text-slate-400 hover:text-white transition-colors text-3xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 sm:p-8 overflow-y-auto custom-scroll flex-grow bg-slate-50">
                 <div id="instructor-locked" class="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm max-w-lg mx-auto">
                     <div class="text-6xl mb-4">🔒</div>
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">Group Analytics & Gap Analysis</h2>
@@ -840,7 +1035,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center"><span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total Assessments</span><div class="text-4xl font-extrabold text-slate-800" id="stat-total-students">0</div></div>
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center"><span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Group Avg Score</span><div class="text-4xl font-extrabold text-sky-600 font-mono" id="stat-avg-score">0%</div></div>
-                        <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 shadow-sm flex flex-col justify-center"><span class="text-sm font-bold text-indigo-700 uppercase tracking-wider mb-1">Final Group Evaluation</span><div class="text-sm font-medium text-slate-800 leading-tight" id="stat-group-eval">Awaiting data to evaluate group competency...</div></div>
+                        <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 shadow-sm flex flex-col justify-center"><span class="text-sm font-bold text-indigo-700 uppercase tracking-wider mb-1">Overall Group Evaluation</span><div class="text-sm font-medium text-slate-800 leading-tight" id="stat-group-eval">Awaiting data to evaluate group competency...</div></div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -871,21 +1066,20 @@
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
-    <!-- MODALS -->
     <!-- CAUSE MODAL -->
-    <div id="cause-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm">
-        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100 opacity-100">
-            <div class="bg-slate-900 p-6 flex justify-between items-center relative overflow-hidden">
+    <div id="cause-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 sm:p-8 overflow-y-auto backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100 opacity-100 my-auto">
+            <div class="bg-slate-900 p-6 flex justify-between items-center relative overflow-hidden shrink-0">
                 <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:20px_20px]"></div>
                 <h2 class="text-2xl font-bold text-white flex items-center gap-3 relative z-10" id="cause-modal-title">Title</h2>
                 <button onclick="window.closeCauseModal()" class="text-slate-400 hover:text-white transition-colors text-3xl leading-none relative z-10">&times;</button>
             </div>
-            <div class="p-8 md:p-10 bg-slate-50 flex flex-col items-center">
-                <div id="cause-modal-anim" class="scale-150 mb-10 mt-4 origin-top"></div>
-                <div class="w-full space-y-6 text-left">
+            <div class="p-6 sm:p-10 bg-slate-50 flex flex-col items-center flex-grow overflow-y-auto custom-scroll">
+                <div id="cause-modal-anim" class="scale-125 sm:scale-150 mb-10 mt-4 origin-top shrink-0"></div>
+                <div class="w-full space-y-6 text-left shrink-0">
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <h4 class="font-bold text-sky-600 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2 text-lg"><span class="text-2xl">⚙️</span> Mechanism</h4>
                         <p class="text-slate-700 text-base leading-relaxed" id="cause-modal-desc"></p>
@@ -899,25 +1093,30 @@
         </div>
     </div>
 
-    <div id="report-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div id="report-modal-content" class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] print:max-h-full">
-            <div class="bg-slate-900 p-6 flex justify-between items-center no-print">
+    <!-- INDIVIDUAL REPORT MODAL -->
+    <div id="report-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto print-container">
+        <div id="report-modal-content" class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col my-auto relative">
+            <div class="bg-slate-900 p-6 flex justify-between items-center no-print shrink-0 rounded-t-2xl">
                 <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>📄</span> Individual Gap Analysis Report</h2>
-                <div class="flex gap-3"><button onclick="window.print()" class="text-slate-300 hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded text-sm font-medium border border-slate-600">Print Report</button><button onclick="window.closeReport()" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button></div>
-            </div>
-            <div class="p-8 overflow-y-auto custom-scroll">
-                <div class="border-b-4 border-slate-900 pb-4 mb-6 flex justify-between items-end">
-                    <div><h1 class="text-3xl font-black text-slate-900 mb-1" id="rep-name">John Doe</h1><p class="text-lg text-slate-600 font-medium" id="rep-role">Driller</p><p class="text-sm text-slate-500 mt-1">Experience: <span id="rep-exp" class="font-bold text-slate-700"></span> Years | Date: <span id="rep-date"></span></p></div>
-                    <div class="text-right"><p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Final Score</p><div class="text-5xl font-black font-mono" id="rep-score">0%</div></div>
+                <div class="flex gap-2 sm:gap-3">
+                    <button onclick="window.saveAsPDF('individual')" class="text-sky-100 hover:text-white transition-colors bg-sky-600 hover:bg-sky-500 px-3 py-1.5 rounded text-sm font-bold shadow-sm flex items-center gap-1"><span>💾</span> Save PDF</button>
+                    <button onclick="window.print()" class="text-slate-300 hover:text-white transition-colors bg-slate-800 px-3 py-1.5 rounded text-sm font-bold border border-slate-600 flex items-center gap-1"><span>🖨️</span> Print</button>
+                    <button onclick="window.closeReport()" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none ml-2">&times;</button>
                 </div>
-                <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-slate-50 rounded-xl p-6 border border-slate-200">
+            </div>
+            <div class="p-6 sm:p-8 overflow-y-auto custom-scroll flex-grow">
+                <div class="border-b-4 border-slate-900 pb-4 mb-6 flex justify-between items-end">
+                    <div><h1 class="text-2xl sm:text-3xl font-black text-slate-900 mb-1" id="rep-name">John Doe</h1><p class="text-base sm:text-lg text-slate-600 font-medium" id="rep-role">Driller</p><p class="text-sm text-slate-500 mt-1">Experience: <span id="rep-exp" class="font-bold text-slate-700"></span> Years | Date: <span id="rep-date"></span></p></div>
+                    <div class="text-right"><p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Final Score</p><div class="text-4xl sm:text-5xl font-black font-mono" id="rep-score">0%</div></div>
+                </div>
+                <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-slate-50 rounded-xl p-6 border border-slate-200 page-break-inside-avoid">
                     <div class="md:col-span-2"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Final Evaluation</h3><div id="rep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white"></div></div>
                     <div class="w-full h-48 relative"><canvas id="indivRadarChart"></canvas></div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 page-break-inside-avoid">
                     <div class="flex flex-col h-full">
                         <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Identified Knowledge Gaps</h3>
-                        <ul id="rep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 mb-4 max-h-40 overflow-y-auto shadow-inner"></ul>
+                        <ul id="rep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 mb-4 max-h-40 overflow-y-auto shadow-inner print-expand-list"></ul>
                         <div class="w-full h-40 relative mt-auto border-t border-slate-200 pt-4"><canvas id="indivGapsChart"></canvas></div>
                     </div>
                     <div>
@@ -925,7 +1124,7 @@
                         <ul id="rep-rec-list" class="space-y-3 text-sm text-slate-700 font-medium bg-sky-50/30 p-4 rounded-lg border border-sky-100 h-full"></ul>
                     </div>
                 </div>
-                <div class="mt-8 border-t border-slate-200 pt-6">
+                <div class="mt-8 border-t border-slate-200 pt-6 page-break-before">
                     <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="text-rose-500">❌</span> Question Review & Explanations</h3>
                     <div id="rep-wrong-answers" class="space-y-4"></div>
                 </div>
@@ -934,22 +1133,44 @@
         </div>
     </div>
 
-    <div id="group-report-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div id="group-report-modal-content" class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] print:max-h-full">
-            <div class="bg-indigo-900 p-6 flex justify-between items-center no-print">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>📈</span> Fleet Group Gap Analysis Report</h2>
-                <div class="flex gap-3"><button onclick="window.print()" class="text-indigo-200 hover:text-white transition-colors bg-indigo-800 px-3 py-1 rounded text-sm font-medium border border-indigo-600">Print Report</button><button onclick="window.closeGroupReport()" class="text-indigo-400 hover:text-white transition-colors text-2xl leading-none">&times;</button></div>
-            </div>
-            <div class="p-8 overflow-y-auto custom-scroll">
-                <div class="border-b-4 border-indigo-900 pb-4 mb-6 flex justify-between items-end">
-                    <div><h1 class="text-3xl font-black text-slate-900 mb-1">Fleet Assessment Summary</h1><p class="text-sm text-slate-500 mt-1">Total Assessments: <span id="grep-total" class="font-bold text-slate-700"></span> | Pass Rate: <span id="grep-passrate" class="font-bold text-slate-700"></span></p></div>
-                    <div class="text-right"><p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Group Avg Score</p><div class="text-5xl font-black font-mono" id="grep-score">0%</div></div>
+    <!-- GROUP REPORT MODAL WITH INFOGRAPHICS -->
+    <div id="group-report-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto print-container">
+        <div id="group-report-modal-content" class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col my-auto relative">
+            <div class="bg-indigo-900 p-6 flex justify-between items-center no-print shrink-0 rounded-t-2xl">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>📈</span> Group Gap Analysis Report</h2>
+                <div class="flex gap-2 sm:gap-3">
+                    <button onclick="window.saveAsPDF('group')" class="text-indigo-100 hover:text-white transition-colors bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded text-sm font-bold shadow-sm flex items-center gap-1"><span>💾</span> Save PDF</button>
+                    <button onclick="window.print()" class="text-indigo-200 hover:text-white transition-colors bg-indigo-800 px-3 py-1.5 rounded text-sm font-bold border border-indigo-600 flex items-center gap-1"><span>🖨️</span> Print</button>
+                    <button onclick="window.closeGroupReport()" class="text-indigo-400 hover:text-white transition-colors text-2xl leading-none ml-2">&times;</button>
                 </div>
-                <div class="mb-8"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Overall Fleet Evaluation</h3><div id="grep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white"></div></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            </div>
+            <div class="p-6 sm:p-8 overflow-y-auto custom-scroll flex-grow">
+                <div class="border-b-4 border-indigo-900 pb-4 mb-6 flex justify-between items-end">
+                    <div><h1 class="text-2xl sm:text-3xl font-black text-slate-900 mb-1">Group Assessment Summary</h1><p class="text-sm text-slate-500 mt-1">Total Assessments: <span id="grep-total" class="font-bold text-slate-700"></span> | Pass Rate: <span id="grep-passrate" class="font-bold text-slate-700"></span></p></div>
+                    <div class="text-right"><p class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Group Avg Score</p><div class="text-4xl sm:text-5xl font-black font-mono" id="grep-score">0%</div></div>
+                </div>
+                
+                <div class="mb-8"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Overall Group Evaluation</h3><div id="grep-eval-box" class="p-4 rounded-lg border-l-4 font-medium text-slate-800 leading-relaxed bg-white"></div></div>
+                
+                <!-- NEW INFOGRAPHICS SECTION FOR MANAGERS -->
+                <div class="mb-8 page-break-before page-break-inside-avoid">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Group Performance Infographics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
+                            <h4 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wide text-center">Pass / Fail Distribution</h4>
+                            <div class="w-full h-48 relative"><canvas id="grepPieChart"></canvas></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
+                            <h4 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wide text-center">Topic Proficiency Radar</h4>
+                            <div class="w-full h-48 relative"><canvas id="grepRadarChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 page-break-before page-break-inside-avoid">
                     <div class="flex flex-col h-full">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Fleet Knowledge Gaps</h3>
-                        <ul id="grep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 mb-4 max-h-40 overflow-y-auto shadow-inner"></ul>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><span class="text-rose-500">⚠️</span> Group Knowledge Gaps</h3>
+                        <ul id="grep-gaps-list" class="space-y-2 text-sm text-slate-700 font-medium bg-rose-50/30 p-4 rounded-lg border border-rose-100 mb-4 max-h-40 overflow-y-auto shadow-inner print-expand-list"></ul>
                         <div class="w-full h-40 relative mt-auto border-t border-slate-200 pt-4"><canvas id="groupGapsChart"></canvas></div>
                     </div>
                     <div>
@@ -962,40 +1183,208 @@
         </div>
     </div>
 
-    <div id="decision-tree-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-slate-900 p-6 flex justify-between items-center"><h2 class="text-xl font-bold text-white flex items-center gap-2"><span>🌳</span> The Kick Detection Decision Tree</h2><button onclick="document.getElementById('decision-tree-modal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button></div>
-            <div class="p-8 overflow-y-auto custom-scroll space-y-6">
-                <p class="text-slate-700 leading-relaxed">A warning sign means the well might be going underbalanced. A positive indicator means the well is actively kicking.<br><br>As per IWCF, the absolute first action to take when a <strong>Kick Warning Sign</strong> (such as a sudden drilling break, increase in background gas, or change in cuttings) is observed is to stop operations and perform a Flow Check.</p>
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-900 mb-3 border-b border-slate-200 pb-2">Immediate Action: The Flow Check Procedure (IWCF Standard)</h3>
-                    <p class="text-sm text-slate-600 mb-4">You do not immediately shut in a well based only on a warning sign. Instead, you verify if the well is flowing statically. When a warning sign is observed, the Driller must immediately execute the following sequence:</p>
-                    <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-700"><li><strong>Stop Rotating:</strong> Cease rotation and remove Weight on Bit (WOB).</li><li><strong>Pick Up Off Bottom:</strong> Pick up the drill string so that the bit is off the bottom. <em>Crucial: Ensure a tool joint is positioned above the rotary table.</em></li><li><strong>Stop the Pumps:</strong> Turn off the mud pumps to remove Equivalent Circulating Density (ECD).</li><li><strong>Observe the Well:</strong> Route the flow line to the trip tank and observe the well for flow.</li></ol>
-                </div>
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-900 mb-3 border-b border-slate-200 pb-2">The Decision Tree (Post-Flow Check)</h3>
-                    <p class="text-sm text-slate-600 mb-4">Once the pumps are off and the well is static, the Driller has two paths based on their observation:</p>
-                    <div class="space-y-4">
-                        <div class="bg-rose-50 border border-rose-100 p-4 rounded-lg"><h4 class="font-bold text-rose-800 mb-1 flex items-center gap-2"><span>🚨</span> Scenario A: The Well is Flowing (Positive Indicator)</h4><p class="text-xs text-slate-700 mb-2">If fluid continues to flow out of the wellbore with the pumps off, the warning sign has escalated to a Positive Kick Indicator.</p><p class="text-sm font-bold text-rose-700">&rarr; Action: Immediately sound the alarm and execute the Hard Shut-In Procedure.</p></div>
-                        <div class="bg-sky-50 border border-sky-100 p-4 rounded-lg"><h4 class="font-bold text-sky-800 mb-1 flex items-center gap-2"><span>🛑</span> Scenario B: The Well is NOT Flowing (Static)</h4><p class="text-xs text-slate-700 mb-2">If the well is completely dead with the pumps off, a kick is not actively entering the wellbore.</p><p class="text-sm font-bold text-sky-700">&rarr; Action: Do not simply resume drilling at full speed. Circulate Bottoms Up through the choke manifold.</p></div>
-                    </div>
-                </div>
-                <div class="bg-amber-100 border border-amber-300 p-5 rounded-xl shadow-sm flex items-center gap-4"><span class="text-4xl drop-shadow">⭐</span><div><span class="block font-bold text-amber-900 uppercase tracking-widest text-xs mb-1">The Golden Rule</span><p class="font-bold text-amber-800">Warning Sign &rarr; Stop & Flow Check. Only shut in if the flow check is POSITIVE.</p></div></div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="bg-slate-900 text-slate-400 py-10 border-t border-slate-800 text-center no-print">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-center gap-2 mb-4"><span class="text-2xl">🛢️</span><span class="font-bold text-xl tracking-tight text-slate-300">Nasser <span class="text-sky-500">AboYounes</span> <span class="hidden sm:inline-block text-slate-500 font-normal text-sm ml-2">| WCI & Well Control Tech Advisor</span></span></div>
-            <div class="flex justify-center items-center gap-4 mt-4 text-sm text-slate-500"><a href="mailto:nfw_1983@yahoo.com" class="hover:text-sky-400 transition-colors flex items-center gap-1"><span>✉️</span> nfw_1983@yahoo.com</a></div>
-        </div>
-    </footer>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Declare ALL chart instances globally to avoid ReferenceErrors
+        window.indivRadarChartInstance = null;
+        window.indivGapsChartInstance = null;
+        window.instructorPieChartInstance = null;
+        window.topicRadarChartInstance = null;
+        window.grepPieChartInstance = null;
+        window.grepRadarChartInstance = null;
+        window.groupGapsChartInstance = null;
+        window.ballooningTimeout = null;
+
+        // Group Analytics Modal Logic
+        window.openInstructorModal = function() {
+            document.getElementById('instructor-modal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        };
+
+        window.closeInstructorModal = function() {
+            document.getElementById('instructor-modal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        };
+
+        // Toggle function for the new Ballooning Mini Simulator
+        window.toggleMiniSimulator = function() {
+            const isPumpOn = document.getElementById('mini-pump-toggle').checked;
+            
+            document.getElementById('mini-pump-status').textContent = isPumpOn ? "ON" : "OFF";
+            document.getElementById('mini-pump-status').className = isPumpOn ? "font-bold text-emerald-600 text-sm w-8 text-center" : "font-bold text-slate-400 text-sm w-8 text-center";
+
+            const balloonFluid = document.getElementById('balloon-fluid');
+            const balloonArrowsOut = document.getElementById('balloon-arrows-out');
+            const balloonArrowsIn = document.getElementById('balloon-arrows-in');
+            const balloonStatus = document.getElementById('balloon-status');
+            const balloonCircDown = document.querySelector('#balloon-circ-down line');
+            const balloonCircUp1 = document.querySelector('#balloon-circ-up line:nth-child(1)');
+            const balloonCircUp2 = document.querySelector('#balloon-circ-up line:nth-child(2)');
+            
+            const kickFluid = document.getElementById('kick-fluid');
+            const kickStatus = document.getElementById('kick-status');
+            const kickArrowsOn = document.getElementById('kick-arrows-on');
+            const kickArrowsOff = document.getElementById('kick-arrows-off');
+            const kickCircDown = document.querySelector('#kick-circ-down line');
+            const kickCircUp1 = document.querySelector('#kick-circ-up line:nth-child(1)');
+            const kickCircUp2 = document.querySelector('#kick-circ-up line:nth-child(2)');
+            
+            if (window.ballooningTimeout) clearTimeout(window.ballooningTimeout);
+
+            if (isPumpOn) {
+                // Ballooning: Losses
+                if (balloonFluid) { balloonFluid.style.opacity = '1'; balloonFluid.classList.remove('frac-state-closing'); balloonFluid.classList.add('frac-state-open'); }
+                if (balloonArrowsOut) balloonArrowsOut.style.display = 'block';
+                if (balloonArrowsIn) balloonArrowsIn.style.display = 'none';
+                if (balloonStatus) balloonStatus.innerHTML = '<span class="text-sky-700 font-black">PUMPS ON:</span> High ECD forces mud into micro-fractures (Losses).';
+                if (balloonCircDown) balloonCircDown.style.display = 'block';
+                if (balloonCircUp1) balloonCircUp1.style.display = 'block';
+                if (balloonCircUp2) balloonCircUp2.style.display = 'block';
+                
+                // Kick: Masked
+                if (kickFluid) kickFluid.style.opacity = '0.3';
+                if (kickStatus) kickStatus.innerHTML = '<span class="text-sky-700 font-black">PUMPS ON:</span> Influx continues, but might be masked by circulation.';
+                if (kickArrowsOn) kickArrowsOn.style.display = 'block';
+                if (kickArrowsOff) kickArrowsOff.style.display = 'none';
+                if (kickCircDown) kickCircDown.style.display = 'block';
+                if (kickCircUp1) kickCircUp1.style.display = 'block';
+                if (kickCircUp2) kickCircUp2.style.display = 'block';
+            } else {
+                // Ballooning: Flowback (Finite) Starts
+                if (balloonFluid) { balloonFluid.style.opacity = '0.8'; balloonFluid.classList.remove('frac-state-open'); balloonFluid.classList.add('frac-state-closing'); }
+                if (balloonArrowsOut) balloonArrowsOut.style.display = 'none';
+                if (balloonArrowsIn) balloonArrowsIn.style.display = 'block';
+                if (balloonStatus) balloonStatus.innerHTML = '<span class="text-rose-600 font-black">PUMPS OFF:</span> Rock relaxes, squeezing mud back into wellbore (Finite Gain).';
+                if (balloonCircDown) balloonCircDown.style.display = 'none';
+                if (balloonCircUp1) balloonCircUp1.style.display = 'none';
+                if (balloonCircUp2) balloonCircUp2.style.display = 'none';
+
+                // FINITE FLOW TIMEOUT: Fractures close completely after 3.5 seconds
+                window.ballooningTimeout = setTimeout(() => {
+                    if (balloonFluid) { balloonFluid.style.opacity = '0'; balloonFluid.classList.remove('frac-state-closing'); }
+                    if (balloonArrowsIn) balloonArrowsIn.style.display = 'none';
+                    if (balloonStatus) balloonStatus.innerHTML = '<span class="text-slate-600 font-black">STATIC:</span> Fractures closed. Flow stopped. (Finite Gain over)';
+                }, 3500);
+                
+                // Kick: Continuous flow
+                if (kickFluid) kickFluid.style.opacity = '1';
+                if (kickStatus) kickStatus.innerHTML = '<span class="text-rose-600 font-black">PUMPS OFF:</span> Loss of ECD allows formation to flow freely (Continuous Gain).';
+                if (kickArrowsOn) kickArrowsOn.style.display = 'none';
+                if (kickArrowsOff) kickArrowsOff.style.display = 'block';
+                if (kickCircDown) kickCircDown.style.display = 'none';
+                if (kickCircUp1) kickCircUp1.style.display = 'none';
+                if (kickCircUp2) kickCircUp2.style.display = 'none';
+            }
+        };
+
+        // ==========================================
+        // SAVE AS PDF LOGIC (html2pdf)
+        // ==========================================
+        window.saveAsPDF = async function(reportType) {
+            const modalId = reportType === 'individual' ? 'report-modal' : 'group-report-modal';
+            const elementId = reportType === 'individual' ? 'report-modal-content' : 'group-report-modal-content';
+            const sourceElement = document.getElementById(elementId);
+            if (!sourceElement) return;
+
+            // 1. Create a deep clone to avoid messing up the interactive UI
+            const clone = sourceElement.cloneNode(true);
+            
+            // 2. Set clone styles strictly for PDF generation (override ALL max-heights and scrollbars)
+            clone.id = "pdf-export-clone";
+            clone.classList.remove('max-h-[90vh]', 'shadow-2xl');
+            clone.style.cssText = `
+                position: absolute;
+                top: -9999px;
+                left: 0;
+                width: 1000px; /* Fixed width for standard A4 scale */
+                height: auto;
+                max-height: none;
+                overflow: visible;
+                background-color: white;
+                z-index: -100;
+                padding: 40px;
+            `;
+
+            // Force all internal scrollable containers to expand completely
+            const scrollingElements = clone.querySelectorAll('.custom-scroll, .overflow-y-auto, .max-h-40, .flex-grow, .overflow-x-auto, #rep-wrong-answers, .print-expand-list');
+            scrollingElements.forEach(el => {
+                el.style.cssText = `
+                    height: auto !important;
+                    max-height: none !important;
+                    overflow: visible !important;
+                    flex: none !important;
+                    display: block !important;
+                `;
+            });
+
+            // Remove buttons
+            const noPrintElements = clone.querySelectorAll('.no-print');
+            noPrintElements.forEach(el => el.parentNode.removeChild(el));
+
+            // Append to body temporarily
+            document.body.appendChild(clone);
+
+            // Wait for charts to finish rendering in the clone (if any canvas elements were copied, we need to manually copy their data)
+            const sourceCanvases = sourceElement.querySelectorAll('canvas');
+            const cloneCanvases = clone.querySelectorAll('canvas');
+            sourceCanvases.forEach((canvas, index) => {
+                if (cloneCanvases[index]) {
+                    cloneCanvases[index].getContext('2d').drawImage(canvas, 0, 0);
+                    cloneCanvases[index].style.maxWidth = '100%';
+                    cloneCanvases[index].style.height = 'auto';
+                }
+            });
+
+            const opt = {
+                margin:       10,
+                filename:     reportType === 'individual' ? 'Individual_Gap_Analysis_Report.pdf' : 'Group_Gap_Analysis_Report.pdf',
+                image:        { type: 'jpeg', quality: 1 },
+                html2canvas:  { scale: 2, useCORS: true, windowWidth: 1000, scrollY: 0 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            // Generate and then remove the clone
+            html2pdf().set(opt).from(clone).save().then(() => {
+                if (document.body.contains(clone)) {
+                    document.body.removeChild(clone);
+                }
+            }).catch(err => {
+                console.error("PDF Generation failed:", err);
+                if (document.body.contains(clone)) {
+                    document.body.removeChild(clone);
+                }
+            });
+        };
+
+        // ==========================================
+        // UI HELPERS
+        // ==========================================
+        window.customAlert = function(msg, title = "Notice") {
+            document.getElementById('custom-modal-title').textContent = title;
+            document.getElementById('custom-modal-message').textContent = msg;
+            const actions = document.getElementById('custom-modal-actions');
+            actions.innerHTML = '<button onclick="document.getElementById(\'custom-modal\').classList.add(\'hidden\')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">OK</button>';
+            document.getElementById('custom-modal').classList.remove('hidden');
+        };
+
+        window.customConfirm = function(msg, onConfirm, title = "Confirm Action") {
+            document.getElementById('custom-modal-title').textContent = title;
+            document.getElementById('custom-modal-message').textContent = msg;
+            const actions = document.getElementById('custom-modal-actions');
+            actions.innerHTML = `
+                <button onclick="document.getElementById('custom-modal').classList.add('hidden')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">Cancel</button>
+                <button id="custom-modal-confirm-btn" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">Confirm</button>
+            `;
+            document.getElementById('custom-modal-confirm-btn').onclick = () => {
+                document.getElementById('custom-modal').classList.add('hidden');
+                onConfirm();
+            };
+            document.getElementById('custom-modal').classList.remove('hidden');
+        };
 
         // ==========================================
         // 🔥 REAL-TIME CLOUD DATABASE CONFIGURATION 🔥
@@ -1033,19 +1422,7 @@
             } catch (e) {
                 console.error("Auth init error:", e);
                 useFirebase = false; 
-                try {
-                    localAssessments = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]');
-                } catch(err) { localAssessments = []; }
-                
-                setTimeout(() => {
-                    const dashboardEl = document.getElementById('instructor-locked');
-                    if(dashboardEl) {
-                        const warning = document.createElement('div');
-                        warning.className = "bg-rose-100 border border-rose-300 text-rose-900 p-4 rounded-xl text-xs font-bold mt-4";
-                        warning.innerHTML = "⚠️ Firebase Auth Error: Authentication is not enabled in your Firebase Project. Go to Firebase Console > Authentication > Get Started > Enable 'Anonymous'. Falling back to local storage.";
-                        dashboardEl.appendChild(warning);
-                    }
-                }, 1000);
+                try { localAssessments = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]'); } catch(err) { localAssessments = []; }
             }
         };
         
@@ -1063,16 +1440,12 @@
                             if (instructorUnlocked && !instructorUnlocked.classList.contains('hidden')) {
                                 window.updateInstructorDashboard();
                             }
-                        }, (error) => {
-                            console.error("Firestore listen error", error);
-                        });
+                        }, (error) => { console.error("Firestore listen error", error); });
                     }
                 }
             });
         } else {
-            try {
-                localAssessments = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]');
-            } catch(err) { localAssessments = []; }
+            try { localAssessments = JSON.parse(localStorage.getItem('wc_assessment_data') || '[]'); } catch(err) { localAssessments = []; }
         }
 
         const setTxt = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
@@ -1080,11 +1453,25 @@
         const setClass = (id, cls) => { const el = document.getElementById(id); if (el) el.className = cls; };
         const val = (id) => { const el = document.getElementById(id); return el ? el.value : null; };
 
+        // Global State for Simulators
+        window.simState = {
+            isKicking: false,
+            pumpsOn: true,
+            env: 'standard',
+            spm: 100,
+            bubbles: [],
+            pumpFlowOffset: 0,
+            simAnimFrame: null
+        };
+
+        // INITIALIZE ALL
         document.addEventListener('DOMContentLoaded', () => {
-            initIndicatorsChart();
-            initCausesGrid();
-            window.updateSimulator();
-            window.updateDashboardCalculators();
+            if(window.initIndicatorsChart) window.initIndicatorsChart();
+            if(window.initCausesGrid) window.initCausesGrid();
+            if(window.resizeCanvas) window.resizeCanvas();
+            if(window.updateSimulator) window.updateSimulator();
+            if(window.updateDashboardCalculators) window.updateDashboardCalculators();
+            if(window.startPhysicsLoop) window.startPhysicsLoop();
         });
 
         window.updateDashboardCalculators = function() {
@@ -1101,26 +1488,6 @@
             document.getElementById(id)?.addEventListener('input', window.updateDashboardCalculators);
         });
 
-        window.updateChecklistAction = function() {
-            const earlyCount = document.querySelectorAll('.custom-checkbox.early-check:checked').length;
-            const posCount = document.querySelectorAll('.custom-checkbox.pos-check:checked').length;
-            const panel = document.getElementById('checklist-action-panel');
-            const actionText = document.getElementById('dynamic-action-text');
-
-            if (!panel || !actionText) return;
-
-            if (posCount > 0) {
-                panel.className = "bg-rose-100 p-4 mt-6 rounded-lg border border-rose-200 transition-all duration-300 h-32 flex flex-col justify-center animate-pulse";
-                actionText.innerHTML = `<span class="text-rose-700 font-bold block mb-2 text-xs">CRITICAL: POSITIVE KICK DETECTED</span><span class="text-sm">🛑 Stop Rotary ➔ 🏗️ Pick Up ➔ ⚙️ Stop Pumps ➔ 👀 Flow Check ➔ <strong class="text-rose-800">SHUT IN IF FLOWING</strong></span>`;
-            } else if (earlyCount > 0) {
-                panel.className = "bg-amber-50 p-4 mt-6 rounded-lg border border-amber-200 transition-all duration-300 h-32 flex flex-col justify-center";
-                actionText.innerHTML = `<span class="text-amber-700 font-bold block mb-2 text-xs">WARNING: ABNORMAL TREND</span><span class="text-sm">Proceed with caution. Verify flow rate, temperature, and pit levels. Alert Mud Logger.</span>`;
-            } else {
-                panel.className = "bg-slate-100 p-4 mt-6 rounded-lg border border-slate-200 transition-all duration-300 h-32 flex flex-col justify-center";
-                actionText.innerHTML = `<span class="text-slate-500 font-bold block mb-2 text-xs">MONITORING</span><span class="text-sm">Maintain standard drilling parameters. Observe closely for anomalies.</span>`;
-            }
-        };
-
         window.showDefinition = function(defId, btnElement) {
             document.querySelectorAll('.def-panel').forEach(panel => { panel.classList.add('hidden'); });
             document.getElementById(defId)?.classList.remove('hidden');
@@ -1128,15 +1495,16 @@
             btnElement.classList.add('active-def');
         };
 
-        const wellCanvas = document.getElementById('wellCanvas');
-        const ctxSim = wellCanvas ? wellCanvas.getContext('2d') : null;
-        let simAnimFrame; let bubbles = []; let pumpFlowOffset = 0;
-
-        function resizeCanvas() {
+        window.resizeCanvas = function() {
             const container = document.getElementById('well-simulator-container');
-            if (container && wellCanvas) { wellCanvas.width = container.clientWidth; wellCanvas.height = container.clientHeight; window.updateSimulator(); }
-        }
-        window.addEventListener('resize', resizeCanvas); 
+            const wellCanvas = document.getElementById('wellCanvas');
+            if (container && wellCanvas) { 
+                wellCanvas.width = container.clientWidth || 350; 
+                wellCanvas.height = container.clientHeight || 450; 
+            }
+        };
+
+        window.addEventListener('resize', () => { if(window.resizeCanvas) window.resizeCanvas(); });
 
         window.updateSimulator = function() {
             const mwEl = document.getElementById('mw-slider');
@@ -1156,6 +1524,10 @@
             const env = envEl.value;
 
             if(isNaN(mw)) return;
+
+            window.simState.pumpsOn = pumpsOn;
+            window.simState.env = env;
+            window.simState.spm = pumpsOn ? spm : 0;
 
             setTxt('mw-val', mw.toFixed(1) + ' ppg');
             setTxt('tvd-val', tvd + ' ft');
@@ -1177,7 +1549,6 @@
             }
 
             const staticHyd = 0.052 * mw * tvd;
-            
             let ecdValue = 0;
             let warningText = "";
             if(pumpsOn) {
@@ -1190,11 +1561,6 @@
             setTxt('env-warning', warningText);
 
             const totalBHP = staticHyd + ecdValue;
-
-            setTxt('calc-static', Math.round(staticHyd));
-            setTxt('calc-ecd', Math.round(ecdValue));
-            setTxt('calc-bhp', Math.round(totalBHP));
-            setTxt('calc-form', fp);
 
             const maxPressure = 15000;
             const bhpPct = Math.min(totalBHP / maxPressure, 1);
@@ -1229,123 +1595,101 @@
                 }
             }
 
-            const isKicking = fp > totalBHP;
+            window.simState.isKicking = fp > totalBHP;
 
-            if (isKicking) {
+            if (window.simState.isKicking) {
                 if (bhpPath) bhpPath.setAttribute('stroke', '#f43f5e'); 
-                setTxt('balance-operator', '<');
-                setClass('balance-operator', 'w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-full bg-rose-100 text-3xl font-bold text-rose-600 shadow-inner');
                 setTxt('status-banner', '🚨 KICK IN PROGRESS 🚨');
                 setClass('status-banner', 'w-full text-center py-3 font-bold text-white uppercase tracking-widest transition-colors duration-300 bg-rose-600 text-sm z-10 relative animate-pulse');
-                document.getElementById('calc-bhp')?.classList.replace('text-sky-600', 'text-rose-600');
             } else {
                 if (bhpPath) bhpPath.setAttribute('stroke', '#0ea5e9'); 
-                setTxt('balance-operator', '≥');
-                setClass('balance-operator', 'w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-full bg-emerald-100 text-3xl font-bold text-emerald-600 shadow-inner');
                 setTxt('status-banner', pumpsOn ? 'Wellbore Stable (Dynamic)' : 'Wellbore Stable (Static)');
                 setClass('status-banner', 'w-full text-center py-3 font-bold text-white uppercase tracking-widest transition-colors duration-300 bg-emerald-500 text-sm z-10 relative');
-                document.getElementById('calc-bhp')?.classList.replace('text-rose-600', 'text-sky-600');
             }
-            
-            const balanceStateContainer = document.getElementById('balance-state-container');
-            const balanceStateTitle = document.getElementById('balance-state-title');
-            const balanceStateDesc = document.getElementById('balance-state-desc');
-            
-            if (balanceStateContainer && balanceStateTitle && balanceStateDesc) {
-                balanceStateContainer.classList.remove('hidden');
-                const rBHP = Math.round(totalBHP);
-                const rFP = Math.round(fp);
-                
-                if (rBHP > rFP) {
-                    balanceStateContainer.className = "mt-4 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-left w-full max-w-md transition-colors duration-300";
-                    balanceStateTitle.innerHTML = "<span>🟢</span> Overbalanced";
-                    balanceStateDesc.innerHTML = "<strong>Bottom Hole Pressure is greater than formation pressure (BHP &gt; FP).</strong> This is the standard safe operating condition.";
-                } else if (rBHP === rFP) {
-                    balanceStateContainer.className = "mt-4 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 text-left w-full max-w-md transition-colors duration-300";
-                    balanceStateTitle.innerHTML = "<span>🟡</span> Balanced";
-                    balanceStateDesc.innerHTML = "<strong>Bottom Hole Pressure (BHP) = Formation pressure (FP).</strong> There is no differential pressure; the well is stable but on the \"edge\" of flowing.";
-                } else {
-                    balanceStateContainer.className = "mt-4 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-900 text-left w-full max-w-md transition-colors duration-300 animate-pulse";
-                    balanceStateTitle.innerHTML = "<span>🔴</span> Underbalanced";
-                    balanceStateDesc.innerHTML = "<strong>Bottom Hole Pressure is less than formation pressure (BHP &lt; FP).</strong> This condition allows formation fluids to enter the wellbore (a \"kick\").";
-                }
-            }
-
-            drawWellbore(isKicking, pumpsOn, env, effectiveSpm);
         };
 
-        function drawWellbore(isKicking, pumpsOn, env, spm) {
-            if (!ctxSim || !wellCanvas) return;
-            ctxSim.clearRect(0, 0, wellCanvas.width, wellCanvas.height);
-            let holeW = env === 'slim' ? 60 : 80;
-            const holeX = (wellCanvas.width - holeW) / 2;
-            const formY = wellCanvas.height - 120;
+        window.startPhysicsLoop = function() {
+            const wellCanvas = document.getElementById('wellCanvas');
+            if (!wellCanvas) return;
+            const ctxSim = wellCanvas.getContext('2d');
+            if (!ctxSim) return;
 
-            ctxSim.fillStyle = '#92400e'; 
-            ctxSim.fillRect(0, formY, wellCanvas.width, wellCanvas.height - formY);
-            ctxSim.fillStyle = '#334155'; 
-            ctxSim.fillRect(holeX, 0, holeW, wellCanvas.height);
-            ctxSim.fillStyle = isKicking ? 'rgba(244, 63, 94, 0.4)' : '#0284c7'; 
-            ctxSim.fillRect(holeX + 6, 0, holeW - 12, wellCanvas.height);
+            function animate() {
+                if(wellCanvas.width === 0) window.resizeCanvas();
 
-            const dpW = 16;
-            ctxSim.fillStyle = '#94a3b8'; 
-            ctxSim.fillRect(holeX + (holeW/2) - (dpW/2), 0, dpW, wellCanvas.height);
+                ctxSim.clearRect(0, 0, wellCanvas.width, wellCanvas.height);
+                
+                let holeW = window.simState.env === 'slim' ? 60 : 80;
+                const holeX = (wellCanvas.width - holeW) / 2;
+                const formY = wellCanvas.height - 120;
 
-            if(pumpsOn && !isKicking && spm > 0) {
-                ctxSim.fillStyle = 'rgba(255,255,255,0.4)';
-                let flowSpeed = Math.max(1, spm / 25);
-                pumpFlowOffset += flowSpeed;
-                if(pumpFlowOffset > 40) pumpFlowOffset = 0;
-                for(let i = -40; i < wellCanvas.height; i += 40) {
-                    ctxSim.fillRect(holeX + (holeW/2) - 2, i + pumpFlowOffset, 4, 10);
-                    ctxSim.fillRect(holeX + 10, wellCanvas.height - (i + pumpFlowOffset), 3, 10);
-                    ctxSim.fillRect(holeX + holeW - 13, wellCanvas.height - (i + pumpFlowOffset), 3, 10);
+                ctxSim.fillStyle = '#92400e'; 
+                ctxSim.fillRect(0, formY, wellCanvas.width, wellCanvas.height - formY);
+                ctxSim.fillStyle = '#334155'; 
+                ctxSim.fillRect(holeX, 0, holeW, wellCanvas.height);
+                ctxSim.fillStyle = window.simState.isKicking ? 'rgba(244, 63, 94, 0.4)' : '#0284c7'; 
+                ctxSim.fillRect(holeX + 6, 0, holeW - 12, wellCanvas.height);
+
+                const dpW = 16;
+                ctxSim.fillStyle = '#94a3b8'; 
+                ctxSim.fillRect(holeX + (holeW/2) - (dpW/2), 0, dpW, wellCanvas.height);
+
+                if(window.simState.pumpsOn && !window.simState.isKicking && window.simState.spm > 0) {
+                    ctxSim.fillStyle = 'rgba(255,255,255,0.4)';
+                    let flowSpeed = Math.max(1, window.simState.spm / 25);
+                    window.simState.pumpFlowOffset += flowSpeed;
+                    if(window.simState.pumpFlowOffset > 40) window.simState.pumpFlowOffset = 0;
+                    for(let i = -40; i < wellCanvas.height; i += 40) {
+                        ctxSim.fillRect(holeX + (holeW/2) - 2, i + window.simState.pumpFlowOffset, 4, 10);
+                        ctxSim.fillRect(holeX + 10, wellCanvas.height - (i + window.simState.pumpFlowOffset), 3, 10);
+                        ctxSim.fillRect(holeX + holeW - 13, wellCanvas.height - (i + window.simState.pumpFlowOffset), 3, 10);
+                    }
                 }
+
+                if (window.simState.isKicking) {
+                    let bubbleSpeedMult = window.simState.env === 'slim' ? 2 : 1; 
+                    if(window.simState.bubbles.length < 60) {
+                        window.simState.bubbles.push({ x: holeX + 10 + Math.random() * (holeW - 20), y: wellCanvas.height, r: Math.random() * 5 + 2, s: (Math.random() * 4 + 3) * bubbleSpeedMult });
+                    }
+                    ctxSim.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    for (let i = window.simState.bubbles.length - 1; i >= 0; i--) {
+                        let b = window.simState.bubbles[i];
+                        ctxSim.beginPath(); ctxSim.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctxSim.fill();
+                        b.y -= b.s; b.x += Math.sin(b.y * 0.1) * 1.5;
+                        if (b.y < -10) window.simState.bubbles.splice(i, 1);
+                    }
+                } else { 
+                    window.simState.bubbles = []; 
+                }
+
+                window.simState.simAnimFrame = requestAnimationFrame(animate);
             }
-
-            if (isKicking) {
-                let bubbleSpeedMult = env === 'slim' ? 2 : 1; 
-                if(bubbles.length < 60) {
-                    bubbles.push({ x: holeX + 10 + Math.random() * (holeW - 20), y: wellCanvas.height, r: Math.random() * 5 + 2, s: (Math.random() * 4 + 3) * bubbleSpeedMult });
-                }
-                ctxSim.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                for (let i = bubbles.length - 1; i >= 0; i--) {
-                    let b = bubbles[i];
-                    ctxSim.beginPath(); ctxSim.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctxSim.fill();
-                    b.y -= b.s; b.x += Math.sin(b.y * 0.1) * 1.5;
-                    if (b.y < -10) bubbles.splice(i, 1);
-                }
-            } else { bubbles = []; }
             
-            if(isKicking || pumpsOn) {
-                cancelAnimationFrame(simAnimFrame);
-                simAnimFrame = requestAnimationFrame(() => drawWellbore(isKicking, pumpsOn, env, spm));
-            } else { cancelAnimationFrame(simAnimFrame); }
-        }
-        
+            if (window.simState.simAnimFrame) cancelAnimationFrame(window.simState.simAnimFrame);
+            window.simState.simAnimFrame = requestAnimationFrame(animate);
+        };
+
         ['mw-slider', 'tvd-slider', 'fp-slider', 'env-select', 'spm-slider'].forEach(id => {
             document.getElementById(id)?.addEventListener('input', window.updateSimulator);
         });
         document.getElementById('pump-toggle')?.addEventListener('change', window.updateSimulator);
 
-        const causesDataGrid = [
-            { title: "Failure to Fill Hole", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-slate-800"></div><div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 bg-sky-500 anim-fluid-drop"></div></div>`, desc: "Fluid level drops during tripping because steel volume isn't replaced with mud.", prev: "Continuously monitor trip tank; fill hole systematically." },
-            { title: "Swabbing & Surging", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-600"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-10 bg-slate-200 border-b-2 border-slate-800 anim-pipe-move z-10"></div></div>`, desc: "Moving pipe too fast creates mechanical pressure spikes (suction or fracture).", prev: "Control tripping speeds; apply Trip Margin." },
-            { title: "Insufficient Mud Weight", animationHTML: `<div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center"><div class="absolute bottom-1 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[20px] border-transparent border-b-slate-400"></div><div class="w-12 h-1.5 bg-slate-400 rounded anim-tilt relative bottom-1"><div class="absolute -top-5 -left-2 w-5 h-5 bg-sky-400 rounded flex items-center justify-center text-[7px] text-white">MW</div><div class="absolute -top-6 -right-3 w-7 h-7 bg-rose-500 rounded flex items-center justify-center text-[9px] text-white">FP</div></div></div>`, desc: "Base density of drilling fluid is too low to hold back pore pressure.", prev: "Accurate pore pressure prediction; timely mud weight increases." },
-            { title: "Lost Circulation", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-500"></div><div class="absolute top-[40%] left-[50%] h-1.5 bg-sky-500 anim-leak-right origin-left"></div></div>`, desc: "Mud lost to fractured formation, causing annular fluid level to drop.", prev: "Treat with LCM; minimize ECD." },
-            { title: "Abnormal Pressures", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4 flex items-end justify-center"><div class="absolute bottom-[-10px] w-14 h-10 bg-rose-600 rounded-t-full anim-pulse-pressure"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-8 bg-sky-600 z-10"></div></div>`, desc: "Drilling into unexpectedly over-pressurized geological pockets.", prev: "Monitor D-exponent and gas trends." },
-            { title: "Gas Cut Mud", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-sky-700 overflow-hidden mx-auto mb-4"><div class="absolute bottom-0 w-full h-4 bg-amber-900"></div><div class="absolute left-[20%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-1"></div><div class="absolute left-[50%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-2"></div></div>`, desc: "Entrained gas expands massively near surface, reducing overall hydrostatic column.", prev: "Time drill gas caps; utilize degassers." }
-        ];
-
-        function initCausesGrid() {
+        window.initCausesGrid = function() {
             const causesGridEl = document.getElementById('causes-grid');
             if(causesGridEl) {
                 causesGridEl.innerHTML = '';
+                const causesDataGrid = [
+                    { title: "Failure to Fill Hole", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-slate-800"></div><div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 bg-sky-500 anim-fluid-drop"></div></div>`, desc: "Fluid level drops during tripping because steel volume isn't replaced with mud.", prev: "Continuously monitor trip tank; fill hole systematically." },
+                    { title: "Swabbing & Surging", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-600"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-10 bg-slate-200 border-b-2 border-slate-800 anim-pipe-move z-10"></div></div>`, desc: "Moving pipe too fast creates mechanical pressure spikes (suction or fracture).", prev: "Control tripping speeds; apply Trip Margin." },
+                    { title: "Insufficient Mud Weight", animationHTML: `<div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center"><div class="absolute bottom-1 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[20px] border-transparent border-b-slate-400"></div><div class="w-12 h-1.5 bg-slate-400 rounded anim-tilt relative bottom-1"><div class="absolute -top-5 -left-2 w-5 h-5 bg-sky-400 rounded flex items-center justify-center text-[7px] text-white">MW</div><div class="absolute -top-6 -right-3 w-7 h-7 bg-rose-500 rounded flex items-center justify-center text-[9px] text-white">FP</div></div></div>`, desc: "Base density of drilling fluid is too low to hold back pore pressure.", prev: "Accurate pore pressure prediction; timely mud weight increases." },
+                    { title: "Lost Circulation", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4"><div class="absolute left-1/2 -translate-x-1/2 w-6 h-full bg-sky-500"></div><div class="absolute top-[40%] left-[50%] h-1.5 bg-sky-500 anim-leak-right origin-left"></div></div>`, desc: "Mud lost to fractured formation, causing annular fluid level to drop.", prev: "Treat with LCM; minimize ECD." },
+                    { title: "Abnormal Pressures", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-amber-900 overflow-hidden mx-auto mb-4 flex items-end justify-center"><div class="absolute bottom-[-10px] w-14 h-10 bg-rose-600 rounded-t-full anim-pulse-pressure"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-8 bg-sky-600 z-10"></div></div>`, desc: "Drilling into unexpectedly over-pressurized geological pockets.", prev: "Monitor D-exponent and gas trends." },
+                    { title: "Gas Cut Mud", animationHTML: `<div class="relative w-16 h-16 border-2 border-slate-300 rounded-lg bg-sky-700 overflow-hidden mx-auto mb-4"><div class="absolute bottom-0 w-full h-4 bg-amber-900"></div><div class="absolute left-[20%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-1"></div><div class="absolute left-[50%] w-1.5 h-1.5 bg-white/80 rounded-full anim-bubble-2"></div></div>`, desc: "Entrained gas expands massively near surface, reducing overall hydrostatic column.", prev: "Time drill gas caps; utilize degassers." }
+                ];
                 causesDataGrid.forEach((cause, index) => {
                     const card = document.createElement('div');
                     card.className = "bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group h-64";
-                    card.onclick = () => window.openCauseModal(index);
+                    card.onclick = () => window.openCauseModal(index, cause);
                     card.innerHTML = `
                         <div class="mb-6 transform group-hover:scale-110 transition-transform duration-300">${cause.animationHTML}</div>
                         <h3 class="font-bold text-xl text-slate-800 leading-tight mb-4">${cause.title}</h3>
@@ -1354,10 +1698,9 @@
                     causesGridEl.appendChild(card);
                 });
             }
-        }
+        };
 
-        window.openCauseModal = function(index) {
-            const cause = causesDataGrid[index];
+        window.openCauseModal = function(index, cause) {
             setTxt('cause-modal-title', cause.title);
             setHtml('cause-modal-anim', cause.animationHTML);
             setTxt('cause-modal-desc', cause.desc);
@@ -1371,7 +1714,7 @@
             document.body.classList.remove('overflow-hidden');
         };
 
-        function initIndicatorsChart() {
+        window.initIndicatorsChart = function() {
             const indicatorsData = [
                 { label: 'Drilling Break (ROP↑)', urgency: 30, type: 'Early', icon: '📉', desc: 'Sudden increase in ROP.', detection: 'Surface Data Logging.' },
                 { label: 'Torque & Drag ↑', urgency: 35, type: 'Early', icon: '🔄', desc: 'Increased mechanical friction.', detection: 'Top Drive Gauges.' },
@@ -1407,7 +1750,7 @@
                     }
                 });
             }
-        }
+        };
 
         window.activateStep = function(step) {
             for(let i=1; i<=4; i++) {
@@ -1426,13 +1769,13 @@
 
         window.calculateKWM = function() {
             const cmwStr = val('calc-current-mw'); const tvdStr = val('calc-tvd'); const sidppStr = val('calc-sidpp');
-            if(!cmwStr || !tvdStr || !sidppStr) return alert("Fill all KWM inputs.");
+            if(!cmwStr || !tvdStr || !sidppStr) return window.customAlert("Fill all KWM inputs.");
             setTxt('result-kwm', (parseFloat(cmwStr) + (parseFloat(sidppStr) / (0.052 * parseFloat(tvdStr)))).toFixed(1));
         };
 
         window.calculateMAASP = function() {
             const maxMwStr = val('calc-max-mw'); const cmwStr = val('calc-current-mw'); const shoeTvdStr = val('calc-shoe-tvd');
-            if(!maxMwStr || !cmwStr || !shoeTvdStr) return alert("Fill MAASP inputs and Current MW.");
+            if(!maxMwStr || !cmwStr || !shoeTvdStr) return window.customAlert("Fill MAASP inputs and Current MW.");
             setTxt('result-maasp', Math.round((parseFloat(maxMwStr) - parseFloat(cmwStr)) * 0.052 * parseFloat(shoeTvdStr)));
         };
 
@@ -1442,83 +1785,15 @@
             if(window.event && window.event.target && window.event.target.classList) window.event.target.classList.add('active');
         };
 
-        const quizQuestions = [
-            { q: "What is the primary objective of primary well control?", options: ["Use BOP to seal.", "Maintain hydrostatic pressure >= formation pressure.", "Produce safely.", "Fracture rock."], answer: 1, topic: "Fundamentals", explanation: "Hydrostatic pressure acts as the first line of defense to prevent formation fluid influx." },
-            { q: "Formula for calculating Hydrostatic Pressure (HP)?", options: ["HP = 0.052 × MW × TVD", "HP = MW × Rate × Vol", "HP = 0.052 × TVD / MW", "HP = CP + DPP"], answer: 0, topic: "Pressure Math", explanation: "HP is calculated by multiplying mud weight, true vertical depth, and the 0.052 conversion constant." },
-            { q: "By definition, what is a well kick?", options: ["Intentional injection.", "Sudden mud loss.", "Uncontrolled intrusion of formation fluids.", "Mechanical BOP failure."], answer: 2, topic: "Fundamentals", explanation: "A kick is specifically the uncontrolled influx of formation fluid, which can escalate to a blowout." },
-            { q: "During which phase do most well control incidents occur?", options: ["Drilling ahead.", "Cementing.", "Tripping.", "Logging."], answer: 2, topic: "Mechanics & Causes", explanation: "Tripping alters bottom hole pressure through swabbing and surging, making it the highest risk phase." },
-            { q: "What is 'swabbing'?", options: ["Running pipe fast.", "Pulling pipe fast (suction).", "Pumping mud fast.", "Displacing mud."], answer: 1, topic: "Mechanics & Causes", explanation: "Pulling pipe creates a vacuum-like suction effect, lowering bottom hole pressure." },
-            { q: "What happens during a 'surging' effect?", options: ["Negative pressure.", "Positive pressure spikes from running pipe.", "Pumps lose prime.", "Gas expands."], answer: 1, topic: "Mechanics & Causes", explanation: "Running pipe into the hole displaces fluid quickly, causing positive pressure spikes." },
-            { q: "How can Lost Circulation lead to a kick?", options: ["Bit stuck.", "Increases hydrostatic.", "Fluid level drops rapidly, reducing hydrostatic.", "H2S poison."], answer: 2, topic: "Mechanics & Causes", explanation: "Loss of mud drops the fluid level in the annulus, directly reducing hydrostatic head." },
-            { q: "Which is an EARLY warning sign of a kick?", options: ["Drilling Break.", "Flow rate increase.", "Pit volume gain.", "Well flowing with pumps off."], answer: 0, topic: "Detection", explanation: "A drilling break indicates entering a new, potentially porous/permeable or overpressured formation." },
-            { q: "Which is a POSITIVE indicator of an active kick?", options: ["Torque increase.", "Sudden flow rate increase.", "Cutting size change.", "Connection gas."], answer: 1, topic: "Detection", explanation: "An actual increase in flow rate while pump speed is constant confirms fluid is entering the well." },
-            { q: "Why might return mud temperature increase during a kick?", options: ["Pumps are working harder.", "Formation fluids entering the wellbore are typically hotter.", "Friction from the drill bit.", "Mud weight is too high."], answer: 1, topic: "Detection", explanation: "Formation fluids coming from deep, high-pressure zones are usually hotter than the circulating mud." },
-            { q: "Incorrect fill volume in trip tank indicates:", options: ["Sensor error.", "Hole takes less mud than steel volume removed (swabbing).", "String parted.", "High MW."], answer: 1, topic: "Detection", explanation: "If the hole takes less mud than the volume of steel pulled, formation fluid has entered the space." },
-            { q: "Decrease in normalized D-Exponent indicates:", options: ["Dull bit.", "Stable wellbore.", "Abnormal compaction/overpressure.", "Cavitating pumps."], answer: 2, topic: "Detection", explanation: "A decreasing trend indicates the formation is becoming undercompacted, a sign of abnormal high pressure." },
-            { q: "What is a 'Trip Margin'?", options: ["Distance to tank.", "MW reduction.", "Additional MW added before tripping.", "Max pull speed."], answer: 2, topic: "Action Protocol", explanation: "Extra mud weight provides a safety buffer against the pressure reduction caused by swabbing during a trip." },
-            { q: "FIRST step of Action Protocol when kick suspected drilling?", options: ["Close BOP.", "Stop Pumps.", "Pick up.", "Stop Rotary Table."], answer: 3, topic: "Action Protocol", explanation: "Stopping the rotary table halts dynamic friction and allows clear observation of the well." },
-            { q: "Why 'Pick up off bottom' during shut-in?", options: ["Prevent sticking.", "Ensure tool joint is above BOP rams.", "Circulate.", "Weight reading."], answer: 1, topic: "Action Protocol", explanation: "Ensures a tool joint doesn't sit across the BOP rams, allowing a secure seal on the pipe body." },
-            { q: "Why stop mud pumps for a Flow Check?", options: ["Save fuel.", "Prevent overflow.", "Remove ECD to isolate static pressure.", "Sample."], answer: 2, topic: "Action Protocol", explanation: "Removes Equivalent Circulating Density (ECD) to see if static hydrostatic pressure can hold the well." },
-            { q: "If well flows during Flow Check with pumps off?", options: ["Pump heavy mud.", "Absolute positive indicator of a kick.", "Rotate pipe.", "Wait."], answer: 1, topic: "Detection", explanation: "Continuous flow with pumps off is absolute proof of a kick. Immediate shut-in is required." },
-            { q: "Increase in Torque & Drag potentially indicates?", options: ["Failing pumps.", "Hole instability/underbalance.", "Heavy pipe.", "Closed BOP."], answer: 1, topic: "Detection", explanation: "Underbalanced pressure can cause the borehole to slightly collapse or shale to heave, increasing friction." },
-            { q: "How does 'Gas Cut Mud' pose a threat?", options: ["Corrosion.", "Entrained gas expands near surface, reducing hydrostatic.", "Thick mud.", "Cools bit."], answer: 1, topic: "Mechanics & Causes", explanation: "As gas migrates up, it expands massively near the surface, rapidly unloading mud and reducing hydrostatic pressure." },
-            { q: "Calculation for Kill Weight Mud (KWM)?", options: ["KWM = CMW + [ SIDPP ÷ (0.052 × TVD) ]", "KWM = CMW × SIDPP / TVD", "KWM = FP - HP", "KWM = 0.052 × SIDPP × TVD"], answer: 0, topic: "Pressure Math", explanation: "Kill Weight Mud adds the required extra density (SIDPP / 0.052 / TVD) to the current mud weight." },
-            { q: "What does a decrease in shale density of cuttings indicate?", options: ["Hard rock.", "Gas in mud.", "Transition into abnormally pressured formation.", "Poor mud rheology."], answer: 2, topic: "Detection", explanation: "Less dense shale typically means under-compaction, which is highly correlated with abnormal pore pressure." },
-            { q: "Failure to keep hole full while tripping is dangerous because:", options: ["Wastes mud.", "Damages tank.", "Dropping fluid level reduces hydrostatic.", "Vibration."], answer: 2, topic: "Mechanics & Causes", explanation: "The mud level drops, leading to a direct loss of hydrostatic pressure on the formation." },
-            { q: "Purpose of calculating MAASP?", options: ["Bit speed.", "Determine max surface pressure before fracturing casing shoe.", "Gas vol.", "Friction."], answer: 1, topic: "Pressure Math", explanation: "MAASP determines the maximum surface casing pressure allowable before the weakest point (casing shoe) fractures." },
-            { q: "Differentiate Ballooning from Kick?", options: ["H2S smell.", "Ballooning: Vol returned = Vol lost (stops). Kick: Continuous flow.", "Shallow formations.", "ECD drops."], answer: 1, topic: "Detection", explanation: "Ballooning is the well 'breathing' back mud lost to micro-fractures, which eventually stops. Kicks flow continuously." },
-            { q: "Bottom hole pressure when Mud Pumps turned OFF?", options: ["Increases.", "Decreases (ECD removed).", "Stays same.", "Fluctuates."], answer: 1, topic: "Pressure Math", explanation: "Turning pumps off eliminates annular friction (ECD), reducing the total dynamic bottom hole pressure." },
-            { q: "Why is kick detection critical in Slim Hole wells?", options: ["Invisible mud.", "Smaller annular volume = faster upward migration.", "Small pumps.", "No BOPs."], answer: 1, topic: "Mechanics & Causes", explanation: "Small annular volumes mean even a tiny influx displaces a tall column of mud, causing rapid pressure changes and fast migration." },
-            { q: "Which is an onshore Masking Factor?", options: ["Drilling break.", "Flowline drain back and mud transfers between pits.", "High MW.", "OBM."], answer: 1, topic: "Detection", explanation: "Mud transfers hide actual pit volume changes, causing drillers to miss slow volume gains from a kick." },
-            { q: "Formula for Dynamic Bottom Hole Pressure?", options: ["Dynamic BHP = HP + SIDPP", "Dynamic BHP = HP + ECD", "Dynamic BHP = HP - ECD", "MAASP"], answer: 1, topic: "Pressure Math", explanation: "Dynamic BHP combines static hydrostatic pressure with the friction loss in the annulus (ECD)." },
-            { q: "An increase in return mud salinity (chlorides) suggests?", options: ["Good mud mixing.", "Influx of formation saltwater.", "Shale swelling.", "Casing leak."], answer: 1, topic: "Detection", explanation: "A sudden jump in chlorides indicates formation saltwater has entered the drilling mud." },
-            { q: "MAASP calculation relies on data from?", options: ["DST", "Leak-Off Test (LOT) / FIT", "Gas Test", "BOP Test"], answer: 1, topic: "Action Protocol", explanation: "Leak-Off Tests (LOT) provide the maximum pressure the formation below the shoe can hold before fracturing." },
-            { q: "How often should trip tank displacement be monitored while pulling drill pipe?", options: ["Every stand", "Every 5 stands", "Every 10 stands", "Only at the casing shoe"], answer: 1, topic: "Operations", explanation: "Standard practice requires monitoring every 5 stands for drill pipe, and every 1 stand for drill collars." },
-            { q: "What is the acceptable accuracy of a trip tank level indicator?", options: ["+/- 5.0 bbls", "+/- 2.0 bbls", "+/- 0.5 to 1.0 bbls", "+/- 10.0 bbls"], answer: 2, topic: "Detection", explanation: "Trip tanks are low-volume, highly calibrated tanks requiring accuracy within 0.5 to 1.0 barrels to detect micro-swabbing." },
-            { q: "What is the industry-standard target reaction time for a Pit Drill while drilling?", options: ["3 minutes", "5 minutes", "1 minute or less", "10 minutes"], answer: 2, topic: "Action Protocol", explanation: "A successful pit drill should result in the well being completely shut-in within 1 minute of the alarm." },
-            { q: "During non-routine operations like wireline logging without a packer, what is the mandatory barrier requirement?", options: ["Single barrier", "Two independent barriers", "Heavy mud only", "Diverter only"], answer: 1, topic: "Action Protocol", explanation: "API and company SOPs strictly mandate maintaining two independent barriers at all times during non-routine ops." },
-            { q: "When must a Choke Manipulation Drill be conducted?", options: ["Every 14 days", "Before drilling out casing shoe tracks", "Only after a kick", "Every shift"], answer: 1, topic: "Action Protocol", explanation: "Choke drills are conducted specifically before drilling out the shoe to ensure the manifold and crew are ready for a potential kill." },
-            { q: "Why is it strictly prohibited to use a centrifugal pump to continuously fill the hole from the suction pit during a trip?", options: ["It damages the pump.", "It causes extreme surge pressure.", "It makes accurate mud-volume measurement impossible.", "It aerates the mud."], answer: 2, topic: "Mechanics & Causes", explanation: "Continuous fill from an uncalibrated active pit hides exactly how much mud the hole is taking, masking swabbing." },
-            { q: "How does string configuration affect surge/swab pressures during a trip?", options: ["No effect.", "Open-ended strings create higher pressures.", "Closed-ended strings (with float valves) create significantly higher pressures.", "It only affects rotary torque."], answer: 2, topic: "Mechanics & Causes", explanation: "A closed float valve acts like a solid piston, preventing fluid from bypassing up the pipe bore, heavily increasing surge/swab forces." },
-            { q: "What is the target reaction time for a Trip Drill?", options: ["1 Minute", "2 Minutes or less", "5 Minutes", "10 Minutes"], answer: 1, topic: "Action Protocol", explanation: "Trip drills take slightly longer than pit drills due to setting slips and installing the FOSV, with a target of 2 minutes or less." },
-            { q: "What is the principle of Managed Pressure Drilling (MPD)?", options: ["Increases pump speed.", "Maintains constant BHP by applying surface backpressure.", "Automatically closes the BOP.", "Eliminates the need for mud."], answer: 1, topic: "Operations", explanation: "MPD dynamically adjusts surface backpressure to maintain a constant bottom hole pressure, allowing for rapid influx control." },
-            { q: "For complex onshore wells with high-viscosity mud, what is the best practice to prevent severe swabbing during tripping?", options: ["Pull as fast as possible.", "Perform Pulling Out Of Hole (POOH) with pumping out.", "Increase mud weight significantly.", "Do not use the trip tank."], answer: 1, topic: "Operations", explanation: "Pumping out of the hole actively breaks the gel strength and fills the void dynamically, mitigating swabbing in high-risk environments." },
-            { q: "What is Effective Porosity?", options: ["Total void space regardless of connectivity.", "The ratio of interconnected pore space to bulk volume.", "The ability of rock to transmit fluids.", "The fracture gradient of the rock."], answer: 1, topic: "Fundamentals", explanation: "Effective porosity only counts the interconnected pore spaces, which is critical because isolated pores cannot flow fluid." },
-            { q: "What is the standard unit of measurement for Permeability (k)?", options: ["psi/ft", "ppg", "Darcies or millidarcies (mD)", "Barrels per minute (BPM)"], answer: 2, topic: "Fundamentals", explanation: "Permeability, the rock's ability to transmit fluids, is measured in Darcies or millidarcies." },
-            { q: "What defines Overburden Pressure?", options: ["Pressure exerted by stationary fluid.", "Pressure exerted by the total weight of the overlying rock matrix and its interstitial fluids.", "Pressure at which the rock fractures.", "Backpressure applied by the choke."], answer: 1, topic: "Fundamentals", explanation: "Overburden pressure is the total weight of the rock matrix and the fluids contained within it acting downward." },
-            { q: "According to IWCF, what is the normal formation pressure gradient for a saltwater environment?", options: ["0.433 psi/ft", "0.465 psi/ft", "0.052 psi/ft", "1.0 psi/ft"], answer: 1, topic: "Pressure Math", explanation: "A full column of native saltwater exerts a normal hydrostatic gradient of approximately 0.465 psi/ft (8.94 ppg)." },
-            { q: "What is the most common cause of abnormal formation pressure (overpressure) according to IWCF?", options: ["Depletion", "Thermal Contraction", "Under-compaction of Shales", "Lost Circulation"], answer: 2, topic: "Mechanics & Causes", explanation: "Rapid deposition prevents formation water from escaping, forcing the trapped fluid to support the overlying rock weight." },
-            { q: "What is the primary cause of Subnormal Formation Pressure in modern drilling?", options: ["Artesian Effect", "Gas Cap Effect", "Reservoir Depletion from production", "Salt Domes"], answer: 2, topic: "Mechanics & Causes", explanation: "Producing hydrocarbons from a reservoir artificially lowers the pore pressure, creating a subnormal or depleted zone." },
-            { q: "How does Dynamic BHP differ when circulating through a closed choke versus the bell nipple?", options: ["It doesn't change.", "The choke adds backpressure, so Dynamic BHP = HP + Friction + Choke Backpressure.", "The bell nipple applies pressure.", "The choke reduces friction."], answer: 1, topic: "Pressure Math", explanation: "Circulating through a closed system (choke) applies backpressure, which is the primary mechanism of controlling BHP during a kill." },
-            { q: "What does MAWP stand for regarding well control equipment?", options: ["Maximum Anticipated Well Pressure", "Maximum Allowable Working Pressure", "Minimum Applied Weight Pressure", "Maximum Annular Working Pressure"], answer: 1, topic: "Action Protocol", explanation: "MAWP is the maximum safe working pressure of equipment as rated by the manufacturer." },
-            { q: "In the circulating system, where does the highest friction pressure loss typically occur?", options: ["The Annulus", "The Standpipe", "The Bit Nozzles", "The Drill Pipe"], answer: 2, topic: "Mechanics & Causes", explanation: "A massive pressure drop (often >50%) is intentionally created across the bit nozzles to maximize hydraulic impact for hole cleaning." },
-            { q: "Why is Annular Pressure Loss (APL) critical for well control despite being a small percentage of total pump pressure?", options: ["It cools the bit.", "It directly acts on the open hole, creating Equivalent Circulating Density (ECD).", "It prevents pipe sticking.", "It powers the mud motor."], answer: 1, topic: "Pressure Math", explanation: "APL is applied directly against the open formation. If removed, the sudden drop in BHP can induce a kick; if too high, it can fracture the rock." }
-        ];
-
+        // Quiz System
         let activeQuizPool = [];
-        let currentQuizQuestion = 0; let quizScore = 0; 
-        let activeStudentData = {}; let currentAttemptData = [];
+        let currentQuizQuestion = 0; 
+        let quizScore = 0; 
+        let activeStudentData = {}; 
+        let currentAttemptData = [];
         let userAnswers = [];
-        
         let timerInterval;
-        let timeRemaining = 60 * 60; // 60 minutes
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            const timerEl = document.getElementById('quiz-timer');
-            if(timerEl) {
-                timerEl.textContent = display;
-                if(timeRemaining < 300) { 
-                    timerEl.classList.remove('text-amber-400');
-                    timerEl.classList.add('text-rose-500', 'animate-pulse');
-                } else {
-                    timerEl.classList.add('text-amber-400');
-                    timerEl.classList.remove('text-rose-500', 'animate-pulse');
-                }
-            }
-        }
+        let timeRemaining = 60 * 60;
 
         window.buildNavGrid = function() {
             const grid = document.getElementById('quiz-nav-grid');
@@ -1547,13 +1822,30 @@
             }
         };
 
+        window.updateTimerDisplay = function() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            const timerEl = document.getElementById('quiz-timer');
+            if(timerEl) {
+                timerEl.textContent = display;
+                if(timeRemaining < 300) { 
+                    timerEl.classList.remove('text-amber-400');
+                    timerEl.classList.add('text-rose-500', 'animate-pulse');
+                } else {
+                    timerEl.classList.add('text-amber-400');
+                    timerEl.classList.remove('text-rose-500', 'animate-pulse');
+                }
+            }
+        };
+
         window.startQuiz = function() {
             const nameInput = val('student-name')?.trim();
             const emailInput = val('student-email')?.trim();
             const posInput = val('student-position');
             const expInput = val('student-exp');
 
-            if(!nameInput || !emailInput || !posInput || expInput === "") return alert("Please fill in all details, including email and years of experience.");
+            if(!nameInput || !emailInput || !posInput || expInput === "") return window.customAlert("Please fill in all details, including email and years of experience.");
             
             activeStudentData = { name: nameInput, email: emailInput, role: posInput, exp: parseInt(expInput) };
             setTxt('modal-student-display', `${activeStudentData.name} | ${activeStudentData.role}`);
@@ -1572,14 +1864,14 @@
             window.scrollTo(0, 0);
             
             timeRemaining = 60 * 60; 
-            updateTimerDisplay();
+            window.updateTimerDisplay();
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 timeRemaining--;
-                updateTimerDisplay();
+                window.updateTimerDisplay();
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
-                    alert("Time is up! Your assessment will now be submitted.");
+                    window.customAlert("Time is up! Your assessment will now be submitted.");
                     window.finishQuiz();
                 }
             }, 1000);
@@ -1642,9 +1934,7 @@
         window.submitQuizEarly = function() {
             const unanswered = userAnswers.filter(a => a === null).length;
             const msg = unanswered > 0 ? `You have ${unanswered} unanswered questions. Are you sure you want to submit?` : "Are you sure you want to submit your assessment?";
-            if(confirm(msg)) {
-                window.finishQuiz();
-            }
+            window.customConfirm(msg, () => { window.finishQuiz(); });
         };
 
         window.finishQuiz = function() {
@@ -1680,7 +1970,6 @@
             window.scrollToSection('assessment');
             
             const percentage = Math.round((quizScore / activeQuizPool.length) * 100);
-            
             latestResultId = Date.now();
             
             const newRecord = { 
@@ -1702,16 +1991,16 @@
                 try {
                     const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
                     const docRef = await addDoc(assessmentsRef, newRecord);
+                    newRecord.firestoreId = docRef.id;
                     currentDocId = docRef.id;
-                    newRecord.firestoreId = currentDocId;
                 } catch (e) {
                     console.error("Failed to save assessment to cloud.", e);
                     currentDocId = 'local_' + latestResultId;
                     newRecord.firestoreId = currentDocId;
                 }
             } else {
-                 newRecord.firestoreId = 'local_' + latestResultId;
-                 currentDocId = newRecord.firestoreId;
+                 currentDocId = 'local_' + latestResultId;
+                 newRecord.firestoreId = currentDocId;
             }
             
             localAssessments.push(newRecord);
@@ -1730,10 +2019,7 @@
             }
 
             const commentInput = document.getElementById('student-comment');
-            if(commentInput) {
-                commentInput.value = '';
-                commentInput.disabled = false;
-            }
+            if(commentInput) { commentInput.value = ''; commentInput.disabled = false; }
             document.getElementById('save-comment-btn')?.classList.remove('hidden');
             document.getElementById('comment-saved-msg')?.classList.add('hidden');
         };
@@ -1743,15 +2029,12 @@
             if(!commentVal) return;
             
             const idx = localAssessments.findIndex(a => a.firestoreId === currentDocId);
-            if (idx > -1) {
-                localAssessments[idx].comment = commentVal;
-            }
+            if (idx > -1) { localAssessments[idx].comment = commentVal; }
             
             if (useFirebase && currentUser && currentDocId && !currentDocId.startsWith('local_')) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'assessments', currentDocId);
                     await updateDoc(docRef, { comment: commentVal });
-                    
                     document.getElementById('save-comment-btn')?.classList.add('hidden');
                     document.getElementById('comment-saved-msg')?.classList.remove('hidden');
                     document.getElementById('student-comment').disabled = true;
@@ -1780,10 +2063,6 @@
             document.getElementById('quiz-results')?.classList.add('hidden');
         };
 
-        let indivRadarChartInstance = null;
-        let indivGapsChartInstance = null;
-        let groupGapsChartInstance = null;
-
         window.openIndividualReport = function(resultId, fromStudentView = false) {
             const idToLoad = fromStudentView ? latestResultId : resultId;
             if(!idToLoad) return;
@@ -1795,7 +2074,7 @@
             setTxt('rep-exp', data.exp); setTxt('rep-date', data.date); setTxt('rep-score', `${data.score}%`);
             
             const scoreEl = document.getElementById('rep-score');
-            if(scoreEl) scoreEl.className = `text-5xl font-black font-mono ${data.passed ? 'text-emerald-600' : 'text-rose-600'}`;
+            if(scoreEl) scoreEl.className = `text-4xl sm:text-5xl font-black font-mono ${data.passed ? 'text-emerald-600' : 'text-rose-600'}`;
 
             const topicScores = { "Fundamentals": {c:0, t:0}, "Pressure Math": {c:0, t:0}, "Detection": {c:0, t:0}, "Mechanics & Causes": {c:0, t:0}, "Action Protocol": {c:0, t:0}, "Operations": {c:0, t:0} };
             const missedTopicsMap = {};
@@ -1817,8 +2096,8 @@
 
             const ctxIndivRadar = document.getElementById('indivRadarChart');
             if(ctxIndivRadar) {
-                if(indivRadarChartInstance) indivRadarChartInstance.destroy();
-                indivRadarChartInstance = new Chart(ctxIndivRadar.getContext('2d'), {
+                if(window.indivRadarChartInstance) window.indivRadarChartInstance.destroy();
+                window.indivRadarChartInstance = new Chart(ctxIndivRadar.getContext('2d'), {
                     type: 'radar',
                     data: { labels: radarLabels, datasets: [{ label: 'Competency %', data: radarDataPoints, backgroundColor: 'rgba(56, 189, 248, 0.2)', borderColor: '#0284c7', pointBackgroundColor: '#0369a1', borderWidth: 2 }] },
                     options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#e2e8f0' }, grid: { color: '#e2e8f0' }, pointLabels: { font: { family: 'Inter', size: 10, weight: 'bold' }, color: '#475569' }, suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } }
@@ -1851,11 +2130,10 @@
                 }
             }
             
-            // Bar Chart for Individual Gaps
             const ctxIndivGaps = document.getElementById('indivGapsChart');
             if(ctxIndivGaps) {
-                if(indivGapsChartInstance) indivGapsChartInstance.destroy();
-                indivGapsChartInstance = new Chart(ctxIndivGaps.getContext('2d'), {
+                if(window.indivGapsChartInstance) window.indivGapsChartInstance.destroy();
+                window.indivGapsChartInstance = new Chart(ctxIndivGaps.getContext('2d'), {
                     type: 'bar',
                     data: { labels: Object.keys(missedTopicsMap), datasets: [{ label: 'Incorrect Answers', data: Object.values(missedTopicsMap), backgroundColor: '#f43f5e', borderRadius: 4 }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } } }
@@ -1868,7 +2146,6 @@
                 
                 if(data.details) {
                     const incorrectDetails = data.details.filter(ans => !ans.isCorrect);
-                    
                     if (incorrectDetails.length === 0) {
                         wrongHtml = '<p class="text-emerald-600 font-bold bg-emerald-50 p-4 rounded-lg">Perfect Assessment! No incorrect answers.</p>';
                     } else {
@@ -1879,7 +2156,7 @@
                             let uAnsText = ans.userAnswerText || "Incorrect / Not Answered";
 
                             wrongHtml += `
-                            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm relative">
+                            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm relative page-break-inside-avoid">
                                 <span class="absolute top-4 right-4 text-xs font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded border border-rose-200">${ans.topic}</span>
                                 <h4 class="font-bold text-slate-800 mb-3 pr-20">Q: ${qText}</h4>
                                 <div class="bg-rose-50 border border-rose-200 p-3 rounded mb-3">
@@ -1928,11 +2205,6 @@
 
         window.closeReport = function() { document.getElementById('report-modal')?.classList.add('hidden'); };
 
-        let instructorPieChartInstance = null; let topicRadarChartInstance = null;
-
-        const pwdInputEl = document.getElementById('instructor-pwd-input');
-        if (pwdInputEl) { pwdInputEl.addEventListener('keypress', function (e) { if (e.key === 'Enter') window.unlockInstructor(); }); }
-
         window.unlockInstructor = async function() {
             const emailVal = val('instructor-email-input');
             const pwdVal = val('instructor-pwd-input');
@@ -1949,6 +2221,7 @@
                     document.getElementById('instructor-locked')?.classList.add('hidden'); 
                     document.getElementById('instructor-unlocked')?.classList.remove('hidden');
                     document.getElementById('pwd-error')?.classList.add('hidden'); 
+                    const pwdInputEl = document.getElementById('instructor-pwd-input');
                     if (pwdInputEl) pwdInputEl.value = ''; 
                     setTimeout(() => window.updateInstructorDashboard(), 500);
                 } catch (error) {
@@ -1957,7 +2230,7 @@
                     document.getElementById('pwd-error')?.classList.remove('hidden'); 
                 }
             } else {
-                alert("Live Cloud is not configured. Cannot perform secure login.");
+                window.customAlert("Live Cloud is not configured. Cannot perform secure login.");
             }
         };
 
@@ -2052,13 +2325,14 @@
         };
 
         window.renderGroupCharts = function(passList, failList, topicData) {
-            if (instructorPieChartInstance) instructorPieChartInstance.destroy(); if (topicRadarChartInstance) topicRadarChartInstance.destroy();
+            if (window.instructorPieChartInstance) window.instructorPieChartInstance.destroy(); 
+            if (window.topicRadarChartInstance) window.topicRadarChartInstance.destroy();
             
             const pieEl = document.getElementById('instructorPieChart');
             if (pieEl) {
                 let passes = passList.length;
                 let fails = failList.length;
-                instructorPieChartInstance = new Chart(pieEl.getContext('2d'), {
+                window.instructorPieChartInstance = new Chart(pieEl.getContext('2d'), {
                     type: 'doughnut', data: { labels: ['Passed', 'Failed'], datasets: [{ data: [passes||1, fails||0], backgroundColor: passes||fails ? ['#10b981', '#f43f5e'] : ['#e2e8f0'], borderWidth: 2, borderColor: '#ffffff' }] },
                     options: { 
                         responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' },
@@ -2086,7 +2360,7 @@
 
             const radarEl = document.getElementById('topicRadarChart');
             if (radarEl) {
-                topicRadarChartInstance = new Chart(radarEl.getContext('2d'), {
+                window.topicRadarChartInstance = new Chart(radarEl.getContext('2d'), {
                     type: 'radar',
                     data: { labels: topicData.labels && topicData.labels.length ? topicData.labels : ['Fundamentals', 'Pressure Math', 'Detection'], datasets: [{ label: 'Avg Group Score', data: topicData.data && topicData.data.length ? topicData.data : [0,0,0], backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: '#6366f1', pointBackgroundColor: '#4f46e5', pointBorderColor: '#fff', borderWidth: 2 }] },
                     options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#e2e8f0' }, grid: { color: '#e2e8f0' }, pointLabels: { font: { family: 'Inter', size: 10, weight: 'bold' }, color: '#475569' }, suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } }
@@ -2095,37 +2369,37 @@
         };
 
         window.deleteRecord = async function(id) {
-            if(!confirm("Are you sure you want to completely delete this record?")) return;
-            
-            if(useFirebase && currentUser) {
-                try {
-                    const docId = typeof id === 'string' ? id : null;
-                    let firestoreId = docId;
-                    if (!firestoreId) {
-                        const rec = localAssessments.find(a => a.id === id);
-                        if(rec) firestoreId = rec.firestoreId;
+            window.customConfirm("Are you sure you want to completely delete this record?", async () => {
+                if(useFirebase && currentUser) {
+                    try {
+                        const docId = typeof id === 'string' ? id : null;
+                        let firestoreId = docId;
+                        if (!firestoreId) {
+                            const rec = localAssessments.find(a => a.id === id);
+                            if(rec) firestoreId = rec.firestoreId;
+                        }
+                        if (firestoreId && !firestoreId.startsWith('local_')) {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'assessments', firestoreId));
+                        } else {
+                            localAssessments = localAssessments.filter(a => a.id !== id && a.firestoreId !== firestoreId);
+                            localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
+                        }
+                        window.updateInstructorDashboard();
+                    } catch(e) {
+                        console.error('Delete error', e);
+                        window.customAlert('Failed to delete. Please check your database permissions.');
                     }
-                    if (firestoreId && !firestoreId.startsWith('local_')) {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'assessments', firestoreId));
-                    } else {
-                        localAssessments = localAssessments.filter(a => a.id !== id && a.firestoreId !== firestoreId);
-                        localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
-                    }
+                } else {
+                    localAssessments = localAssessments.filter(a => a.id !== id && a.firestoreId !== id);
+                    localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
                     window.updateInstructorDashboard();
-                } catch(e) {
-                    console.error('Delete error', e);
-                    alert('Failed to delete. Please check your database permissions.');
                 }
-            } else {
-                localAssessments = localAssessments.filter(a => a.id !== id && a.firestoreId !== id);
-                localStorage.setItem('wc_assessment_data', JSON.stringify(localAssessments));
-                window.updateInstructorDashboard();
-            }
+            });
         };
 
         window.openGroupReport = function() {
             const results = localAssessments;
-            if(results.length === 0) return alert("No data available for group report.");
+            if(results.length === 0) return window.customAlert("No data available for group report.");
 
             const total = results.length;
             const passes = results.filter(r => r.passed).length;
@@ -2137,7 +2411,7 @@
             setTxt('grep-score', `${avgScore}%`);
 
             const scoreEl = document.getElementById('grep-score');
-            if(scoreEl) scoreEl.className = `text-5xl font-black font-mono ${avgScore >= 70 ? 'text-emerald-600' : 'text-rose-600'}`;
+            if(scoreEl) scoreEl.className = `text-4xl sm:text-5xl font-black font-mono ${avgScore >= 70 ? 'text-emerald-600' : 'text-rose-600'}`;
 
             const topicScores = { "Fundamentals": {c:0, t:0}, "Pressure Math": {c:0, t:0}, "Detection": {c:0, t:0}, "Mechanics & Causes": {c:0, t:0}, "Action Protocol": {c:0, t:0}, "Operations": {c:0, t:0} };
             const missedTopicsMap = {};
@@ -2160,7 +2434,7 @@
                 gapsList.innerHTML = ''; recList.innerHTML = '';
 
                 if(Object.keys(missedTopicsMap).length === 0) {
-                    gapsList.innerHTML = '<li class="text-emerald-600 font-bold">No knowledge gaps identified. Perfect score for the fleet.</li>';
+                    gapsList.innerHTML = '<li class="text-emerald-600 font-bold">No knowledge gaps identified. Perfect score for the group.</li>';
                     recList.innerHTML = '<li>Maintain current operational readiness. No immediate group training required.</li>';
                 } else {
                     const sortedTopics = Object.entries(missedTopicsMap).sort((a, b) => b[1] - a[1]);
@@ -2181,10 +2455,10 @@
 
             let evalText = "", evalColor = "";
             if(avgScore >= 70) {
-                evalText = `The fleet demonstrates satisfactory operational competency. Minor gaps highlighted above should be reviewed.`;
+                evalText = `The group demonstrates satisfactory operational competency. Minor gaps highlighted above should be reviewed.`;
                 evalColor = "border-sky-500 bg-sky-50 text-sky-900";
             } else {
-                evalText = `Fundamental knowledge gaps identified across the fleet. Comprehensive retraining required before assuming active well control duties.`;
+                evalText = `Fundamental knowledge gaps identified across the group. Comprehensive retraining required before assuming active well control duties.`;
                 evalColor = "border-rose-500 bg-rose-50 text-rose-900";
             }
 
@@ -2194,37 +2468,72 @@
                 evalBox.textContent = evalText;
             }
 
+            const radarLabels = Object.keys(topicScores);
+            const radarDataPoints = radarLabels.map(topic => {
+                return topicScores[topic].t > 0 ? Math.round((topicScores[topic].c / topicScores[topic].t) * 100) : 0;
+            });
+
+            if (window.grepPieChartInstance) window.grepPieChartInstance.destroy();
+            const grepPieEl = document.getElementById('grepPieChart');
+            if (grepPieEl) {
+                window.grepPieChartInstance = new Chart(grepPieEl.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: ['Passed', 'Failed'], datasets: [{ data: [passes||1, (total-passes)||0], backgroundColor: passes||(total-passes) ? ['#10b981', '#f43f5e'] : ['#e2e8f0'], borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            if (window.grepRadarChartInstance) window.grepRadarChartInstance.destroy();
+            const grepRadarEl = document.getElementById('grepRadarChart');
+            if (grepRadarEl) {
+                window.grepRadarChartInstance = new Chart(grepRadarEl.getContext('2d'), {
+                    type: 'radar',
+                    data: { labels: radarLabels, datasets: [{ label: 'Avg Proficiency %', data: radarDataPoints, backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: '#6366f1', pointBackgroundColor: '#4f46e5', borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { r: { suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } }
+                });
+            }
+            
+            if (window.groupGapsChartInstance) window.groupGapsChartInstance.destroy();
+            const grepGapsEl = document.getElementById('groupGapsChart');
+            if (grepGapsEl) {
+                window.groupGapsChartInstance = new Chart(grepGapsEl.getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: Object.keys(missedTopicsMap), datasets: [{ label: 'Total Errors', data: Object.values(missedTopicsMap), backgroundColor: '#f43f5e', borderRadius: 4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            }
+
             document.getElementById('group-report-modal')?.classList.remove('hidden');
         };
 
         window.closeGroupReport = function() { document.getElementById('group-report-modal')?.classList.add('hidden'); };
 
         window.clearResults = async function() { 
-            if(confirm("Delete all records?")) { 
+            window.customConfirm("Delete all records?", async () => {
                 if(useFirebase && currentUser) {
                     try {
                         const assessmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'assessments');
                         const snapshot = await getDocs(assessmentsRef);
                         const deletePromises = snapshot.docs.map(docSnap => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'assessments', docSnap.id)));
                         await Promise.all(deletePromises);
-                        alert('Cloud database cleared.');
+                        window.customAlert('Cloud database cleared.');
                         window.updateInstructorDashboard();
                     } catch(e) {
                         console.error('Error clearing database', e);
-                        alert('Failed to clear database. Ensure you have permissions.');
+                        window.customAlert('Failed to clear database. Ensure you have permissions.');
                     }
                 } else {
                     localStorage.removeItem('wc_assessment_data');
                     localAssessments = [];
-                    alert('Local database cleared.');
+                    window.customAlert('Local database cleared.');
                     window.updateInstructorDashboard();
                 }
-            } 
+            });
         };
         
         window.exportCSV = function() {
             const results = localAssessments;
-            if(results.length === 0) return alert("No data to export.");
+            if(results.length === 0) return window.customAlert("No data to export.");
             
             let csv = "Date,Name,Email,Position,Experience(yrs),Score,Status,Comments\n" + results.map(r => {
                 const commentStr = r.comment ? r.comment.replace(/"/g, '""') : '';
@@ -2234,6 +2543,12 @@
             const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8," + csv); link.download = `Group_Analytics.csv`;
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
         };
+
+        // Attach Enter key logic after DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const pwdInputEl = document.getElementById('instructor-pwd-input');
+            if (pwdInputEl) { pwdInputEl.addEventListener('keypress', function (e) { if (e.key === 'Enter') window.unlockInstructor(); }); }
+        });
     </script>
 </body>
 </html>
